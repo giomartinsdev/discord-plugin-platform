@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>plugin platform · protótipo</title>
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#11141a; --panel2:#161a22; --line:#232a35; --line2:#2e3746;
+    --text:#e7ebf2; --mute:#8b94a3; --dim:#5d6675;
+    --acc:#7c8cff; --acc2:#3b47a8;
+    --ok:#4ade80; --warn:#fbbf24; --err:#fb7185;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--text);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--acc);text-decoration:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  input,textarea,select{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;outline:none}
+  input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px #7c8cff22}
+  .app{display:grid;grid-template-columns:236px 1fr;height:100%}
+
+  /* rail */
+  .rail{border-right:1px solid var(--line);background:#080a0e;display:flex;flex-direction:column;padding:14px 10px;gap:18px;overflow:auto}
+  .brand{display:flex;gap:10px;align-items:center;padding:4px 8px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(140deg,var(--acc),#b06cff);box-shadow:0 0 24px #7c8cff55}
+  .brand b{font-size:13px;letter-spacing:.2px}
+  .brand span{display:block;font-size:10.5px;color:var(--dim);letter-spacing:.6px;text-transform:uppercase}
+  .nav{display:flex;flex-direction:column;gap:2px}
+  .nav i{font-style:normal;font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 10px 4px}
+  .nav button{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;color:var(--mute);text-align:left;width:100%}
+  .nav button:hover{background:var(--panel);color:var(--text)}
+  .nav button.on{background:#1a1f2b;color:var(--text);box-shadow:inset 2px 0 0 var(--acc)}
+  .nav .badge{margin-left:auto;font-size:10px;background:var(--line);color:var(--mute);padding:1px 6px;border-radius:99px}
+  .rail .foot{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;font-size:11.5px;color:var(--dim);display:flex;flex-direction:column;gap:6px}
+  .rail .foot .row{display:flex;justify-content:space-between}
+  .rail .foot .row b{color:var(--mute);font-weight:500}
+
+  /* main */
+  main{overflow:auto;padding:22px 28px 60px}
+  .topbar{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .topbar .guild{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);padding:6px 12px 6px 7px;border-radius:99px}
+  .topbar .guild .av{width:22px;height:22px;border-radius:50%;background:linear-gradient(140deg,#3b4a8f,#7c8cff);font-size:10px;display:grid;place-items:center;font-weight:700}
+  .topbar .spacer{flex:1}
+  .topbar .user{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:12.5px}
+  .topbar .user .av{width:26px;height:26px;border-radius:50%;background:#2b3242;display:grid;place-items:center;font-size:11px;color:#c3cad6}
+
+  h1{font-size:19px;margin:0 0 3px;letter-spacing:-.2px}
+  h1 small{font-weight:400;color:var(--dim);font-size:12.5px;margin-left:8px}
+  .sub{color:var(--mute);font-size:13px;margin:0 0 20px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+  .pad{padding:16px}
+  .grid{display:grid;gap:14px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+
+  .kpi .lbl{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--dim)}
+  .kpi .val{font-size:26px;font-weight:600;letter-spacing:-.6px;margin-top:6px}
+  .kpi .val small{font-size:12px;color:var(--mute);font-weight:400}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line2);color:var(--mute);white-space:nowrap}
+  .pill.ok{color:var(--ok);border-color:#1f4030;background:#0f1f18}
+  .pill.warn{color:var(--warn);border-color:#463615;background:#1e1808}
+  .pill.err{color:var(--err);border-color:#4a1f27;background:#1f0f12}
+  .pill.acc{color:#b6c0ff;border-color:#2c3566;background:#141a33}
+  .pill.run{font-family:var(--mono);font-size:10.5px;color:#9aa4b4}
+
+  .mono{font-family:var(--mono);font-size:12px}
+  .muted{color:var(--mute)}
+  .dim{color:var(--dim)}
+
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);font-weight:500;padding:10px 14px;border-bottom:1px solid var(--line)}
+  td{padding:11px 14px;border-bottom:1px solid #1a202a;font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#141821}
+  td.r,th.r{text-align:right}
+
+  /* plugin list rows */
+  .plrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+  .plrow .nm{display:flex;align-items:center;gap:10px}
+  .plrow .nm .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:#1b2130;border:1px solid var(--line2)}
+  .plrow .nm b{font-size:13.5px;font-weight:600}
+  .plrow .nm .meta{display:flex;gap:8px;align-items:center;margin-top:3px;color:var(--dim);font-size:11.5px}
+
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font-size:13px;font-weight:500}
+  .btn:hover{border-color:#3e4a5e;background:#1b212b}
+  .btn.pri{background:linear-gradient(180deg,#8390ff,#6470e8);border-color:#8b96ff;color:#0b0d16;font-weight:600}
+  .btn.pri:hover{filter:brightness(1.07)}
+  .btn.danger{color:#ffb3bd;border-color:#4a2029;background:#1d1013}
+  .btn.danger:hover{background:#2a1519}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 18px}
+  .tabs button{padding:9px 14px;font-size:13px;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--acc)}
+  .tabs button:hover{color:var(--text)}
+
+  pre{background:#0b0e14;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.65;margin:0}
+  pre .k{color:#8ba4ff} pre .s{color:#8fe0a8} pre .c{color:#5d6675} pre .e{color:#ff9aa6} pre .n{color:#f0c07a}
+  .kv{display:grid;grid-template-columns:130px 1fr;gap:7px 14px;font-size:12.5px}
+  .kv dt{color:var(--dim)} .kv dd{margin:0;color:var(--text)}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;padding:4px 9px;border-radius:7px;background:#151b26;border:1px solid var(--line);color:#a8b3c4;margin:0 6px 6px 0}
+  .chip b{color:var(--acc);font-weight:500}
+
+  .empty{padding:40px;text-align:center;color:var(--dim)}
+  .toast{position:fixed;bottom:22px;right:22px;background:#161c27;border:1px solid var(--line2);border-left:3px solid var(--acc);padding:11px 16px;border-radius:8px;font-size:13px;box-shadow:0 12px 40px #0008;transform:translateY(12px);opacity:0;transition:.18s;pointer-events:none;z-index:50}
+  .toast.on{transform:none;opacity:1}
+  .toast.ok{border-left-color:var(--ok)}
+
+  /* wizard */
+  .steps{display:flex;gap:0;margin-bottom:22px;font-size:12.5px;color:var(--dim)}
+  .steps div{display:flex;align-items:center;gap:8px;padding-right:14px}
+  .steps div::after{content:"";width:38px;height:1px;background:var(--line2);margin-left:6px}
+  .steps div:last-child::after{display:none}
+  .steps .num{width:20px;height:20px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:11px}
+  .steps .on{color:var(--text)} .steps .on .num{background:var(--acc);border-color:var(--acc);color:#0b0d16;font-weight:700}
+  .steps .done{color:var(--mute)} .steps .done .num{border-color:#2e5b41;color:var(--ok)}
+
+  .logbox{height:300px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px;background:#0b0e14;border:1px solid var(--line);border-radius:10px}
+  .logbox .t{color:#4d5666;margin-right:8px}
+  .logbox .lvl{display:inline-block;width:44px}
+  .logbox .info{color:#8ba4ff} .logbox .ok{color:var(--ok)} .logbox .warn{color:var(--warn)} .logbox .err{color:var(--err)}
+  .logbox .msg{color:#c3ccda}
+
+  .perm{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);margin-bottom:8px}
+  .perm input{width:auto;margin-top:2px;accent-color:var(--acc)}
+  .perm .nm{font-family:var(--mono);font-size:12.5px;color:#c3ccda}
+  .perm .ds{font-size:12px;color:var(--mute)}
+  .perm.sys{opacity:.65}
+
+  .sel{display:flex;flex-wrap:wrap;gap:8px}
+  .sel button{border:1px solid var(--line);background:var(--panel2);padding:7px 12px;border-radius:8px;font-size:12.5px;color:var(--mute)}
+  .sel button.on{border-color:var(--acc);color:var(--text);background:#161c2c}
+
+  .hint{font-size:12px;color:var(--dim);margin-top:6px}
+  .row{display:flex;gap:10px;align-items:center}
+  .row.wrap{flex-wrap:wrap}
+  .sep{height:1px;background:var(--line);margin:16px 0}
+  .sec{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+  .split{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:start}
+  @media(max-width:1150px){.split{grid-template-columns:1fr}}
+  .bar{height:6px;border-radius:99px;background:#1a2029;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#b06cff)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="dot"></div>
+      <div><b>plugin platform</b><span>protótipo · mock</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <i>servidor</i>
+      <button data-go="overview">Visão geral</button>
+      <button data-go="plugins">Plugins <span class="badge" id="nav-pl-count">0</span></button>
+      <button data-go="logs">Logs</button>
+      <i>desenvolvimento</i>
+      <button data-go="install">Instalar plugin</button>
+      <button data-go="console">Console JSON-RPC</button>
+      <i>plataforma</i>
+      <button data-go="guilds">Guilds &amp; permissões</button>
+      <button data-go="protocol">Protocolo</button>
+    </nav>
+    <div class="foot">
+      <div class="row"><span>core</span><b class="pill ok">online</b></div>
+      <div class="row"><span>uptime</span><b>6d 4h</b></div>
+      <div class="row"><span>version</span><b class="mono">0.4.2</b></div>
+      <div class="row"><span>plugins ativos</span><b id="foot-active">0</b></div>
+    </div>
+  </aside>
+  <main id="view"></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ───────────────────────── mock data ───────────────────────── */
+const guilds = [
+  { id: "1201", name: "Servidor Dev BR", initials: "DV", members: 2431, role: "owner" },
+  { id: "1202", name: "Casinha do Gio", initials: "CG", members: 87, role: "owner" },
+  { id: "1203", name: "Bot Lab", initials: "BL", members: 512, role: "admin" },
+];
+
+const plugins = [
+  {
+    id: "pets", name: "Pets", icon: "🐾", lang: "python", version: "1.4.2",
+    repo: "github.com/devlucas/discord-pets", branch: "main", sha: "a91f2c7",
+    runtime: { kind: "process", build: ["pip", "install", "-r", "requirements.txt"], cmd: ["python3", "main.py"] },
+    status: "healthy", enabled: true, guilds: ["1201", "1202"],
+    caps: ["reply", "kv", "economy.read", "scheduler"],
+    commands: [{ name: "pet", desc: "Adota/acaricia seu pet" }, { name: "petrank", desc: "Ranking de pets do servidor" }],
+    events: ["MESSAGE_CREATE"],
+    calls24h: 12480, p95: 41, errors24h: 3, kvKeys: 8120, mem: "38 MB", restarts: 0,
+    schema: {
+      cooldown: { type: "number", title: "Cooldown (s)", default: 30 },
+      hunger_rate: { type: "number", title: "Fome por hora", default: 4 },
+      announce_adoption: { type: "boolean", title: "Anunciar adoção no canal" },
+    },
+    config: { cooldown: 30, hunger_rate: 4, announce_adoption: true },
+  },
+  {
+    id: "loja", name: "Loja", icon: "🛒", lang: "rust", version: "2.0.1",
+    repo: "github.com/mari/loja-bot", branch: "release", sha: "77be004",
+    runtime: { kind: "container", image: "ghcr.io/mari/loja:2.0.1", port: 8080 },
+    status: "healthy", enabled: true, guilds: ["1201"],
+    caps: ["reply", "kv", "economy.grant", "economy.read", "add_role"],
+    commands: [{ name: "loja", desc: "Abre a loja" }, { name: "comprar", desc: "Compra um item" }],
+    events: ["INTERACTION_CREATE"],
+    calls24h: 3310, p95: 96, errors24h: 0, kvKeys: 1240, mem: "112 MB", restarts: 0,
+    schema: {
+      currency_name: { type: "string", title: "Nome da moeda", default: "coins" },
+      tax_percent: { type: "number", title: "Taxa (%)", default: 5 },
+    },
+    config: { currency_name: "coins", tax_percent: 5 },
+  },
+  {
+    id: "economia", name: "Economia (core)", icon: "🪙", lang: "core", version: "0.9.0",
+    repo: "—", branch: "—", sha: "builtin",
+    runtime: { kind: "core", cmd: [] },
+    status: "healthy", enabled: true, guilds: ["*"],
+    caps: ["economy"],
+    commands: [{ name: "saldo", desc: "Mostra seu saldo" }, { name: "daily", desc: "Recompensa diária" }],
+    events: [],
+    calls24h: 40120, p95: 6, errors24h: 0, kvKeys: 2431, mem: "—", restarts: 0,
+    schema: { daily_amount: { type: "number", title: "Valor do daily", default: 100 } },
+    config: { daily_amount: 100 },
+  },
+  {
+    id: "cassino", name: "Cassino", icon: "🎲", lang: "typescript", version: "0.6.0",
+    repo: "github.com/joao/cassino", branch: "main", sha: "3d90aa1",
+    runtime: { kind: "process", build: ["npm", "ci", "&&", "npm", "run", "build"], cmd: ["node", "dist/index.js"] },
+    status: "degraded", enabled: true, guilds: ["1201", "1203"],
+    caps: ["reply", "economy.grant", "kv"],
+    commands: [{ name: "roleta", desc: "Aposta na roleta" }, { name: "caraoucoroa", desc: "Aposta no cara ou coroa" }],
+    events: [],
+    calls24h: 2180, p95: 2900, errors24h: 41, kvKeys: 380, mem: "64 MB", restarts: 6,
+    schema: {
+      max_bet: { type: "number", title: "Aposta máxima", default: 500 },
+      house_edge: { type: "number", title: "Margem da casa (%)", default: 3 },
+    },
+    config: { max_bet: 500, house_edge: 3 },
+  },
+  {
+    id: "moderacao", name: "Moderação", icon: "🛡️", lang: "go", version: "1.1.0",
+    repo: "github.com/botlab/moderacao", branch: "v1", sha: "c0ffee2",
+    runtime: { kind: "process", cmd: ["./bin/mod"] },
+    status: "stopped", enabled: false, guilds: ["1201"],
+    caps: ["reply", "add_role", "kick", "kv"],
+    commands: [{ name: "ban", desc: "Bane um membro" }, { name: "warn", desc: "Adverte um membro" }],
+    events: ["MESSAGE_CREATE", "GUILD_MEMBER_ADD"],
+    calls24h: 0, p95: 0, errors24h: 0, kvKeys: 91, mem: "—", restarts: 0,
+    schema: { auto_role: { type: "string", title: "Cargo automático no join", default: "" } },
+    config: { auto_role: "" },
+  },
+];
+
+const allCaps = {
+  reply: ["Reply em canal", "Envia mensagem no canal do evento."],
+  replyEphemeral: ["Reply efêmero", "Responde só para quem interagiu."],
+  editMessage: ["Editar mensagem", "Edita mensagens do próprio bot."],
+  addRole: ["Gerenciar cargos", "Atribui/remove cargos nos membros."],
+  kick: ["Expulsar membros", "Remove membros do servidor."],
+  kv: ["KV storage", "Guarda dados no namespace do plugin + guild."],
+  "economy.read": ["Ler economia", "Consulta saldo da moeda global."],
+  "economy.grant": ["Dar/tirar moeda", "Altera saldo — requer aprovação do admin."],
+  scheduler: ["Agendador", "Agenda tarefas recorrentes (pets com fome, etc)."],
+  http: ["HTTP externo", "Chamadas de saída para domínios declarados."],
+};
+
+/* ───────────────────────── utils ───────────────────────── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const nf = (n) => n.toLocaleString("pt-BR");
+const langColor = { python: "#ffd866", rust: "#ff9d76", typescript: "#7fb2ff", go: "#6be0e0", core: "#b06cff" };
+
+let curGuild = guilds[0].id;
+let state = { view: "overview", plugin: null, tab: "overview", toastT: null };
+
+function toast(msg, ok) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast on" + (ok ? " ok" : "");
+  clearTimeout(state.toastT);
+  state.toastT = setTimeout(() => (t.className = "toast"), 2200);
+}
+
+function statusPill(p) {
+  if (!p.enabled) return `<span class="pill">desativado</span>`;
+  if (p.status === "healthy") return `<span class="pill ok">● healthy</span>`;
+  if (p.status === "degraded") return `<span class="pill warn">● degradado</span>`;
+  return `<span class="pill err">● parado</span>`;
+}
+function runtimePill(p) {
+  if (p.runtime.kind === "core") return `<span class="pill acc">core</span>`;
+  const icon = p.runtime.kind === "container" ? "▣" : "⌘";
+  const name = p.runtime.kind === "container" ? p.runtime.image.split(":")[0].split("/").pop() + ":" + p.runtime.image.split(":")[1] : "process";
+  return `<span class="pill run">${icon} ${esc(name)}</span>`;
+}
+function langDot(l) {
+  return `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${langColor[l] || "#888"}"></span>`;
+}
+
+/* ───────────────────────── views ───────────────────────── */
+function viewOverview() {
+  const active = plugins.filter((p) => p.enabled);
+  const calls = plugins.reduce((a, p) => a + p.calls24h, 0);
+  const errs = plugins.reduce((a, p) => a + p.errors24h, 0);
+  const kv = plugins.reduce((a, p) => a + p.kvKeys, 0);
+  return `
+    <div class="topbar">${guildPicker()}<div class="spacer"></div>
+      <button class="btn sm" data-go="install">+ Instalar plugin</button>
+      <div class="user"><div class="av">GM</div> giovanni <span class="pill acc">owner</span></div>
+    </div>
+    <h1>Visão geral <small>Servidor Dev BR</small></h1>
+    <p class="sub">Tudo que roda dentro deste servidor, isolado por plugin.</p>
+
+    <div class="grid g4">
+      <div class="card pad kpi"><div class="lbl">Plugins ativos</div><div class="val">${active.length}<small> / ${plugins.length}</small></div></div>
+      <div class="card pad kpi"><div class="lbl">Chamadas 24h</div><div class="val">${nf(calls)}</div></div>
+      <div class="card pad kpi"><div class="lbl">Erros 24h</div><div class="val" style="color:${errs ? "var(--warn)" : "var(--ok)"}">${nf(errs)}</div></div>
+      <div class="card pad kpi"><div class="lbl">Chaves KV</div><div class="val">${nf(kv)}</div></div>
+    </div>
+
+    <div class="split" style="margin-top:16px">
+      <div>
+        <h2 class="sec">Plugins instalados</h2>
+        <div class="card" style="overflow:hidden">
+          <div class="grid" style="gap:0">
+            ${plugins.map(pluginRow).join("")}
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2 class="sec">Eventos do gateway</h2>
+        <div class="card pad">
+          <div class="logbox" id="ev-stream" style="height:230px;border:0;padding:0"></div>
+        </div>
+        <h2 class="sec" style="margin-top:18px">Avisos</h2>
+        <div class="card pad" style="display:grid;gap:10px;font-size:12.5px">
+          <div class="row" style="align-items:flex-start"><span class="pill warn">degradado</span><div><b>cassino</b> — 6 restarts, p95 2900ms. <span class="dim">timeout 3s atingido 41x.</span></div></div>
+          <div class="row" style="align-items:flex-start"><span class="pill">parado</span><div><b>moderacao</b> — desativado pelo admin há 3d.</div></div>
+          <div class="row" style="align-items:flex-start"><span class="pill acc">update</span><div><b>pets</b> — nova versão 1.5.0 no repo (<span class="mono">main</span>).</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function pluginRow(p) {
+  const mem = p.mem !== "—" ? ` · ${p.mem}` : "";
+  return `<div class="pad plrow" style="border-bottom:1px solid #1a202a;cursor:pointer" data-plugin="${p.id}">
+    <div class="nm">
+      <div class="ico">${p.icon}</div>
+      <div>
+        <b>${esc(p.name)}</b> <span class="dim mono" style="font-size:11px">v${p.version}</span>
+        <div class="meta">${langDot(p.lang)} ${esc(p.lang)} ${runtimePill(p)} ${statusPill(p)}</div>
+      </div>
+    </div>
+    <div class="row" style="gap:18px">
+      <div class="dim mono" style="font-size:11.5px;text-align:right">${nf(p.calls24h)} calls${mem}</div>
+      <span class="dim">›</span>
+    </div>
+  </div>`;
+}
+
+function guildPicker() {
+  const g = guilds.find((x) => x.id === curGuild) || guilds[0];
+  return `<div class="guild" title="guild ativa"><div class="av">${g.initials}</div><b style="font-size:12.5px;font-weight:500">${esc(g.name)}</b><span class="dim" style="font-size:11px">${nf(g.members)} membros</span></div>`;
+}
+
+function viewPlugins() {
+  return `
+    <div class="topbar">${guildPicker()}<div class="spacer"></div>
+      <button class="btn sm" data-go="install">+ Instalar plugin</button>
+    </div>
+    <h1>Plugins</h1>
+    <p class="sub">Cada plugin roda isolado, com capabilities declaradas e consentidas.</p>
+    <div class="card" style="overflow:auto">
+      <table>
+        <thead><tr>
+          <th>Plugin</th><th>Runtime</th><th>Status</th><th>Capabilities</th>
+          <th class="r">Calls 24h</th><th class="r">p95</th><th class="r">Erros</th><th></th>
+        </tr></thead>
+        <tbody>
+        ${plugins.map((p) => `
+          <tr>
+            <td style="cursor:pointer" data-plugin="${p.id}">
+              <div class="row" style="gap:9px">
+                <div class="ico" style="width:28px;height:28px;border-radius:7px;display:grid;place-items:center;background:#1b2130;border:1px solid var(--line2)">${p.icon}</div>
+                <div><b>${esc(p.name)}</b> <span class="dim mono" style="font-size:11px">${esc(p.sha)}</span>
+                <div class="dim" style="font-size:11.5px">${langDot(p.lang)} ${esc(p.lang)}${p.repo !== "—" ? " · " + esc(p.repo.split("/").slice(1).join("/")) : ""}</div></div>
+              </div>
+            </td>
+            <td>${runtimePill(p)}</td>
+            <td>${statusPill(p)}</td>
+            <td style="max-width:230px">${p.caps.slice(0, 3).map((c) => `<span class="chip" style="margin-bottom:3px">${esc(c)}</span>`).join("")}${p.caps.length > 3 ? `<span class="dim" style="font-size:11px">+${p.caps.length - 3}</span>` : ""}</td>
+            <td class="r mono">${nf(p.calls24h)}</td>
+            <td class="r mono" style="color:${p.p95 > 500 ? "var(--warn)" : "var(--mute)"}">${p.p95 ? p.p95 + "ms" : "—"}</td>
+            <td class="r mono" style="color:${p.errors24h ? "var(--err)" : "var(--dim)"}">${p.errors24h}</td>
+            <td class="r"><button class="btn sm" data-plugin="${p.id}">Abrir</button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function viewPlugin(id) {
+  const p = plugins.find((x) => x.id === id);
+  if (!p) return viewPlugins();
+  const tab = state.tab;
+  return `
+    <div class="topbar">${guildPicker()}<div class="spacer"></div>
+      <button class="btn sm" data-go="plugins">← Plugins</button>
+    </div>
+    <div class="row wrap" style="gap:12px;margin-bottom:6px">
+      <div style="width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:#1b2130;border:1px solid var(--line2);font-size:20px">${p.icon}</div>
+      <div style="flex:1">
+        <div class="row" style="gap:9px"><h1 style="margin:0">${esc(p.name)}</h1>${statusPill(p)}${runtimePill(p)}</div>
+        <div class="dim mono" style="font-size:12px">${esc(p.repo)}${p.repo !== "—" ? ` @ ${esc(p.branch)} · ${esc(p.sha)}` : ""} · v${p.version} · ${esc(p.lang)}</div>
+      </div>
+      <button class="btn" data-act="toggle" data-id="${p.id}">${p.enabled ? "Desativar" : "Ativar"}</button>
+      <button class="btn danger" data-act="kill" data-id="${p.id}">Kill switch</button>
+    </div>
+
+    <div class="tabs">
+      ${[["overview", "Visão geral"], ["config", "Configuração"], ["protocol", "Protocolo"], ["logs", "Logs"]]
+        .map(([k, l]) => `<button class="${tab === k ? "on" : ""}" data-tab="${k}" data-id="${p.id}">${l}</button>`).join("")}
+    </div>
+    <div id="tab-body">${pluginTab(p, tab)}</div>`;
+}
+
+function pluginTab(p, tab) {
+  if (tab === "config") {
+    const fields = Object.entries(p.schema).map(([k, s]) => {
+      const v = p.config[k];
+      if (s.type === "boolean")
+        return `<div class="perm"><input type="checkbox" ${v ? "checked" : ""}><div><div class="nm">${k}</div><div class="ds">${esc(s.title)}</div></div></div>`;
+      return `<div style="margin-bottom:12px"><label class="mono" style="font-size:12px">${k}</label>
+        <div class="ds" style="font-size:12px;color:var(--mute);margin-bottom:5px">${esc(s.title)}</div>
+        <input type="${s.type === "number" ? "number" : "text"}" value="${esc(v ?? "")}"></div>`;
+    }).join("");
+    return `<div class="split">
+      <div class="card pad">
+        <h2 class="sec">Form gerado do <span class="mono">config_schema</span> do manifesto</h2>
+        ${fields || '<div class="empty">Este plugin não declara configuração.</div>'}
+        <div class="row" style="margin-top:16px"><button class="btn pri" data-act="save" data-id="${p.id}">Salvar e recarregar</button>
+        <span class="dim" style="font-size:12px">Core envia <span class="mono">initialize</span> com a nova config; sem restart do processo.</span></div>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Config efetiva (JSON)</h2>
+        <pre>${esc(JSON.stringify(p.config, null, 2))}</pre>
+        <div class="sep"></div>
+        <div class="kv">
+          <dt>override por guild</dt><dd class="muted">sim, cascata: guild → defaults</dd>
+          <dt>secrets</dt><dd class="muted">via env do runtime, nunca no KV</dd>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (tab === "logs") {
+    return `<div class="card pad">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2 class="sec" style="margin:0">stdout · ${esc(p.id)}</h2>
+        <div class="row"><span class="pill ok">streaming</span><button class="btn sm" data-act="clearlogs">Limpar</button></div>
+      </div>
+      <div class="logbox" id="plog">${logLines(p)}</div>
+      <div class="hint">Logs do plugin vão para <span class="mono">stderr</span>. Cada linha é prefixada com <span class="mono">[guild] [request_id]</span> pelo core.</div>
+    </div>`;
+  }
+
+  if (tab === "protocol") {
+    return `<div class="split">
+      <div class="card pad">
+        <h2 class="sec">Manifesto</h2>
+        <pre>${esc(manifestOf(p))}</pre>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Testar chamada</h2>
+        <div class="row" style="margin-bottom:10px"><button class="btn sm" data-act="rpc" data-id="${p.id}" data-m="handleCommand">handleCommand</button>
+        <button class="btn sm" data-act="rpc" data-id="${p.id}" data-m="handleEvent">handleEvent</button>
+        <button class="btn sm" data-act="rpc" data-id="${p.id}" data-m="health">health</button></div>
+        <pre id="rpc-out" style="min-height:150px">${esc(JSON.stringify({ jsonrpc: "2.0", note: "clique em um método acima para executar contra o mock" }, null, 2))}</pre>
+        <div class="hint">No core real isto vira um socket stdio (ou POST /rpc se <span class="mono">container</span>).</div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="grid g4">
+      <div class="card pad kpi"><div class="lbl">Calls 24h</div><div class="val" style="font-size:22px">${nf(p.calls24h)}</div></div>
+      <div class="card pad kpi"><div class="lbl">p95</div><div class="val" style="font-size:22px;color:${p.p95 > 500 ? "var(--warn)" : "inherit"}">${p.p95 ? p.p95 + "<small>ms</small>" : "—"}</div></div>
+      <div class="card pad kpi"><div class="lbl">Erros 24h</div><div class="val" style="font-size:22px;color:${p.errors24h ? "var(--err)" : "var(--ok)"}">${p.errors24h}</div></div>
+      <div class="card pad kpi"><div class="lbl">Memória</div><div class="val" style="font-size:22px">${p.mem.replace(" MB", "<small> MB</small>")}</div></div>
+    </div>
+    <div class="split" style="margin-top:14px">
+      <div class="card pad">
+        <h2 class="sec">Comandos registrados</h2>
+        <table><tbody>
+          ${p.commands.map((c) => `<tr><td class="mono" style="width:150px">/${esc(c.name)}</td><td class="muted">${esc(c.desc)}</td></tr>`).join("")}
+        </tbody></table>
+        <div class="sep"></div>
+        <h2 class="sec">Eventos assinados</h2>
+        ${p.events.length ? p.events.map((e) => `<span class="chip">${esc(e)}</span>`).join("") : '<span class="dim" style="font-size:12.5px">nenhum — só comandos</span>'}
+        <div class="sep"></div>
+        <h2 class="sec">Capabilities consentidas</h2>
+        ${p.caps.map((c) => `<span class="chip"><b>${esc(c)}</b>${allCaps[c] ? " · " + esc(allCaps[c][0]) : ""}</span>`).join("")}
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Runtime</h2>
+        <dl class="kv">
+          <dt>kind</dt><dd class="mono">${p.runtime.kind}</dd>
+          ${p.runtime.cmd && p.runtime.cmd.length ? `<dt>cmd</dt><dd class="mono">${esc(p.runtime.cmd.join(" "))}</dd>` : ""}
+          ${p.runtime.build ? `<dt>build</dt><dd class="mono">${esc(p.runtime.build.join(" "))}</dd>` : ""}
+          ${p.runtime.image ? `<dt>image</dt><dd class="mono">${esc(p.runtime.image)}</dd>` : ""}
+          ${p.runtime.port ? `<dt>port</dt><dd class="mono">${p.runtime.port}</dd>` : ""}
+          <dt>commit pinado</dt><dd class="mono">${esc(p.sha)}</dd>
+          <dt>restarts</dt><dd>${p.restarts}</dd>
+          <dt>guilds</dt><dd>${p.guilds.includes("*") ? "todas" : p.guilds.map((g) => guilds.find((x) => x.id === g)?.name || g).join(", ")}</dd>
+        </dl>
+        <div class="sep"></div>
+        <h2 class="sec">Permissões por guild</h2>
+        <table><tbody>
+          ${guilds.map((g) => {
+            const on = p.guilds.includes("*") || p.guilds.includes(g.id);
+            return `<tr><td>${esc(g.name)}</td><td class="r"><span class="pill ${on ? "ok" : ""}">${on ? "instalado" : "não instalado"}</span></td></tr>`;
+          }).join("")}
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+function manifestOf(p) {
+  return `name = "${p.id}"
+version = "${p.version}"
+entry = "dist/index.js"
+capabilities = [${p.caps.map((c) => `"${c}"`).join(", ")}]
+events = [${p.events.map((e) => `"${e}"`).join(", ")}]
+commands = [
+${p.commands.map((c) => `  { name = "${c.name}", description = "${c.desc}" },`).join("\n")}
+]
+
+[runtime]
+kind = "${p.runtime.kind}"${p.runtime.cmd && p.runtime.cmd.length ? `\ncmd  = ${JSON.stringify(p.runtime.cmd)}` : ""}${p.runtime.build ? `\nbuild = ${JSON.stringify(p.runtime.build)}` : ""}${p.runtime.image ? `\nimage = "${p.runtime.image}"\nport  = ${p.runtime.port}` : ""}`;
+}
+
+function logLines(p) {
+  const base = [
+    ["info", "initialize · guild=1201 config=ok"],
+    ["ok", "handleCommand /" + (p.commands[0]?.name || "ping") + " · 41ms · actions=1"],
+    ["info", "handleEvent MESSAGE_CREATE · 12ms · actions=0"],
+    ["ok", "kv.set pet:4410 · 3ms"],
+  ];
+  if (p.status === "degraded") base.push(["err", "timeout after 3000ms · request_id=8f2a1c (killed child)"], ["warn", "respawn attempt 7/3 — backoff 8s"], ["info", "child exited code=137 signal=SIGKILL"]);
+  if (!p.enabled) base.push(["warn", "process stopped by admin (kill switch)"]);
+  return base.map(([lvl, msg]) => `<div><span class="t">12:0${Math.floor(Math.random() * 9)}:${Math.floor(Math.random() * 59).toString().padStart(2, "0")}</span><span class="lvl ${lvl}">${lvl.toUpperCase()}</span><span class="msg">${esc(msg)}</span></div>`).join("");
+}
+
+/* ───────────────────────── install wizard ───────────────────────── */
+let wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null };
+
+function viewInstall() {
+  const steps = ["Repo", "Manifesto", "Permissões", "Build", "Pronto"];
+  const bar = `<div class="steps">${steps.map((s, i) => {
+    const n = i + 1;
+    const cls = wiz.step === n ? "on" : wiz.step > n ? "done" : "";
+    return `<div class="${cls}"><span class="num">${wiz.step > n ? "✓" : n}</span>${s}</div>`;
+  }).join("")}</div>`;
+
+  let body = "";
+  if (wiz.step === 1) {
+    body = `<div class="card pad" style="max-width:680px">
+      <h2 class="sec">Repositório git do plugin</h2>
+      <input id="wiz-url" placeholder="https://github.com/devlucas/discord-pets" value="${esc(wiz.url)}">
+      <div class="hint">O core clona, lê o <span class="mono">plugin.toml</span> na raiz e pina um commit SHA. A branch é só a origem — a instalação nunca segue <span class="mono">main</span> sozinha.</div>
+      <div class="row" style="margin-top:16px">
+        <input placeholder="branch (default: main)" style="max-width:200px" id="wiz-branch" value="main">
+        <button class="btn pri" data-act="wiz-next">Analisar repo →</button>
+      </div>
+    </div>`;
+  } else if (wiz.step === 2) {
+    body = `<div class="split">
+      <div class="card pad">
+        <h2 class="sec">Manifesto detectado</h2>
+        <pre>${esc(manifestOf(wiz.manifest))}</pre>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Checagens</h2>
+        <div style="display:grid;gap:9px;font-size:12.5px">
+          ${[["plugin.toml válido", "ok"], ["runtime suportado (process)", "ok"], ["entry existe no commit", "ok"], ["sem dependência de discord.js", "ok"], ["sem rede declarada sem capability http", "ok"], ["conformance suite: 5/5 métodos", "ok"]]
+            .map(([l, s]) => `<div class="row"><span class="pill ${s === "ok" ? "ok" : "warn"}">${s === "ok" ? "✓" : "!"}</span>${esc(l)}</div>`).join("")}
+        </div>
+        <div class="sep"></div>
+        <div class="kv"><dt>commit</dt><dd class="mono">a91f2c7</dd><dt>tamanho</dt><dd>412 KB</dd><dt>licença</dt><dd>MIT</dd></div>
+        <div class="row" style="margin-top:16px"><button class="btn" data-act="wiz-back">← Voltar</button><button class="btn pri" data-act="wiz-perms">Revisar permissões →</button></div>
+      </div>
+    </div>`;
+  } else if (wiz.step === 3) {
+    body = `<div class="split">
+      <div class="card pad">
+        <h2 class="sec">O plugin pede acesso a</h2>
+        ${wiz.manifest.caps.map((c) => {
+          const [title, desc] = allCaps[c] || [c, ""];
+          const sys = c.startsWith("economy");
+          return `<div class="perm ${sys ? "sys" : ""}">
+            <input type="checkbox" data-perm="${c}" ${wiz.perms[c] !== false ? "checked" : ""}>
+            <div><div class="nm">${esc(c)} <span class="dim">· ${esc(title)}</span></div><div class="ds">${esc(desc)}</div>
+            ${sys ? '<div class="ds" style="color:var(--warn);margin-top:3px">⚠ toca a moeda global do servidor</div>' : ""}</div>
+          </div>`;
+        }).join("")}
+        <div class="row" style="margin-top:14px"><button class="btn" data-act="wiz-back">← Voltar</button><button class="btn pri" data-act="wiz-build">Consentir e buildar →</button></div>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Instalar em</h2>
+        ${guilds.map((g, i) => `<div class="perm"><input type="checkbox" ${i === 0 ? "checked" : ""}><div><div class="nm">${esc(g.name)}</div><div class="ds">${g.role} · ${nf(g.members)} membros</div></div></div>`).join("")}
+        <div class="sep"></div>
+        <div class="hint">Capabilities não marcadas = o core recusa a chamada com <span class="mono">E_CAPABILITY</span>. O plugin não “esquece” permissão, ele simplesmente não passa.</div>
+      </div>
+    </div>`;
+  } else if (wiz.step === 4) {
+    body = `<div class="card pad" style="max-width:880px">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 class="sec" style="margin:0">Build &amp; conformance</h2><span class="pill ${wiz.done ? "ok" : "acc"}">${wiz.done ? "sucesso" : "rodando"}</span></div>
+      <div class="logbox" id="buildlog" style="height:260px">${wiz.logs.map((l) => esc(l)).join("\n")}</div>
+      <div class="row" style="margin-top:14px"><button class="btn pri" data-act="wiz-done" ${wiz.done ? "" : "disabled"}>Concluir instalação →</button></div>
+    </div>`;
+  } else {
+    body = `<div class="card pad" style="max-width:680px;text-align:center;padding:36px">
+      <div style="font-size:34px">✅</div>
+      <h2 style="margin:8px 0 4px">pets v1.4.2 instalado</h2>
+      <p class="muted" style="margin:0 0 16px">Roda em <span class="mono">Servidor Dev BR</span> · commit <span class="mono">a91f2c7</span> · capabilities consentidas.</p>
+      <div class="row" style="justify-content:center"><button class="btn" data-act="wiz-reset">Instalar outro</button><button class="btn pri" data-plugin="pets">Abrir plugin →</button></div>
+    </div>`;
+  }
+
+  return `<h1>Instalar plugin</h1><p class="sub">Do repo ao servidor em 4 passos. Sem deploy manual, sem SSH.</p>
+    ${bar}${body}
+    <div class="hint" style="margin-top:20px">Protótipo: todas as etapas são simuladas. O build real roda em container descartável no control plane.</div>`;
+}
+
+function wizNext() {
+  wiz.url = $("#wiz-url")?.value || wiz.url;
+  wiz.step = 2;
+  wiz.manifest = {
+    id: "pets", name: "Pets", version: "1.4.2", icon: "🐾", lang: "python", sha: "a91f2c7",
+    runtime: { kind: "process", build: ["pip", "install", "-r", "requirements.txt"], cmd: ["python3", "main.py"] },
+    caps: ["reply", "kv", "economy.read", "economy.grant", "scheduler"],
+    commands: [{ name: "pet", desc: "Adota/acaricia seu pet" }],
+    events: ["MESSAGE_CREATE"],
+  };
+  render();
+}
+
+function wizBuild() {
+  wiz.step = 4; wiz.done = false; wiz.logs = [];
+  render();
+  const lines = [
+    "$ git clone --depth 1 -b main https://github.com/devlucas/discord-pets .",
+    "→ commit a91f2c7 pinned",
+    "$ pip install -r requirements.txt",
+    "Collecting discord-sdk-lite... done (pure stdio, sem token)",
+    "$ python3 -m bot_plugin_conformance",
+    "✓ initialize          12ms",
+    "✓ handleCommand /pet  38ms  → 1 action",
+    "✓ handleEvent         9ms   → 0 actions",
+    "✓ health              2ms",
+    "✓ protocol malformado → erro correto, sem crash",
+    "✓ timeout 3s respeitado",
+    "conformance 6/6 · build ok · artifact sha256:9c1f…",
+  ];
+  let i = 0;
+  clearInterval(wiz.timer);
+  wiz.timer = setInterval(() => {
+    if (i >= lines.length) {
+      clearInterval(wiz.timer);
+      wiz.done = true;
+      render();
+      return;
+    }
+    wiz.logs.push(lines[i++]);
+    const el = $("#buildlog");
+    if (el) { el.textContent = wiz.logs.join("\n"); el.scrollTop = el.scrollHeight; }
+    else render();
+  }, 420);
+}
+
+/* ───────────────────────── console ───────────────────────── */
+let con = { plugin: "pets", method: "handleCommand", out: null };
+
+function viewConsole() {
+  return `<h1>Console JSON-RPC</h1>
+    <p class="sub">Fala com o plugin igual o core fala. Mesmo protocolo, qualquer linguagem.</p>
+    <div class="split">
+      <div class="card pad">
+        <div class="row" style="margin-bottom:10px">
+          <select id="con-plugin" style="max-width:200px">${plugins.map((p) => `<option value="${p.id}" ${con.plugin === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
+          <select id="con-method" style="max-width:200px">${["initialize", "handleCommand", "handleEvent", "health"].map((m) => `<option ${con.method === m ? "selected" : ""}>${m}</option>`).join("")}</select>
+          <button class="btn pri sm" data-act="con-send">Executar →</button>
+        </div>
+        <h2 class="sec">request (NDJSON, uma linha)</h2>
+        <textarea id="con-req" rows="9" class="mono" style="font-family:var(--mono);font-size:12px">${esc(JSON.stringify({
+          jsonrpc: "2.0", id: 1, method: con.method,
+          params: con.method === "handleCommand"
+            ? { command: "pet", args: [], userId: "4410", guildId: "1201", channelId: "9001" }
+            : con.method === "handleEvent"
+              ? { type: "MESSAGE_CREATE", payload: { userId: "4410", content: "!pet", channelId: "9001" } }
+              : { guildId: "1201" },
+        }, null, 2))}</textarea>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">response → Action[]</h2>
+        <pre id="con-out" style="min-height:220px">${con.out ? esc(con.out) : esc(JSON.stringify({ jsonrpc: "2.0", note: "envie um request para ver a resposta do mock" }, null, 2))}</pre>
+        <div class="sep"></div>
+        <div class="hint">Actions são a única saída do plugin. O core valida capability e executa no Discord. Plugin nunca vê o token.</div>
+      </div>
+    </div>`;
+}
+
+function conSend() {
+  con.plugin = $("#con-plugin").value;
+  con.method = $("#con-method").value;
+  const req = JSON.parse($("#con-req").value);
+  const p = plugins.find((x) => x.id === con.plugin);
+  let result;
+  if (!p.enabled) result = { error: { code: -32000, message: "E_PLUGIN_DISABLED" } };
+  else if (con.method === "initialize") result = { result: [], note: `manifest ${p.id}@${p.version} aceito, config aplicada` };
+  else if (con.method === "health") result = { result: [] };
+  else if (con.method === "handleEvent")
+    result = { result: [{ type: "emit", topic: `${p.id}.xp`, payload: { userId: req.params.payload.userId, amount: 1 } }] };
+  else
+    result = {
+      result: [
+        { type: "reply", content: "**Bilu** · fome 3/10 · felicidade 8/10" },
+        { type: "kv.set", key: `pet:${req.params.userId}`, value: { name: "Bilu", hunger: 3 } },
+      ],
+    };
+  con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, ...result }, null, 2);
+  render();
+}
+
+/* ───────────────────────── guilds ───────────────────────── */
+function viewGuilds() {
+  return `<h1>Guilds &amp; permissões</h1>
+    <p class="sub">Onde cada plugin pode rodar. Admin da guild consente; owner vê tudo.</p>
+    <div class="grid g3">
+      ${guilds.map((g) => {
+        const inst = plugins.filter((p) => p.enabled && (p.guilds.includes("*") || p.guilds.includes(g.id)));
+        return `<div class="card pad">
+          <div class="row" style="gap:10px"><div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(140deg,#3b4a8f,#7c8cff);display:grid;place-items:center;font-size:12px;font-weight:700">${g.initials}</div>
+          <div><b>${esc(g.name)}</b><div class="dim" style="font-size:11.5px">${nf(g.members)} membros · teu papel: ${g.role}</div></div></div>
+          <div class="sep"></div>
+          <div class="sec">plugins ativos (${inst.length})</div>
+          ${inst.map((p) => `<div class="row" style="justify-content:space-between;padding:5px 0;font-size:12.5px"><span>${p.icon} ${esc(p.name)}</span><span class="dim mono" style="font-size:11px">v${p.version}</span></div>`).join("") || '<div class="dim" style="font-size:12.5px">nenhum</div>'}
+          <div class="sep"></div>
+          <button class="btn sm" data-go="install">+ instalar plugin aqui</button>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="card pad" style="margin-top:16px">
+      <h2 class="sec">Capabilities mais pedidas (todas as guilds)</h2>
+      <div class="grid g2" style="gap:8px 26px;font-size:12.5px">
+        ${["reply", "kv", "economy.grant", "add_role", "scheduler", "http"].map((c) => {
+          const n = plugins.filter((p) => p.caps.includes(c)).length;
+          return `<div class="row" style="justify-content:space-between"><span class="mono">${c}</span><div class="row" style="gap:8px;flex:1;margin-left:14px"><div class="bar" style="flex:1"><i style="width:${(n / plugins.length) * 100}%"></i></div><span class="dim mono" style="font-size:11px">${n}</span></div></div>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+
+/* ───────────────────────── protocol doc ───────────────────────── */
+function viewProtocol() {
+  return `<h1>Protocolo</h1>
+    <p class="sub">JSON-RPC 2.0, newline-delimited, sobre stdio (ou HTTP para containers). É o contrato inteiro.</p>
+    <div class="split">
+      <div class="card pad">
+        <h2 class="sec">Métodos</h2>
+        <table><thead><tr><th>método</th><th>direção</th><th>payload</th></tr></thead><tbody>
+          ${[["initialize", "core → plugin", "{manifest, guildId, config}"],
+             ["handleCommand", "core → plugin", "{command, args, userId, guildId, channelId}"],
+             ["handleEvent", "core → plugin", "{type, payload}"],
+             ["health", "core → plugin", "{}"],
+             ["response", "plugin → core", "Action[]"]]
+            .map(([m, d, p]) => `<tr><td class="mono">${m}</td><td class="dim" style="font-size:12px">${d}</td><td class="mono dim" style="font-size:11.5px">${esc(p)}</td></tr>`).join("")}
+        </tbody></table>
+        <div class="sep"></div>
+        <h2 class="sec">Actions (union fechada)</h2>
+        <pre>${esc(`{ type: "reply",          content: string, ephemeral?: boolean }
+{ type: "editMessage",    messageId: string, content: string }
+{ type: "addRole",        userId: string, roleId: string }
+{ type: "removeRole",     userId: string, roleId: string }
+{ type: "kick",           userId: string, reason?: string }
+{ type: "kv.get" | "kv.set" | "kv.del", key, value? }
+{ type: "economy.grant",  userId: string, amount: number }
+{ type: "emit",           topic: string, payload: unknown }
+{ type: "schedule",       in: "10m", run: string }`)}</pre>
+      </div>
+      <div class="card pad">
+        <h2 class="sec">Plugin mínimo em Python</h2>
+        <pre>${esc(`import sys, json
+
+def send(req, result):
+    print(json.dumps(
+        {"jsonrpc": "2.0", "id": req["id"], "result": result}
+    ), flush=True)
+
+for line in sys.stdin:
+    req = json.loads(line)
+    m, p = req["method"], req.get("params", {})
+
+    if m == "initialize":
+        send(req, [])
+    elif m == "handleCommand" and p["command"] == "pet":
+        send(req, [{"type": "reply",
+                    "content": "Bilu está com fome 3/10"}])
+    elif m == "health":
+        send(req, [])`)}</pre>
+        <div class="hint">Isso é o SDK inteiro. stdout = protocolo, stderr = logs.</div>
+        <div class="sep"></div>
+        <h2 class="sec">Por linguagem</h2>
+        <table><tbody>
+          ${[["Python, Node, Go, Rust, C", "process", "ok"], ["C#, Java, Kotlin, PHP, Elixir", "container", "warn"], ["binário estático qualquer", "process", "ok"]]
+            .map(([l, k, s]) => `<tr><td style="font-size:12.5px">${esc(l)}</td><td><span class="pill run">${esc(k)}</span></td><td class="r"><span class="pill ${s === "ok" ? "ok" : "warn"}">${s === "ok" ? "suportado" : "container"}</span></td></tr>`).join("")}
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+/* ───────────────────────── render / router ───────────────────────── */
+function render() {
+  const v = state.view;
+  let html;
+  if (v === "overview") html = viewOverview();
+  else if (v === "plugins") html = viewPlugins();
+  else if (v === "plugin") html = viewPlugin(state.plugin);
+  else if (v === "install") html = viewInstall();
+  else if (v === "console") html = viewConsole();
+  else if (v === "guilds") html = viewGuilds();
+  else if (v === "protocol") html = viewProtocol();
+  else if (v === "logs") html = viewLogs();
+  $("#view").innerHTML = html;
+  $$("#nav button").forEach((b) => b.classList.toggle("on", b.dataset.go === v || (v === "plugin" && b.dataset.go === "plugins")));
+  $("#nav-pl-count").textContent = plugins.length;
+  $("#foot-active").textContent = plugins.filter((p) => p.enabled).length;
+  if (v === "overview") startEvStream();
+  if (v === "logs") startLogStream();
+  $("#view").scrollTop = 0;
+}
+
+let evT = null, logT = null;
+function stopStreams() { clearInterval(evT); clearInterval(logT); evT = logT = null; }
+
+function startEvStream() {
+  stopStreams();
+  const events = ["MESSAGE_CREATE", "INTERACTION_CREATE", "GUILD_MEMBER_ADD", "MESSAGE_CREATE", "MESSAGE_CREATE", "PRESENCE_UPDATE"];
+  const targets = ["pets", "cassino", "loja", "moderacao"];
+  const add = () => {
+    const el = $("#ev-stream");
+    if (!el) return stopStreams();
+    const e = events[Math.floor(Math.random() * events.length)];
+    const t = targets[Math.floor(Math.random() * targets.length)];
+    const ms = (Math.random() * 60 + 4).toFixed(0);
+    const line = document.createElement("div");
+    line.innerHTML = `<span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="msg"><span style="color:#8ba4ff">${e}</span> <span class="dim">→ ${t}</span> <span style="color:#4d5666">${ms}ms</span></span>`;
+    el.appendChild(line);
+    while (el.children.length > 14) el.removeChild(el.firstChild);
+    el.scrollTop = el.scrollHeight;
+  };
+  for (let i = 0; i < 6; i++) add();
+  evT = setInterval(add, 1400);
+}
+
+function viewLogs() {
+  const all = plugins.filter((p) => p.enabled).map((p) => `<option>${p.id}</option>`).join("");
+  return `<h1>Logs</h1><p class="sub">Stream unificado, correlacionado por <span class="mono">request_id</span>.</p>
+    <div class="card pad">
+      <div class="row" style="margin-bottom:10px">
+        <select style="max-width:200px" id="log-src"><option>todas</option>${all}</select>
+        <span class="pill ok">streaming</span>
+        <div style="flex:1"></div><span class="dim mono" style="font-size:11.5px">últimas 200 linhas</span>
+      </div>
+      <div class="logbox" id="log-stream" style="height:420px"></div>
+    </div>`;
+}
+
+function startLogStream() {
+  stopStreams();
+  const msgs = [
+    ["pets", "ok", "handleCommand /pet · 38ms · actions=1"],
+    ["loja", "ok", "handleCommand /comprar · 84ms · actions=2"],
+    ["cassino", "warn", "p95 acima do limite (2900ms) — request_id=8f2a1c"],
+    ["pets", "info", "kv.set pet:4410 · 3ms"],
+    ["economia", "info", "daily grant guild=1201 amount=100 users=14"],
+    ["loja", "ok", "addRole userId=8891 roleId=555 · ok"],
+    ["cassino", "err", "E_TIMEOUT request_id=9c11d2 — child killed, respawn 1/3"],
+  ];
+  const add = () => {
+    const el = $("#log-stream");
+    if (!el) return stopStreams();
+    const [src, lvl, msg] = msgs[Math.floor(Math.random() * msgs.length)];
+    const line = document.createElement("div");
+    line.innerHTML = `<span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="lvl" style="color:#5d6675;display:inline-block;width:88px">[${src}]</span><span class="lvl ${lvl}">${lvl.toUpperCase()}</span><span class="msg">${esc(msg)}</span>`;
+    el.appendChild(line);
+    while (el.children.length > 200) el.removeChild(el.firstChild);
+    el.scrollTop = el.scrollHeight;
+  };
+  for (let i = 0; i < 12; i++) add();
+  logT = setInterval(add, 1100);
+}
+
+/* ───────────────────────── events ───────────────────────── */
+document.addEventListener("click", (e) => {
+  const go = e.target.closest("[data-go]");
+  if (go) {
+    const next = go.dataset.go;
+    if (next === "install" && state.view !== "install" && wiz.step !== 1) {
+      clearInterval(wiz.timer);
+      wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null };
+    }
+    state.view = next; state.plugin = null; render(); return;
+  }
+
+  const pl = e.target.closest("[data-plugin]");
+  if (pl && !e.target.closest("[data-act]")) {
+    state.view = "plugin"; state.plugin = pl.dataset.plugin; state.tab = "overview"; render(); return;
+  }
+
+  const tab = e.target.closest("[data-tab]");
+  if (tab) {
+    state.tab = tab.dataset.tab;
+    const p = plugins.find((x) => x.id === tab.dataset.id);
+    $("#tab-body").innerHTML = pluginTab(p, state.tab);
+    $$(".tabs button").forEach((b) => b.classList.toggle("on", b === tab));
+    return;
+  }
+
+  const act = e.target.closest("[data-act]");
+  if (!act) return;
+  const a = act.dataset.act;
+  const p = plugins.find((x) => x.id === act.dataset.id);
+
+  if (a === "toggle") {
+    p.enabled = !p.enabled;
+    p.status = p.enabled ? "healthy" : "stopped";
+    toast(`${p.name} ${p.enabled ? "ativado" : "desativado"}`, true);
+    render();
+  } else if (a === "kill") {
+    p.enabled = false; p.status = "stopped";
+    toast(`Kill switch: ${p.name} parado. Eventos descartados.`, true);
+    render();
+  } else if (a === "save") {
+    toast(`Config de ${p.name} aplicada via initialize`, true);
+  } else if (a === "clearlogs") {
+    const el = $("#plog"); if (el) el.innerHTML = '<span class="dim">— vazio —</span>';
+  } else if (a === "rpc") {
+    const m = act.dataset.m;
+    const out = { jsonrpc: "2.0", id: 1, result: m === "handleCommand" ? [{ type: "reply", content: "**Bilu** · fome 3/10" }] : [] };
+    const el = $("#rpc-out"); if (el) el.textContent = JSON.stringify(out, null, 2);
+  } else if (a === "wiz-next") wizNext();
+  else if (a === "wiz-back") { wiz.step = Math.max(1, wiz.step - 1); render(); }
+  else if (a === "wiz-perms") { wiz.step = 3; render(); }
+  else if (a === "wiz-build") {
+    $$("[data-perm]").forEach((c) => (wiz.perms[c.dataset.perm] = c.checked));
+    wizBuild();
+  } else if (a === "wiz-done") { wiz.step = 5; render(); }
+  else if (a === "wiz-reset") { wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null }; render(); }
+  else if (a === "con-send") {
+    try { conSend(); } catch (err) { toast("JSON inválido no request"); }
+  }
+});
+
+render();
+</script>
+</body>
+</html>
