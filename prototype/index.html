@@ -7,59 +7,65 @@
 <style>
   :root{
     color-scheme: light dark;
-    --bg:#f5f5f7;
-    --side:#ececee;
+    --bg:#f6f6f7;
+    --side:#ededef;
     --surface:#ffffff;
-    --surface-2:#fafafa;
-    --surface-3:#f0f0f2;
-    --text:#1d1d1f;
-    --text-2:#6e6e73;
-    --text-3:#8e8e93;
-    --line:rgba(0,0,0,.09);
-    --line-2:rgba(0,0,0,.16);
-    --accent:#0071e3;
-    --accent-soft:#e8f1fd;
-    --green:#1d7a3e; --green-soft:#e7f4ea;
-    --amber:#8a5a00; --amber-soft:#fdf3dd;
-    --red:#c0362c;   --red-soft:#fbeceb;
-    --r:12px;
-    --r-sm:7px;
+    --surface-2:#fafafb;
+    --surface-3:#f1f1f3;
+    --text:#1c1c1e;
+    --text-2:#5f6066;
+    --text-3:#8b8c92;
+    --line:rgba(0,0,0,.085);
+    --line-2:rgba(0,0,0,.15);
+    --accent:#0b62d6;
+    --accent-soft:#e9f0fd;
+    --green:#16713d;
+    --green-soft:#e8f4ec;
+    --amber:#8a5a06;
+    --amber-soft:#fdf4e2;
+    --red:#bb362c;
+    --red-soft:#fbeeed;
+    --r:11px;
+    --r-sm:6px;
     --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Inter,system-ui,sans-serif;
     --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#161618;
+      --bg:#151517;
       --side:#1a1a1c;
-      --surface:#202022;
-      --surface-2:#262628;
-      --surface-3:#2c2c2e;
-      --text:#f2f2f5;
-      --text-2:#a0a0a6;
-      --text-3:#8a8a90;
-      --line:rgba(255,255,255,.085);
-      --line-2:rgba(255,255,255,.18);
-      --accent:#0a84ff;
-      --accent-soft:rgba(10,132,255,.15);
-      --green:#32d74b; --green-soft:rgba(50,215,75,.14);
-      --amber:#ffd60a; --amber-soft:rgba(255,214,10,.13);
-      --red:#ff453a;   --red-soft:rgba(255,69,58,.14);
+      --surface:#1f1f22;
+      --surface-2:#252528;
+      --surface-3:#2b2b2f;
+      --text:#f2f2f4;
+      --text-2:#a4a4ab;
+      --text-3:#8c8c93;
+      --line:rgba(255,255,255,.08);
+      --line-2:rgba(255,255,255,.17);
+      --accent:#3d8bfd;
+      --accent-soft:rgba(61,139,253,.15);
+      --green:#37c25f;
+      --green-soft:rgba(55,194,95,.13);
+      --amber:#e8b53a;
+      --amber-soft:rgba(232,181,58,.13);
+      --red:#f26157;
+      --red-soft:rgba(242,97,87,.13);
     }
   }
   html[data-theme="light"]{
-    --bg:#f5f5f7;--side:#ececee;--surface:#fff;--surface-2:#fafafa;--surface-3:#f0f0f2;
-    --text:#1d1d1f;--text-2:#6e6e73;--text-3:#8e8e93;
-    --line:rgba(0,0,0,.09);--line-2:rgba(0,0,0,.16);
-    --accent:#0071e3;--accent-soft:#e8f1fd;
-    --green:#1d7a3e;--green-soft:#e7f4ea;--amber:#8a5a00;--amber-soft:#fdf3dd;--red:#c0362c;--red-soft:#fbeceb;
+    --bg:#f6f6f7;--side:#ededef;--surface:#fff;--surface-2:#fafafb;--surface-3:#f1f1f3;
+    --text:#1c1c1e;--text-2:#5f6066;--text-3:#8b8c92;
+    --line:rgba(0,0,0,.085);--line-2:rgba(0,0,0,.15);
+    --accent:#0b62d6;--accent-soft:#e9f0fd;
+    --green:#16713d;--green-soft:#e8f4ec;--amber:#8a5a06;--amber-soft:#fdf4e2;--red:#bb362c;--red-soft:#fbeeed;
     color-scheme:light;
   }
   html[data-theme="dark"]{
-    --bg:#161618;--side:#1a1a1c;--surface:#202022;--surface-2:#262628;--surface-3:#2c2c2e;
-    --text:#f2f2f5;--text-2:#a0a0a6;--text-3:#8a8a90;
-    --line:rgba(255,255,255,.085);--line-2:rgba(255,255,255,.18);
-    --accent:#0a84ff;--accent-soft:rgba(10,132,255,.15);
-    --green:#32d74b;--green-soft:rgba(50,215,75,.14);--amber:#ffd60a;--amber-soft:rgba(255,214,10,.13);--red:#ff453a;--red-soft:rgba(255,69,58,.14);
+    --bg:#151517;--side:#1a1a1c;--surface:#1f1f22;--surface-2:#252528;--surface-3:#2b2b2f;
+    --text:#f2f2f4;--text-2:#a4a4ab;--text-3:#8c8c93;
+    --line:rgba(255,255,255,.08);--line-2:rgba(255,255,255,.17);
+    --accent:#3d8bfd;--accent-soft:rgba(61,139,253,.15);
+    --green:#37c25f;--green-soft:rgba(55,194,95,.13);--amber:#e8b53a;--amber-soft:rgba(232,181,58,.13);--red:#f26157;--red-soft:rgba(242,97,87,.13);
     color-scheme:dark;
   }
 
@@ -67,14 +73,14 @@
   html,body{height:100%;margin:0}
   body{
     background:var(--bg);color:var(--text);
-    font:13.5px/1.5 var(--sans);
+    font:13.5px/1.55 var(--sans);
     -webkit-font-smoothing:antialiased;
-    letter-spacing:-.003em;
+    letter-spacing:-.004em;
   }
   a{color:var(--accent);text-decoration:none}
   button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;letter-spacing:inherit}
   input,select,textarea{
-    font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line-2);
+    font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line-2);
     border-radius:var(--r-sm);padding:6px 9px;width:100%;outline:none;letter-spacing:inherit;
     transition:border-color .12s, box-shadow .12s;
   }
@@ -82,176 +88,190 @@
   ::selection{background:var(--accent-soft)}
   svg{display:block}
 
-  .app{display:grid;grid-template-columns:224px 1fr;height:100%}
+  .app{display:grid;grid-template-columns:230px 1fr;height:100%}
 
-  /* ── sidebar ── */
+  /* ══ barra lateral ══ */
   .rail{
-    background:var(--side);
-    border-right:1px solid var(--line);
+    background:var(--side);border-right:1px solid var(--line);
     display:flex;flex-direction:column;
-    padding:12px 8px 10px;gap:16px;overflow:auto;
+    padding:14px 9px 10px;gap:18px;overflow:auto;
   }
-  .brand{display:flex;gap:8px;align-items:center;padding:4px 8px 2px}
+  .brand{display:flex;gap:9px;align-items:center;padding:2px 9px 0}
   .brand .mark{
-    width:24px;height:24px;border-radius:6px;flex:0 0 auto;
-    background:var(--text);color:var(--bg);
+    width:25px;height:25px;border-radius:7px;flex:0 0 auto;
+    background:var(--text);color:var(--side);
     display:grid;place-items:center;
   }
-  .brand b{font-size:13px;font-weight:600;letter-spacing:-.01em}
-  .brand span{display:block;font-size:11px;color:var(--text-3);margin-top:-2px}
+  .brand .txt b{display:block;font-size:13px;font-weight:600;letter-spacing:-.012em;line-height:1.25}
+  .brand .txt span{display:block;font-size:11px;color:var(--text-3);line-height:1.3}
 
   .nav{display:flex;flex-direction:column;gap:1px}
-  .nav i{font-style:normal;font-size:11px;font-weight:500;color:var(--text-3);padding:12px 9px 4px}
-  .nav button{
+  .nav i{font-style:normal;font-size:11px;font-weight:600;color:var(--text-3);padding:13px 10px 4px;letter-spacing:.005em}
+  .nav a{
     display:flex;align-items:center;gap:8px;width:100%;
-    padding:5px 9px;border-radius:6px;color:var(--text);
-    font-size:13px;text-align:left;transition:background .1s;
+    padding:5px 9px;border-radius:var(--r-sm);color:var(--text);
+    font-size:13px;text-align:left;cursor:pointer;transition:background .1s;
   }
-  .nav button:hover{background:rgba(0,0,0,.045)}
-  html[data-theme="dark"] .nav button:hover{background:rgba(255,255,255,.055)}
-  @media (prefers-color-scheme: dark){ .nav button:hover{background:rgba(255,255,255,.055)} }
-  .nav button.on{background:var(--accent);color:#fff}
-  .nav button.on .ic{opacity:1}
-  .nav .ic{opacity:.55;flex:0 0 auto;display:grid;place-items:center}
+  .nav a:hover{background:var(--line)}
+  .nav a.on{background:var(--surface);color:var(--text);font-weight:500}
+  .nav a.on .ic{color:var(--accent);opacity:1}
+  .nav .ic{opacity:.5;flex:0 0 auto;display:grid;place-items:center;width:15px}
   .nav .count{margin-left:auto;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
-  .nav button.on .count{color:rgba(255,255,255,.75)}
+  .nav a.on .count{color:var(--text-2)}
 
   .rail .foot{
-    margin-top:auto;padding:10px 9px 2px;border-top:1px solid var(--line);
-    display:grid;gap:5px;font-size:11.5px;color:var(--text-2);
+    margin-top:auto;padding:11px 10px 2px;border-top:1px solid var(--line);
+    display:grid;gap:6px;font-size:11.5px;color:var(--text-2);
   }
   .rail .foot .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .rail .foot .row b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
   .dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;flex:0 0 auto}
 
-  /* ── main ── */
+  /* ══ conteúdo ══ */
   main{overflow:auto;background:var(--bg)}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 32px 72px}
-  @media(max-width:820px){.wrap{padding:0 18px}}
-  @media(min-width:1240px){.wrap{padding:0 40px}}
+  .wrap{max-width:1064px;margin:0 auto;padding:0 34px 72px}
+  @media(max-width:860px){.wrap{padding:0 18px}}
 
-  .topbar{
-    display:flex;align-items:center;gap:10px;
-    padding:14px 0 0;
-  }
+  .topbar{display:flex;align-items:center;gap:10px;padding:13px 0 0}
   .guild{
-    display:flex;align-items:center;gap:8px;padding:3px 10px 3px 3px;
+    display:flex;align-items:center;gap:8px;padding:3px 11px 3px 3px;
     border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--line);
-    font-size:12.5px;font-weight:500;
+    font-size:12.5px;font-weight:500;cursor:pointer;
   }
-  .guild .av{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-size:9.5px;font-weight:600;color:#fff;background:#6e6e73}
+  .guild:hover{border-color:var(--line-2)}
+  .guild .av{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-size:9.5px;font-weight:600;color:#fff;background:#71727a}
   .guild em{font-style:normal;font-weight:400;color:var(--text-3);font-size:11.5px;font-variant-numeric:tabular-nums}
   .topbar .sp{flex:1}
-  .iconbtn{
-    width:28px;height:28px;border-radius:6px;display:grid;place-items:center;
-    color:var(--text-2);
-  }
+  .iconbtn{width:28px;height:28px;border-radius:var(--r-sm);display:grid;place-items:center;color:var(--text-2)}
   .iconbtn:hover{background:var(--surface);color:var(--text)}
   .me{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-2)}
   .me .av{width:22px;height:22px;border-radius:50%;background:var(--surface-3);display:grid;place-items:center;font-size:10px;font-weight:600;color:var(--text-2)}
 
-  /* headings */
-  .head{display:flex;align-items:flex-end;gap:20px;padding:28px 0 18px}
+  /* cabeçalho de página */
+  .head{display:flex;align-items:flex-end;gap:24px;padding:30px 0 20px}
   .head .txt{flex:1;min-width:0}
-  h1{font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-.022em;margin:0}
-  .lede{margin:7px 0 0;font-size:13.5px;color:var(--text-2);max-width:64ch}
-  @media(max-width:640px){h1{font-size:22px}.head{flex-direction:column;align-items:flex-start;gap:14px;padding:20px 0 14px}}
+  .eyebrow{font-size:11.5px;font-weight:600;color:var(--text-3);letter-spacing:.01em;margin-bottom:5px}
+  h1{font-size:25px;line-height:1.2;font-weight:600;letter-spacing:-.024em;margin:0}
+  .lede{margin:6px 0 0;font-size:13.5px;color:var(--text-2);max-width:62ch;line-height:1.5}
+  @media(max-width:640px){h1{font-size:21px}.head{flex-direction:column;align-items:flex-start;gap:14px;padding:20px 0 15px}}
 
-  /* buttons */
+  /* botões */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:6px;
     height:28px;padding:0 11px;border-radius:var(--r-sm);
     background:var(--surface);border:1px solid var(--line-2);
     font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;
-    transition:background .1s,border-color .1s;
+    transition:background .1s;
   }
-  .btn:hover{background:var(--surface-2);border-color:var(--line-2)}
+  .btn:hover{background:var(--surface-2)}
   .btn.pri{background:var(--accent);border-color:transparent;color:#fff}
-  .btn.pri:hover{background:var(--accent);filter:brightness(1.08)}
-  .btn.ghost{background:transparent;border-color:transparent;color:var(--accent)}
-  .btn.ghost:hover{background:var(--accent-soft)}
-  .btn.danger{color:var(--red)}
+  .btn.pri:hover{filter:brightness(1.09)}
+  .btn.danger{color:var(--red);border-color:var(--red-soft);background:transparent}
   .btn.danger:hover{background:var(--red-soft);border-color:var(--red-soft)}
   .btn.sm{height:24px;padding:0 9px;font-size:12px}
   .btn:disabled{opacity:.4;pointer-events:none}
   .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
-  /* cards */
+  /* cartões */
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
   .pad{padding:16px}
-  .card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px 10px}
-  .card-h h2{font-size:12.5px;font-weight:600;margin:0}
+  .card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px 11px}
+  .card-h h2{font-size:12.5px;font-weight:600;margin:0;letter-spacing:-.01em}
   .card-h .sub{font-size:11.5px;color:var(--text-3);display:inline-flex;align-items:center;gap:5px}
+  .card-h .link{font-size:12px;font-weight:500;color:var(--accent);cursor:pointer}
+  .card-h .link:hover{text-decoration:underline}
 
-  /* metrics */
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  @media(max-width:860px){.metrics{grid-template-columns:repeat(2,1fr)}}
-  .metric{padding:12px 14px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
-  .metric .lbl{font-size:11.5px;color:var(--text-3)}
-  .metric .val{font-size:22px;font-weight:600;letter-spacing:-.028em;margin-top:3px;font-variant-numeric:tabular-nums;line-height:1.2}
+  /* faixa de métricas */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .metric{padding:13px 16px 15px;border-left:1px solid var(--line)}
+  .metric:first-child{border-left:0}
+  .metric .lbl{font-size:11.5px;color:var(--text-3);line-height:1.35}
+  .metric .val{font-size:21px;font-weight:600;letter-spacing:-.03em;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.15}
   .metric .val small{font-size:12px;font-weight:400;color:var(--text-3);letter-spacing:0}
-  .metric .delta{font-size:11.5px;color:var(--text-3);margin-top:2px}
+  .metric .delta{font-size:11.5px;color:var(--text-3);margin-top:3px;line-height:1.35}
+  @media(max-width:880px){
+    .metrics{grid-template-columns:1fr 1fr}
+    .metric:nth-child(3){border-left:0}
+    .metric:nth-child(n+3){border-top:1px solid var(--line)}
+  }
 
-  .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:12px;margin-top:12px;align-items:start}
+  .cols{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-top:12px;align-items:start}
   @media(max-width:1000px){.cols{grid-template-columns:1fr}}
   .stack{display:grid;gap:12px}
 
-  /* list rows */
+  .guilds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:880px){.guilds{grid-template-columns:1fr}}
+
+  /* lista de plugins */
   .rows{display:block}
   .row-item{
     display:flex;align-items:center;gap:11px;
-    padding:10px 16px;border-top:1px solid var(--line);
+    padding:11px 16px;border-top:1px solid var(--line);
     cursor:pointer;transition:background .08s;
   }
   .row-item:first-child{border-top:0}
   .row-item:hover{background:var(--surface-2)}
   .tile{
-    width:30px;height:30px;border-radius:var(--r-sm);flex:0 0 auto;
+    width:29px;height:29px;border-radius:var(--r-sm);flex:0 0 auto;
     display:grid;place-items:center;
-    background:var(--surface-3);border:1px solid var(--line);
-    font-size:12px;font-weight:600;color:var(--text-2);
-    letter-spacing:0;text-transform:uppercase;
+    background:var(--surface-3);
+    font-size:11.5px;font-weight:600;color:var(--text-2);letter-spacing:0;
   }
-  .tile.lg{width:44px;height:44px;border-radius:10px;font-size:17px}
+  .tile.lg{width:42px;height:42px;border-radius:9px;font-size:16px}
   .row-main{flex:1;min-width:0}
-  .row-main .name{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:6px}
-  .row-main .meta{font-size:11.5px;color:var(--text-3);display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:1px}
-  .row-end{display:flex;align-items:center;gap:12px;color:var(--text-3);font-size:12px;font-variant-numeric:tabular-nums;flex:0 0 auto}
-  .chev{color:var(--text-3);opacity:.75}
+  .row-main .name{font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:7px;letter-spacing:-.008em}
+  .row-main .name .ver{font-weight:400;font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+  .row-main .desc{font-size:12px;color:var(--text-2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row-main .meta{font-size:11.5px;color:var(--text-3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px}
+  .row-end{display:flex;align-items:center;gap:12px;flex:0 0 auto;color:var(--text-3)}
+  .row-end .num{font-size:12px;font-variant-numeric:tabular-nums;color:var(--text-2)}
+  .row-end .num span{color:var(--text-3)}
+  .chev{color:var(--text-3);opacity:.55}
 
   /* status */
   .stat{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);white-space:nowrap}
   .stat.ok{color:var(--green)} .stat.warn{color:var(--amber)} .stat.err{color:var(--red)}
   .stat .dot{background:currentColor}
-  .tag{display:inline-flex;align-items:center;gap:4px;height:19px;padding:0 6px;border-radius:5px;font-size:11px;font-weight:500;background:var(--surface-3);color:var(--text-2);white-space:nowrap;border:1px solid transparent}
+  .tag{display:inline-flex;align-items:center;height:19px;padding:0 6px;border-radius:4px;font-size:10.5px;font-weight:500;background:var(--surface-3);color:var(--text-2);white-space:nowrap}
   .tag.ok{background:var(--green-soft);color:var(--green)}
   .tag.warn{background:var(--amber-soft);color:var(--amber)}
   .tag.err{background:var(--red-soft);color:var(--red)}
   .tag.acc{background:var(--accent-soft);color:var(--accent)}
-  .tag.code{font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--text-2);background:var(--surface-3)}
+  .tag.code{font-family:var(--mono);font-size:10.5px;font-weight:400}
 
   .mono{font-family:var(--mono);font-size:11.5px}
   .dim{color:var(--text-3)}
   .muted{color:var(--text-2)}
   .num{font-variant-numeric:tabular-nums}
-  .sep{height:1px;background:var(--line);margin:12px 0}
-  .sec{font-size:11.5px;font-weight:600;color:var(--text-3);margin:0 0 7px}
+  .sep{height:1px;background:var(--line);margin:0}
+  .sec{font-size:11.5px;font-weight:600;color:var(--text-3);margin:0 0 8px}
 
-  /* activity */
-  .stream{padding:2px 0 8px;max-height:228px;overflow:auto;font-size:12px}
-  .stream .ev{display:flex;gap:9px;align-items:baseline;padding:3px 16px;font-variant-numeric:tabular-nums}
+  /* gráfico de volume */
+  .chart{padding:2px 16px 14px}
+  .chart .bars{display:flex;align-items:flex-end;gap:3px;height:78px}
+  .chart .bars i{flex:1;background:var(--accent);opacity:.22;border-radius:2px 2px 0 0;min-height:2px;transition:opacity .12s}
+  .chart .bars i:hover{opacity:.65}
+  .chart .bars i.hot{opacity:.85}
+  .chart .axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-3);margin-top:7px;font-variant-numeric:tabular-nums}
+  .chart .legend{display:flex;gap:14px;font-size:11.5px;color:var(--text-2);margin-top:10px;flex-wrap:wrap}
+  .chart .legend b{font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+
+  /* atividade */
+  .stream{padding:0 0 8px;max-height:222px;overflow:auto;font-size:11.5px}
+  .stream .ev{display:flex;gap:8px;align-items:baseline;padding:3px 16px;font-variant-numeric:tabular-nums}
   .stream .ev .t{color:var(--text-3);font-family:var(--mono);font-size:10.5px;flex:0 0 auto}
-  .stream .ev .n{color:var(--text-2);font-family:var(--mono);font-size:11px;flex:0 0 auto}
+  .stream .ev .n{color:var(--text-2);font-family:var(--mono);font-size:11px;flex:0 0 auto;min-width:132px}
   .stream .ev .w{color:var(--text-3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .stream .ev .d{color:var(--text-3);font-family:var(--mono);font-size:10.5px}
 
-  /* attention */
+  /* atenção */
   .attn{display:flex;gap:9px;padding:10px 16px;border-top:1px solid var(--line);font-size:12px;line-height:1.45;align-items:flex-start}
   .attn:first-child{border-top:0}
   .attn b{font-weight:500}
   .attn .txt{color:var(--text-2)}
+  .attn .stat{margin-top:1px;flex:0 0 auto}
 
-  /* tables */
+  /* tabelas */
   table{width:100%;border-collapse:collapse}
   th{text-align:left;font-size:11.5px;font-weight:500;color:var(--text-3);padding:8px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
   td{padding:10px 16px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:middle}
@@ -260,55 +280,55 @@
   th.r,td.r{text-align:right}
   .tblwrap{overflow-x:auto}
 
-  /* segmented */
-  .segmented{display:inline-flex;gap:1px;padding:2px;background:var(--surface-3);border-radius:var(--r-sm);margin:2px 0 14px;border:1px solid var(--line)}
-  .segmented button{padding:3px 12px;border-radius:5px;font-size:12.5px;color:var(--text-2);transition:.12s;white-space:nowrap}
+  /* abas */
+  .segmented{display:inline-flex;gap:1px;padding:2px;background:var(--surface-3);border-radius:var(--r-sm);margin:0 0 14px;border:1px solid var(--line)}
+  .segmented button{padding:3px 12px;border-radius:4px;font-size:12.5px;color:var(--text-2);transition:.12s;white-space:nowrap}
   .segmented button:hover{color:var(--text)}
   .segmented button.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 0 0 1px var(--line)}
 
-  /* code */
+  /* código */
   pre{
-    background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
-    padding:14px;margin:0;overflow:auto;
-    font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--text);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
+    padding:13px;margin:0;overflow:auto;
+    font-family:var(--mono);font-size:11.5px;line-height:1.72;color:var(--text);
   }
   .hint{font-size:11.5px;color:var(--text-3);margin-top:7px;line-height:1.55}
-  code{.mono}
 
-  /* definition list */
   .dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:12.5px;align-items:baseline}
   .dl dt{color:var(--text-3);white-space:nowrap}
-  .dl dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+  .dl dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 
   /* switch */
-  .switch{position:relative;display:inline-block;width:38px;height:22px;flex:0 0 auto}
+  .switch{position:relative;display:inline-block;width:37px;height:22px;flex:0 0 auto}
   .switch input{position:absolute;opacity:0;width:0;height:0}
   .switch i{position:absolute;inset:0;background:var(--line-2);border-radius:99px;transition:background .18s;cursor:pointer}
   .switch i::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.22);transition:transform .18s}
   .switch input:checked + i{background:var(--green)}
-  .switch input:checked + i::after{transform:translateX(16px)}
+  .switch input:checked + i::after{transform:translateX(15px)}
   .switch input:focus-visible + i{box-shadow:0 0 0 3px var(--accent-soft)}
 
-  /* settings rows */
+  /* linhas de ajuste */
   .set-row{display:flex;align-items:center;gap:14px;padding:11px 16px;border-top:1px solid var(--line)}
   .set-row:first-child{border-top:0}
   .set-row .l{flex:1;min-width:0}
-  .set-row .l .t{font-size:12.5px;font-weight:500}
+  .set-row .l .t{font-size:12.5px;font-weight:500;letter-spacing:-.005em}
   .set-row .l .d{font-size:11.5px;color:var(--text-3);margin-top:1px;line-height:1.4}
-  .set-row .ctl{flex:0 0 auto;width:170px}
+  .set-row .ctl{flex:0 0 auto;width:168px}
+  .set-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:11px 16px;background:var(--surface-2);border-top:1px solid var(--line);border-radius:0 0 var(--r) var(--r)}
   @media(max-width:700px){.set-row{flex-wrap:wrap}.set-row .ctl{width:100%}}
 
   /* logs */
-  .logs{background:var(--surface-2);border-top:1px solid var(--line);border-radius:0 0 var(--r) var(--r);max-height:400px;overflow:auto;padding:8px 0;font-family:var(--mono);font-size:11.5px;line-height:1.7}
-  .logs .ln{display:flex;gap:8px;padding:1px 14px}
+  .logs{background:var(--surface-2);border-top:1px solid var(--line);max-height:400px;overflow:auto;padding:8px 0;font-family:var(--mono);font-size:11.5px;line-height:1.72}
+  .logs.round{border-radius:0 0 var(--r) var(--r);border-top:1px solid var(--line)}
+  .logs .ln{display:flex;gap:8px;padding:1px 15px}
   .logs .ln .t{color:var(--text-3);flex:0 0 auto}
-  .logs .ln .s{color:var(--text-3);flex:0 0 auto}
+  .logs .ln .s{color:var(--text-3);flex:0 0 auto;min-width:72px}
   .logs .ln .lv{flex:0 0 auto;width:34px;font-weight:500}
   .logs .lv.info{color:var(--accent)} .logs .lv.ok{color:var(--green)} .logs .lv.warn{color:var(--amber)} .logs .lv.err{color:var(--red)}
   .logs .ln .m{color:var(--text-2);min-width:0;white-space:pre-wrap}
 
   /* wizard */
-  .wiz{max-width:720px}
+  .wiz{max-width:760px}
   .steps{display:flex;align-items:center;gap:0;margin:0 0 16px;font-size:12px;color:var(--text-3);flex-wrap:wrap;row-gap:8px}
   .steps .st{display:flex;align-items:center;gap:7px}
   .steps .st .n{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:600;background:var(--surface-3);color:var(--text-2);border:1px solid var(--line)}
@@ -317,57 +337,58 @@
   .steps .st.done .n{background:var(--green-soft);color:var(--green);border-color:transparent}
   .steps .bar{width:22px;height:1px;background:var(--line-2);margin:0 9px}
 
-  .check{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0}
+  .check{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;color:var(--text-2)}
   .check .ok{color:var(--green);flex:0 0 auto}
-  .check .warn{color:var(--amber);flex:0 0 auto}
 
-  .cap-row{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-top:1px solid var(--line)}
+  .cap-row{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-top:1px solid var(--line);cursor:pointer}
   .cap-row:first-child{border-top:0}
+  .cap-row:hover{background:var(--surface-2)}
   .cap-row input{width:auto;flex:0 0 auto;margin-top:2px;accent-color:var(--accent)}
-  .cap-row .nm{font-family:var(--mono);font-size:11.5px;font-weight:500}
+  .cap-row .nm{font-size:12.5px;font-weight:500}
+  .cap-row .cd{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-left:4px;font-weight:400}
   .cap-row .ds{font-size:11.5px;color:var(--text-3);margin-top:1px;line-height:1.45}
-  .warnline{font-size:11.5px;color:var(--amber);margin-top:2px}
+  .warnline{font-size:11.5px;color:var(--amber);margin-top:3px}
 
   /* toast */
   .toast{
-    position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);
+    position:fixed;left:50%;bottom:24px;transform:translate(-50%,10px);
     display:flex;align-items:center;gap:8px;
     background:var(--surface);border:1px solid var(--line-2);
     padding:8px 14px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;
-    box-shadow:0 8px 24px -8px rgba(0,0,0,.28);
+    box-shadow:0 6px 22px -6px rgba(0,0,0,.22);
     opacity:0;pointer-events:none;transition:.18s cubic-bezier(.32,.72,0,1);z-index:80;
   }
   .toast.on{opacity:1;transform:translate(-50%,0)}
   .toast .g{color:var(--green)}
 
-  .fade{animation:fade .22s ease-out both}
-  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .fade{animation:fade .2s ease-out both}
+  @keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){.fade{animation:none}}
 
-  .empty{padding:36px 16px;text-align:center;color:var(--text-3);font-size:12.5px}
-  .kv-chips{display:flex;flex-wrap:wrap;gap:5px}
-  .bars{display:grid;gap:11px}
-  .bar{display:grid;grid-template-columns:1fr auto;gap:5px;font-size:12px;align-items:center}
-  .bar .track{grid-column:1/-1;height:4px;border-radius:99px;background:var(--surface-3);overflow:hidden}
-  .bar .track i{display:block;height:100%;border-radius:99px;background:var(--accent)}
-  .back{display:inline-flex;align-items:center;gap:3px;font-size:12.5px;color:var(--text-2);margin-bottom:10px}
+  .empty{padding:34px 16px;text-align:center;color:var(--text-3);font-size:12.5px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .bars-list{display:grid;gap:11px}
+  .bars-list .b{display:grid;grid-template-columns:1fr auto;gap:5px;font-size:12px;align-items:baseline}
+  .bars-list .b .nm{color:var(--text-2)}
+  .bars-list .b .v{color:var(--text-3);font-variant-numeric:tabular-nums;font-size:11.5px}
+  .bars-list .b .track{grid-column:1/-1;height:4px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+  .bars-list .b .track i{display:block;height:100%;border-radius:99px;background:var(--accent);opacity:.75}
+  .back{display:inline-flex;align-items:center;gap:3px;font-size:12.5px;color:var(--text-2);margin-bottom:12px;cursor:pointer}
   .back:hover{color:var(--accent)}
 
-  /* compact viewport */
   @media(max-width:760px){
     .app{grid-template-columns:1fr;grid-template-rows:auto 1fr}
     .rail{flex-direction:row;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;padding:8px 12px;border-right:0;border-bottom:1px solid var(--line);scrollbar-width:none}
     .rail::-webkit-scrollbar{display:none}
     .brand{padding:0;flex:0 0 auto}
-    .brand div:last-child{display:none}
+    .brand .txt{display:none}
     .nav{flex-direction:row;gap:2px;align-items:center}
     .nav i{display:none}
-    .nav button{white-space:nowrap;font-size:12.5px;padding:5px 9px}
+    .nav a{white-space:nowrap;font-size:12.5px;padding:5px 9px}
     .nav .ic{display:none}
     .rail .foot{display:none}
     main{height:auto}
     .head{padding:18px 0 14px}
-    .metrics{grid-template-columns:1fr 1fr}
     .cols{grid-template-columns:1fr}
     .dl{grid-template-columns:1fr;gap:2px}
     .dl dd{text-align:left;margin-bottom:6px}
@@ -379,22 +400,22 @@
   <aside class="rail">
     <div class="brand">
       <div class="mark" id="brandmark"></div>
-      <div><b>Plugin Platform</b><span>protótipo</span></div>
+      <div class="txt"><b>Plugin Platform</b><span>Protótipo</span></div>
     </div>
     <nav class="nav" id="nav">
       <i>Servidor</i>
-      <button data-go="overview"><span class="ic"></span>Visão geral</button>
-      <button data-go="plugins"><span class="ic"></span>Plugins<span class="count" id="nav-pl-count">0</span></button>
-      <button data-go="logs"><span class="ic"></span>Logs</button>
+      <a data-go="overview"><span class="ic"></span>Visão geral</a>
+      <a data-go="plugins"><span class="ic"></span>Plugins<span class="count" id="nav-pl-count">0</span></a>
+      <a data-go="logs"><span class="ic"></span>Logs</a>
       <i>Desenvolvimento</i>
-      <button data-go="install"><span class="ic"></span>Instalar plugin</button>
-      <button data-go="console"><span class="ic"></span>Console JSON-RPC</button>
+      <a data-go="install"><span class="ic"></span>Instalar plugin</a>
+      <a data-go="console"><span class="ic"></span>Console JSON-RPC</a>
       <i>Plataforma</i>
-      <button data-go="guilds"><span class="ic"></span>Guilds e permissões</button>
-      <button data-go="protocol"><span class="ic"></span>Protocolo</button>
+      <a data-go="guilds"><span class="ic"></span>Guilds</a>
+      <a data-go="protocol"><span class="ic"></span>Protocolo</a>
     </nav>
     <div class="foot">
-      <div class="row"><span style="display:inline-flex;align-items:center;gap:6px"><i class="dot"></i>Core</span><b>6d 4h</b></div>
+      <div class="row"><span style="display:inline-flex;align-items:center;gap:6px"><i class="dot"></i>Core online</span><b>6 d 4 h</b></div>
       <div class="row"><span>Versão</span><b>0.4.2</b></div>
       <div class="row"><span>Plugins ativos</span><b id="foot-active">0</b></div>
     </div>
@@ -404,38 +425,35 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ───────────── ícones (stroke 1.3 · grid 16) ───────────── */
+/* ─────────── ícones ─────────── */
 const ICON = {
-  overview: '<circle cx="8" cy="8" r="6.1"/><path d="M8 4.7V8.2l2.2 1.4"/>',
-  plugins: '<rect x="2.3" y="2.3" width="4.7" height="4.7" rx="1.1"/><rect x="9" y="2.3" width="4.7" height="4.7" rx="1.1"/><rect x="2.3" y="9" width="4.7" height="4.7" rx="1.1"/><rect x="9" y="9" width="4.7" height="4.7" rx="1.1"/>',
-  logs: '<path d="M2.6 4.2h10.8M2.6 8h10.8M2.6 11.8h6.4"/>',
-  install: '<path d="M8 2.6v6.8M5.5 7l2.5 2.5L10.5 7M2.6 12.4h10.8"/>',
-  console: '<rect x="2.1" y="3.1" width="11.8" height="9.8" rx="1.8"/><path d="m5.1 6.5 1.7 1.6-1.7 1.6M8.7 9.9h2.3"/>',
-  guilds: '<circle cx="5.9" cy="5.7" r="2.1"/><path d="M2.2 12.3a3.7 3.7 0 0 1 7.4 0"/><path d="M10.4 4.1a2.1 2.1 0 0 1 0 3.9M10.7 8.9a3.3 3.3 0 0 1 3 3.4"/>',
-  protocol: '<path d="M6.1 2.5C4.2 2.5 4 3.5 4 5v1.2c0 1-.6 1.5-1.6 1.8 1 .3 1.6.8 1.6 1.8V11c0 1.5.2 2.5 2.1 2.5"/><path d="M9.9 2.5c1.9 0 2.1 1 2.1 2.5v1.2c0 1 .6 1.5 1.6 1.8-1 .3-1.6.8-1.6 1.8V11c0 1.5-.2 2.5-2.1 2.5"/>',
-  sun: '<circle cx="8" cy="8" r="2.9"/><path d="M8 1.7v1.1M8 13.2v1.1M1.7 8h1.1M13.2 8h1.1M3.6 3.6l.8.8M11.6 11.6l.8.8M12.4 3.6l-.8.8M4.4 11.6l-.8.8"/>',
-  moon: '<path d="M9.5 2.4a5.5 5.5 0 1 0 4.1 8.1 4.5 4.5 0 0 1-4.1-8.1Z"/>',
-  check: '<path d="m3 8.3 3 3 7-7"/>',
-  chevR: '<path d="m6.2 3.6 4.4 4.4-4.4 4.4"/>',
-  chevL: '<path d="M9.8 3.6 5.4 8l4.4 4.4"/>',
-  alert: '<path d="M8 2.6 14 13H2L8 2.6Z"/><path d="M8 6.6v3M8 11.2v.1"/>',
-  brand: '<path d="M3.4 3.4h9.2v9.2H3.4z"/><path d="M6.2 6.2h3.6v3.6H6.2z"/>',
+  overview: '<circle cx="8" cy="8" r="5.9"/><path d="M8 4.9v3.3l2 1.3"/>',
+  plugins: '<rect x="2.4" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="9" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="2.4" y="9" width="4.6" height="4.6" rx="1"/><rect x="9" y="9" width="4.6" height="4.6" rx="1"/>',
+  logs: '<path d="M2.7 4.3h10.6M2.7 8h10.6M2.7 11.7h6.2"/>',
+  install: '<path d="M8 2.7v6.6M5.6 7l2.4 2.4L10.4 7M2.7 12.3h10.6"/>',
+  console: '<rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.7"/><path d="m5.2 6.6 1.6 1.5-1.6 1.5M8.7 9.8h2.1"/>',
+  guilds: '<circle cx="6" cy="5.8" r="2"/><path d="M2.4 12.2a3.6 3.6 0 0 1 7.2 0"/><path d="M10.3 4.2a2 2 0 0 1 0 3.7M10.7 8.9a3.2 3.2 0 0 1 2.9 3.3"/>',
+  protocol: '<path d="M6.2 2.6C4.3 2.6 4.1 3.6 4.1 5v1.1c0 1-.5 1.5-1.5 1.8 1 .3 1.5.8 1.5 1.8v1.1c0 1.4.2 2.4 2.1 2.4"/><path d="M9.8 2.6c1.9 0 2.1 1 2.1 2.4v1.1c0 1 .5 1.5 1.5 1.8-1 .3-1.5.8-1.5 1.8v1.1c0 1.4-.2 2.4-2.1 2.4"/>',
+  sun: '<circle cx="8" cy="8" r="2.8"/><path d="M8 1.8v1M8 13.2v1M1.8 8h1M13.2 8h1M3.7 3.7l.7.7M11.6 11.6l.7.7M12.3 3.7l-.7.7M4.4 11.6l-.7.7"/>',
+  moon: '<path d="M9.4 2.5a5.4 5.4 0 1 0 4.1 8 4.4 4.4 0 0 1-4.1-8Z"/>',
+  check: '<path d="m3.2 8.3 2.9 2.9 6.7-6.7"/>',
+  chevR: '<path d="m6.3 3.7 4.3 4.3-4.3 4.3"/>',
+  chevL: '<path d="M9.7 3.7 5.4 8l4.3 4.3"/>',
+  brand: '<path d="M3.5 3.5h9v9h-9z"/><path d="M6.3 6.3h3.4v3.4H6.3z"/>',
 };
-function icon(name, size = 14) {
-  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[name] || ""}</svg>`;
-}
-function mono(name) { return (name || "?").trim().charAt(0); }
+const icon = (n, s = 14) => `<svg viewBox="0 0 16 16" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ""}</svg>`;
 
-/* ───────────── dados mockados ───────────── */
+/* ─────────── dados ─────────── */
 const guilds = [
-  { id: "1201", name: "Servidor Dev BR", initials: "DV", members: 2431, role: "owner" },
-  { id: "1202", name: "Casinha do Gio", initials: "CG", members: 87, role: "owner" },
-  { id: "1203", name: "Bot Lab", initials: "BL", members: 512, role: "admin" },
+  { id: "1201", name: "Servidor Dev BR", initials: "DV", members: 2431, role: "proprietário" },
+  { id: "1202", name: "Casinha do Gio", initials: "CG", members: 87, role: "proprietário" },
+  { id: "1203", name: "Bot Lab", initials: "BL", members: 512, role: "administrador" },
 ];
 
 const plugins = [
   {
     id: "pets", name: "Pets", lang: "python", version: "1.4.2",
+    desc: "Pets com fome, felicidade e ranking",
     repo: "github.com/devlucas/discord-pets", branch: "main", sha: "a91f2c7",
     runtime: { kind: "process", build: ["pip", "install", "-r", "requirements.txt"], cmd: ["python3", "main.py"] },
     status: "healthy", enabled: true, guilds: ["1201", "1202"],
@@ -452,6 +470,7 @@ const plugins = [
   },
   {
     id: "loja", name: "Loja", lang: "rust", version: "2.0.1",
+    desc: "Itens, cargos e cobrança na moeda do servidor",
     repo: "github.com/mari/loja-bot", branch: "release", sha: "77be004",
     runtime: { kind: "container", image: "ghcr.io/mari/loja:2.0.1", port: 8080 },
     status: "healthy", enabled: true, guilds: ["1201"],
@@ -467,6 +486,7 @@ const plugins = [
   },
   {
     id: "economia", name: "Economia", lang: "core", version: "0.9.0",
+    desc: "Moeda global, saldo e recompensa diária",
     repo: "—", branch: "—", sha: "builtin",
     runtime: { kind: "core", cmd: [] },
     status: "healthy", enabled: true, guilds: ["*"],
@@ -474,11 +494,12 @@ const plugins = [
     commands: [{ name: "saldo", desc: "Mostra seu saldo" }, { name: "daily", desc: "Recompensa diária" }],
     events: [],
     calls24h: 40120, p95: 6, errors24h: 0, kvKeys: 2431, mem: "—", restarts: 0,
-    schema: { daily_amount: { type: "number", title: "Valor do daily", hint: "Moedas dadas a cada 24h", default: 100 } },
+    schema: { daily_amount: { type: "number", title: "Valor do daily", hint: "Moedas dadas a cada 24 horas", default: 100 } },
     config: { daily_amount: 100 },
   },
   {
     id: "cassino", name: "Cassino", lang: "typescript", version: "0.6.0",
+    desc: "Apostas na roleta e no cara ou coroa",
     repo: "github.com/joao/cassino", branch: "main", sha: "3d90aa1",
     runtime: { kind: "process", build: ["npm", "ci", "&&", "npm", "run", "build"], cmd: ["node", "dist/index.js"] },
     status: "degraded", enabled: true, guilds: ["1201", "1203"],
@@ -494,6 +515,7 @@ const plugins = [
   },
   {
     id: "moderacao", name: "Moderação", lang: "go", version: "1.1.0",
+    desc: "Banimentos, advertências e cargos automáticos",
     repo: "github.com/botlab/moderacao", branch: "v1", sha: "c0ffee2",
     runtime: { kind: "process", cmd: ["./bin/mod"] },
     status: "stopped", enabled: false, guilds: ["1201"],
@@ -501,30 +523,37 @@ const plugins = [
     commands: [{ name: "ban", desc: "Bane um membro" }, { name: "warn", desc: "Adverte um membro" }],
     events: ["MESSAGE_CREATE", "GUILD_MEMBER_ADD"],
     calls24h: 0, p95: 0, errors24h: 0, kvKeys: 91, mem: "—", restarts: 0,
-    schema: { auto_role: { type: "string", title: "Cargo automático no join", hint: "ID do cargo dado a novos membros", default: "" } },
+    schema: { auto_role: { type: "string", title: "Cargo automático na entrada", hint: "ID do cargo dado a novos membros", default: "" } },
     config: { auto_role: "" },
   },
 ];
 
-const allCaps = {
-  reply: ["Responder em canais", "Envia mensagens no canal do evento."],
+const CAPS = {
+  reply: ["Responder", "Envia mensagens no canal do evento."],
   replyEphemeral: ["Responder em privado", "Resposta visível só para quem interagiu."],
   editMessage: ["Editar mensagens", "Edita mensagens já enviadas pelo bot."],
   add_role: ["Gerenciar cargos", "Atribui e remove cargos dos membros."],
   kick: ["Expulsar membros", "Remove membros do servidor."],
-  kv: ["Armazenamento KV", "Guarda dados no namespace do plugin e da guild."],
-  "economy.read": ["Ler economia", "Consulta o saldo da moeda global."],
-  "economy.grant": ["Alterar moeda", "Muda o saldo de membros — precisa de aprovação."],
-  scheduler: ["Agendador", "Executa tarefas recorrentes, como fome de pets."],
+  kv: ["Dados próprios", "Armazena dados no espaço do plugin e da guild."],
+  "economy.read": ["Ler moeda", "Consulta o saldo da moeda global."],
+  "economy.grant": ["Alterar moeda", "Muda o saldo de membros — exige aprovação."],
+  economy: ["Moeda do servidor", "Serviço global de saldo e recompensas."],
+  scheduler: ["Agendamentos", "Executa tarefas recorrentes, como fome de pets."],
   http: ["Rede externa", "Requisições para os domínios declarados."],
 };
 
-/* ───────────── utilitários ───────────── */
+const LANG = { python: "Python", rust: "Rust", typescript: "TypeScript", go: "Go", core: "Core" };
+const LANG_COLOR = { python: "#b08800", rust: "#b0603a", typescript: "#2f6fc4", go: "#1a8f8f", core: "#6558b8" };
+
+const VOLUME = [38, 31, 24, 19, 16, 21, 34, 52, 74, 88, 81, 76, 69, 72, 85, 97, 100, 92, 78, 66, 54, 47, 41, 35];
+const HOURLY = ["00", "03", "06", "09", "12", "15", "18", "21", "23"];
+
+/* ─────────── utilitários ─────────── */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const nf = (n) => n.toLocaleString("pt-BR");
-const langColor = { python: "#c9a227", rust: "#b4653f", typescript: "#3b74c9", go: "#1c9a9a", core: "#6b5bc4" };
+const plural = (n, one, many) => `${nf(n)} ${n === 1 ? one : many}`;
 
 const storedTheme = (() => { try { return localStorage.getItem("theme") || ""; } catch { return ""; } })();
 if (storedTheme) document.documentElement.dataset.theme = storedTheme;
@@ -546,20 +575,30 @@ function toast(msg) {
   state.toastT = setTimeout(() => (t.className = "toast"), 2300);
 }
 
-function statusTag(p) {
-  if (!p.enabled) return `<span class="stat"><i class="dot" style="background:var(--text-3)"></i>Parado</span>`;
-  if (p.status === "healthy") return `<span class="stat ok"><i class="dot"></i>Ativo</span>`;
-  if (p.status === "degraded") return `<span class="stat warn"><i class="dot"></i>Degradado</span>`;
-  return `<span class="stat err"><i class="dot"></i>Parado</span>`;
-}
-function runtimeTag(p) {
-  if (p.runtime.kind === "core") return `<span class="tag acc">core</span>`;
-  const label = p.runtime.kind === "container" ? p.runtime.image.split(":").pop() : "process";
-  return `<span class="tag code">${esc(label)}</span>`;
-}
-function langDot(l) {
-  return `<span style="width:5px;height:5px;border-radius:50%;background:${langColor[l] || "#8e8e93"};display:inline-block"></span>`;
-}
+const statusOf = (p) => !p.enabled
+  ? { label: "Parado", cls: "", tone: "var(--text-3)" }
+  : p.status === "healthy"
+    ? { label: "Ativo", cls: "ok", tone: "var(--green)" }
+    : p.status === "degraded"
+      ? { label: "Degradado", cls: "warn", tone: "var(--amber)" }
+      : { label: "Parado", cls: "err", tone: "var(--red)" };
+
+const statusTag = (p) => {
+  const s = statusOf(p);
+  return `<span class="stat ${s.cls}"><i class="dot" style="background:${s.tone}"></i>${s.label}</span>`;
+};
+
+const runtimeLabel = (p) => p.runtime.kind === "container" ? "container" : p.runtime.kind === "core" ? "core" : "processo";
+const runtimeTag = (p) => `<span class="tag ${p.runtime.kind === "core" ? "acc" : "code"}">${runtimeLabel(p)}</span>`;
+
+const langLabel = (p) => `<span style="display:inline-flex;align-items:center;gap:5px;color:var(--text-3)">
+  <span style="width:5px;height:5px;border-radius:50%;background:${LANG_COLOR[p.lang] || "#8b8c92"}"></span>${LANG[p.lang] || p.lang}</span>`;
+
+const capChips = (caps, max) => {
+  const list = max ? caps.slice(0, max) : caps;
+  const rest = max ? caps.length - list.length : 0;
+  return `<div class="chips">${list.map((c) => `<span class="tag" title="${esc(c)}">${esc((CAPS[c] || [c])[0])}</span>`).join("")}${rest > 0 ? `<span class="tag code">+${rest}</span>` : ""}</div>`;
+};
 
 function shell(head, body) {
   return `<div class="topbar">${guildPicker()}<div class="sp"></div>
@@ -571,86 +610,113 @@ function shell(head, body) {
 
 function guildPicker() {
   const g = guilds.find((x) => x.id === curGuild) || guilds[0];
-  return `<div class="guild"><div class="av">${g.initials}</div>${esc(g.name)} <em>${nf(g.members)}</em></div>`;
+  return `<div class="guild" title="Trocar de servidor"><div class="av">${g.initials}</div>${esc(g.name)}<em>${nf(g.members)}</em></div>`;
 }
 
-function pageHead(title, lede, actions) {
-  return `<div class="head"><div class="txt"><h1>${esc(title)}</h1>${lede ? `<p class="lede">${lede}</p>` : ""}</div>${actions ? `<div class="actions">${actions}</div>` : ""}</div>`;
+function pageHead(title, lede, actions, eyebrow) {
+  return `<div class="head"><div class="txt">
+      ${eyebrow ? `<div class="eyebrow">${esc(eyebrow)}</div>` : ""}
+      <h1>${esc(title)}</h1>
+      ${lede ? `<p class="lede">${lede}</p>` : ""}
+    </div>${actions ? `<div class="actions">${actions}</div>` : ""}</div>`;
 }
 
-/* ───────────── visão geral ───────────── */
+/* ─────────── visão geral ─────────── */
 function viewOverview() {
   const active = plugins.filter((p) => p.enabled);
   const calls = plugins.reduce((a, p) => a + p.calls24h, 0);
   const errs = plugins.reduce((a, p) => a + p.errors24h, 0);
   const kv = plugins.reduce((a, p) => a + p.kvKeys, 0);
 
-  const head = pageHead("Visão geral", "O que está rodando neste servidor agora.", `<button class="btn pri" data-go="install">Instalar plugin</button>`);
+  const head = pageHead(
+    "Visão geral",
+    "Tudo que está rodando neste servidor agora.",
+    `<button class="btn pri" data-go="install">Instalar plugin</button>`,
+  );
 
   const metrics = `<div class="metrics">
-    <div class="metric"><div class="lbl">Plugins ativos</div><div class="val">${active.length}<small> de ${plugins.length}</small></div><div class="delta">1 desativado manualmente</div></div>
-    <div class="metric"><div class="lbl">Chamadas · 24h</div><div class="val">${nf(calls)}</div><div class="delta">p95 geral 41 ms</div></div>
-    <div class="metric"><div class="lbl">Erros · 24h</div><div class="val" style="color:${errs ? "var(--amber)" : "var(--green)"}">${nf(errs)}</div><div class="delta">Todos vindos do Cassino</div></div>
-    <div class="metric"><div class="lbl">Chaves KV</div><div class="val">${nf(kv)}</div><div class="delta">3 namespaces</div></div>
+    <div class="metric"><div class="lbl">Plugins em execução</div><div class="val">${active.length}<small> de ${plugins.length}</small></div><div class="delta">1 desativado manualmente</div></div>
+    <div class="metric"><div class="lbl">Chamadas em 24 h</div><div class="val">${nf(calls)}</div><div class="delta">Tempo de resposta p95 de 41 ms</div></div>
+    <div class="metric"><div class="lbl">Erros em 24 h</div><div class="val" style="color:${errs ? "var(--amber)" : "var(--green)"}">${nf(errs)}</div><div class="delta">Todos vindos do Cassino</div></div>
+    <div class="metric"><div class="lbl">Chaves armazenadas</div><div class="val">${nf(kv)}</div><div class="delta">Em 3 espaços de dados</div></div>
   </div>`;
 
+  const peak = Math.max(...VOLUME);
+  const chart = `<section class="card">
+    <div class="card-h"><h2>Volume nas últimas 24 horas</h2><span class="sub">${nf(calls)} chamadas</span></div>
+    <div class="chart">
+      <div class="bars">${VOLUME.map((v, i) => `<i class="${v >= peak * 0.92 ? "hot" : ""}" style="height:${Math.max(2, (v / peak) * 100)}%" title="${HOURLY[Math.floor(i / 3)] || ""}h · ${nf(Math.round((v / 100) * 720))} chamadas"></i>`).join("")}</div>
+      <div class="axis">${HOURLY.map((h) => `<span>${h}h</span>`).join("")}</div>
+      <div class="legend">
+        <span><b>${nf(Math.round(calls * 0.69))}</b> Pets</span>
+        <span><b>${nf(Math.round(calls * 0.18))}</b> Economia</span>
+        <span><b>${nf(Math.round(calls * 0.13))}</b> Outros</span>
+      </div>
+    </div>
+  </section>`;
+
   const list = `<section class="card">
-    <div class="card-h"><h2>Plugins instalados</h2><span class="sub">${plugins.length} no total</span></div>
+    <div class="card-h"><h2>Plugins instalados</h2><span class="link" data-go="plugins">Ver todos</span></div>
     <div class="rows">${plugins.map(pluginRow).join("")}</div>
   </section>`;
 
   const side = `<div class="stack">
     <section class="card">
-      <div class="card-h"><h2>Atividade</h2><span class="sub"><i class="dot"></i>ao vivo</span></div>
+      <div class="card-h"><h2>Atividade</h2><span class="sub"><i class="dot"></i>Ao vivo</span></div>
       <div class="stream" id="ev-stream"></div>
     </section>
     <section class="card">
       <div class="card-h"><h2>Precisa de atenção</h2></div>
-      <div class="attn"><span class="stat warn" style="margin-top:1px"><i class="dot"></i>Degradado</span><div class="txt"><b>Cassino</b> reiniciou 6 vezes e passa de 2,9 s no p95. O limite é 3 s.</div></div>
-      <div class="attn"><span class="stat" style="margin-top:1px"><i class="dot" style="background:var(--text-3)"></i>Parado</span><div class="txt"><b>Moderação</b> está desativada há 3 dias.</div></div>
-      <div class="attn"><span class="stat" style="margin-top:1px;color:var(--accent)"><i class="dot"></i>Update</span><div class="txt"><b>Pets</b> tem a versão 1.5.0 no repositório.</div></div>
+      <div class="attn"><span class="stat warn"><i class="dot"></i>Degradado</span><div class="txt"><b>Cassino</b> reiniciou 6 vezes e passa de 2,9 s no p95. O limite é 3 s.</div></div>
+      <div class="attn"><span class="stat"><i class="dot" style="background:var(--text-3)"></i>Parado</span><div class="txt"><b>Moderação</b> está desativada há 3 dias.</div></div>
+      <div class="attn"><span class="stat" style="color:var(--accent)"><i class="dot"></i>Nova versão</span><div class="txt"><b>Pets</b> tem a 1.5.0 publicada no repositório.</div></div>
     </section>
   </div>`;
 
-  return shell(head, metrics + `<div class="cols">${list}${side}</div>`);
+  return shell(head, metrics + `<div class="cols"><div class="stack">${chart}${list}</div>${side}</div>`);
 }
 
 function pluginRow(p) {
   const mem = p.mem !== "—" ? ` · ${p.mem}` : "";
   return `<div class="row-item" data-plugin="${p.id}" role="button" tabindex="0">
-    <div class="tile">${esc(mono(p.name))}</div>
+    <div class="tile">${esc(p.name.charAt(0))}</div>
     <div class="row-main">
-      <div class="name">${esc(p.name)} <span class="dim" style="font-weight:400;font-size:11.5px">v${p.version}</span></div>
-      <div class="meta">${langDot(p.lang)} ${esc(p.lang)} ${runtimeTag(p)} ${statusTag(p)}</div>
+      <div class="name">${esc(p.name)}<span class="ver">${p.version}</span>${p.status === "degraded" ? statusTag(p) : ""}</div>
+      <div class="desc">${esc(p.desc)}</div>
+      <div class="meta">${langLabel(p)} <span class="dim">·</span> ${runtimeLabel(p)} ${!p.enabled ? `<span class="dim">·</span> desativado` : ""}</div>
     </div>
-    <div class="row-end"><span>${nf(p.calls24h)}<span class="dim"> chamadas${mem}</span></span><span class="chev">${icon("chevR", 13)}</span></div>
+    <div class="row-end"><span class="num">${nf(p.calls24h)}<span> chamadas${mem}</span></span><span class="chev">${icon("chevR", 13)}</span></div>
   </div>`;
 }
 
-/* ───────────── plugins ───────────── */
+/* ─────────── lista de plugins ─────────── */
 function viewPlugins() {
-  const head = pageHead("Plugins", "Cada plugin roda isolado, com permissões declaradas e aprovadas.", `<button class="btn pri" data-go="install">Instalar plugin</button>`);
+  const head = pageHead(
+    "Plugins",
+    "Cada plugin roda em um processo separado, com as permissões que você aprovou.",
+    `<button class="btn pri" data-go="install">Instalar plugin</button>`,
+  );
   const body = `<section class="card tblwrap">
     <table>
-      <thead><tr><th>Plugin</th><th>Runtime</th><th>Status</th><th>Permissões</th><th class="r">Chamadas</th><th class="r">p95</th><th class="r">Erros</th><th></th></tr></thead>
+      <thead><tr><th>Plugin</th><th>Ambiente</th><th>Status</th><th>Permissões</th><th class="r">Chamadas</th><th class="r">p95</th><th class="r">Erros</th><th></th></tr></thead>
       <tbody>
       ${plugins.map((p) => `
         <tr>
           <td style="cursor:pointer" data-plugin="${p.id}">
             <div style="display:flex;align-items:center;gap:9px">
-              <div class="tile" style="width:26px;height:26px;border-radius:6px;font-size:11px">${esc(mono(p.name))}</div>
+              <div class="tile" style="width:27px;height:27px;border-radius:5px;font-size:11px">${esc(p.name.charAt(0))}</div>
               <div>
-                <div style="font-weight:500">${esc(p.name)}</div>
-                <div class="dim mono" style="font-size:10.5px">${p.repo === "—" ? "builtin" : esc(p.sha)} · ${esc(p.lang)}</div>
+                <div style="font-weight:500">${esc(p.name)}<span class="dim" style="font-weight:400;font-size:11.5px;margin-left:6px">${p.version}</span></div>
+                <div style="font-size:11.5px;color:var(--text-3)">${langLabel(p)} · ${p.repo === "—" ? "embutido" : esc(p.sha)}</div>
               </div>
             </div>
           </td>
           <td>${runtimeTag(p)}</td>
           <td>${statusTag(p)}</td>
-          <td><div class="kv-chips">${p.caps.slice(0, 2).map((c) => `<span class="tag code">${esc(c)}</span>`).join("")}${p.caps.length > 2 ? `<span class="tag code">+${p.caps.length - 2}</span>` : ""}</div></td>
-          <td class="r num mono">${nf(p.calls24h)}</td>
-          <td class="r num mono" style="color:${p.p95 > 500 ? "var(--amber)" : "var(--text-2)"}">${p.p95 ? p.p95 + " ms" : "—"}</td>
-          <td class="r num mono" style="color:${p.errors24h ? "var(--red)" : "var(--text-3)"}">${p.errors24h}</td>
+          <td>${capChips(p.caps, 2)}</td>
+          <td class="r num mono" style="color:var(--text-2)">${nf(p.calls24h)}</td>
+          <td class="r num" style="color:${p.p95 > 500 ? "var(--amber)" : "var(--text-2)"};font-variant-numeric:tabular-nums">${p.p95 ? p.p95 + " ms" : "—"}</td>
+          <td class="r num" style="color:${p.errors24h ? "var(--red)" : "var(--text-3)"};font-variant-numeric:tabular-nums">${p.errors24h}</td>
           <td class="r"><button class="btn sm" data-plugin="${p.id}">Abrir</button></td>
         </tr>`).join("")}
       </tbody>
@@ -659,17 +725,23 @@ function viewPlugins() {
   return shell(head, body);
 }
 
-/* ───────────── detalhe do plugin ───────────── */
+/* ─────────── detalhe ─────────── */
 function viewPlugin(id) {
   const p = plugins.find((x) => x.id === id);
   if (!p) return viewPlugins();
 
-  const head = `<a class="back" data-go="plugins">${icon("chevL", 12)} Plugins</a>
+  const head = `<div class="back" data-go="plugins">${icon("chevL", 12)}Plugins</div>
     <div class="head" style="padding-top:0">
-      <div class="tile lg">${esc(mono(p.name))}</div>
+      <div class="tile lg">${esc(p.name.charAt(0))}</div>
       <div class="txt">
-        <h1 style="font-size:22px;display:flex;align-items:center;gap:9px;flex-wrap:wrap">${esc(p.name)} ${statusTag(p)}</h1>
-        <div class="dim mono" style="font-size:11px;margin-top:4px">${p.repo === "—" ? "builtin" : esc(p.repo) + " · " + esc(p.branch) + " · " + esc(p.sha)} · v${p.version}</div>
+        <h1 style="font-size:21px;display:flex;align-items:center;gap:9px;flex-wrap:wrap">${esc(p.name)}
+          <span class="dim" style="font-weight:400;font-size:13px">${p.version}</span>
+          ${p.status === "degraded" ? statusTag(p) : ""}
+        </h1>
+        <div style="font-size:12px;color:var(--text-3);margin-top:4px;display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+          ${langLabel(p)} <span class="dim">·</span> ${runtimeLabel(p)} <span class="dim">·</span>
+          ${p.repo === "—" ? "embutido no core" : `<span class="mono" style="font-size:11px">${esc(p.repo)}</span> <span class="dim">·</span> ${esc(p.branch)} <span class="dim">·</span> <span class="mono" style="font-size:11px">${esc(p.sha)}</span>`}
+        </div>
       </div>
       <div class="actions">
         <label class="switch" title="Ativar ou desativar"><input type="checkbox" data-act="toggle" data-id="${p.id}" ${p.enabled ? "checked" : ""} aria-label="Ativar plugin"><i></i></label>
@@ -699,25 +771,25 @@ function pluginTab(p, tab) {
 
     return `<div class="cols">
       <section class="card">
-        <div class="card-h"><h2>Configuração</h2><span class="sub">gerada do manifesto</span></div>
+        <div class="card-h"><h2>Configuração</h2><span class="sub">gerada pelo próprio plugin</span></div>
         ${rows || '<div class="empty">Este plugin não declara configuração.</div>'}
-        <div class="set-row" style="justify-content:flex-end;gap:8px;background:var(--surface-2);border-radius:0 0 var(--r) var(--r)">
-          <span class="dim" style="font-size:11.5px;margin-right:auto">O core reenvia <span class="mono">initialize</span> sem reiniciar o processo.</span>
+        <div class="set-foot">
+          <span class="dim" style="font-size:11.5px;margin-right:auto">O core reenvia a configuração sem reiniciar o processo.</span>
           <button class="btn" data-act="reset">Reverter</button>
           <button class="btn pri" data-act="save" data-id="${p.id}">Salvar</button>
         </div>
       </section>
       <div class="stack">
         <section class="card pad">
-          <h2 class="sec">Configuração efetiva</h2>
+          <h2 class="sec">Valores em uso</h2>
           <pre>${esc(JSON.stringify(p.config, null, 2))}</pre>
         </section>
         <section class="card pad">
-          <h2 class="sec">Como aplica</h2>
+          <h2 class="sec">Como é aplicado</h2>
           <dl class="dl">
-            <dt>Por guild</dt><dd>sobrescreve padrões</dd>
+            <dt>Por guild</dt><dd>sobrepõe os padrões</dd>
             <dt>Segredos</dt><dd>via ambiente</dd>
-            <dt>Recarga</dt><dd>sem restart</dd>
+            <dt>Recarga</dt><dd>sem reiniciar</dd>
           </dl>
         </section>
       </div>
@@ -726,63 +798,71 @@ function pluginTab(p, tab) {
 
   if (tab === "logs") {
     return `<section class="card">
-      <div class="card-h"><h2>Logs de ${esc(p.name)}</h2><div style="display:flex;gap:8px;align-items:center"><span class="sub"><i class="dot"></i>ao vivo</span><button class="btn sm" data-act="clearlogs">Limpar</button></div></div>
-      <div class="logs" id="plog">${logLines(p)}</div>
+      <div class="card-h"><h2>Logs de ${esc(p.name)}</h2><div style="display:flex;gap:10px;align-items:center"><span class="sub"><i class="dot"></i>Ao vivo</span><button class="btn sm" data-act="clearlogs">Limpar</button></div></div>
+      <div class="logs round" id="plog">${logLines(p)}</div>
     </section>
-    <p class="hint">O plugin escreve logs em <span class="mono">stderr</span>. O core prefixa cada linha com guild e <span class="mono">request_id</span>.</p>`;
+    <p class="hint">O plugin escreve em <span class="mono">stderr</span>. O core acrescenta guild e <span class="mono">request_id</span> em cada linha.</p>`;
   }
 
   if (tab === "protocol") {
     return `<div class="cols">
       <section class="card pad">
-        <h2 class="sec">Manifesto</h2>
+        <h2 class="sec">Manifesto do plugin</h2>
         <pre>${esc(manifestOf(p))}</pre>
       </section>
       <div class="stack">
         <section class="card">
-          <div class="card-h"><h2>Testar chamada</h2><span class="sub">contra o mock</span></div>
+          <div class="card-h"><h2>Testar chamada</h2><span class="sub">resposta simulada</span></div>
           <div class="pad" style="padding-top:0;display:flex;gap:7px;flex-wrap:wrap">
             <button class="btn sm" data-act="rpc" data-m="handleCommand">handleCommand</button>
             <button class="btn sm" data-act="rpc" data-m="handleEvent">handleEvent</button>
             <button class="btn sm" data-act="rpc" data-m="health">health</button>
           </div>
-          <div class="pad" style="padding-top:0"><pre id="rpc-out" style="min-height:140px">${esc(JSON.stringify({ jsonrpc: "2.0", note: "escolha um método para executar" }, null, 2))}</pre></div>
+          <div class="pad" style="padding-top:0"><pre id="rpc-out" style="min-height:140px">${esc(JSON.stringify({ jsonrpc: "2.0", note: "escolha um método acima" }, null, 2))}</pre></div>
         </section>
-        <p class="hint">No core real, isto vira stdio (process) ou <span class="mono">POST /rpc</span> (container).</p>
+        <p class="hint">Com o core real, isso vira stdio para processos ou <span class="mono">POST /rpc</span> para containers.</p>
       </div>
     </div>`;
   }
 
   return `<div class="metrics">
-      <div class="metric"><div class="lbl">Chamadas · 24h</div><div class="val" style="font-size:20px">${nf(p.calls24h)}</div></div>
-      <div class="metric"><div class="lbl">p95</div><div class="val" style="font-size:20px;color:${p.p95 > 500 ? "var(--amber)" : "inherit"}">${p.p95 ? p.p95 + `<small> ms</small>` : "—"}</div></div>
-      <div class="metric"><div class="lbl">Erros · 24h</div><div class="val" style="font-size:20px;color:${p.errors24h ? "var(--red)" : "var(--green)"}">${p.errors24h}</div></div>
-      <div class="metric"><div class="lbl">Memória</div><div class="val" style="font-size:20px">${p.mem.replace(" MB", `<small> MB</small>`)}</div></div>
+      <div class="metric"><div class="lbl">Chamadas em 24 h</div><div class="val" style="font-size:19px">${nf(p.calls24h)}</div></div>
+      <div class="metric"><div class="lbl">Tempo de resposta p95</div><div class="val" style="font-size:19px;color:${p.p95 > 500 ? "var(--amber)" : "inherit"}">${p.p95 ? p.p95 + `<small> ms</small>` : "—"}</div></div>
+      <div class="metric"><div class="lbl">Erros em 24 h</div><div class="val" style="font-size:19px;color:${p.errors24h ? "var(--red)" : "var(--green)"}">${p.errors24h}</div></div>
+      <div class="metric"><div class="lbl">Memória em uso</div><div class="val" style="font-size:19px">${p.mem.replace(" MB", `<small> MB</small>`)}</div></div>
     </div>
     <div class="cols" style="margin-top:12px">
       <div class="stack">
         <section class="card">
-          <div class="card-h"><h2>Comandos</h2><span class="sub">${p.commands.length}</span></div>
-          ${p.commands.map((c) => `<div class="set-row"><div class="l"><div class="t mono" style="font-size:12px">/${esc(c.name)}</div><div class="d">${esc(c.desc)}</div></div></div>`).join("")}
-        </section>
-        <section class="card">
-          <div class="card-h"><h2>Eventos assinados</h2></div>
-          <div class="pad" style="padding-top:0"><div class="kv-chips">${p.events.length ? p.events.map((e) => `<span class="tag code">${esc(e)}</span>`).join("") : '<span class="dim" style="font-size:12px">Nenhum — o plugin só responde a comandos.</span>'}</div></div>
+          <div class="card-h"><h2>Comandos</h2><span class="sub">${plural(p.commands.length, "comando", "comandos")}</span></div>
+          ${p.commands.map((c) => `<div class="set-row"><div class="l"><div class="t mono" style="font-size:12px;font-weight:500">/${esc(c.name)}</div><div class="d">${esc(c.desc)}</div></div></div>`).join("")}
         </section>
         <section class="card">
           <div class="card-h"><h2>Permissões aprovadas</h2></div>
-          <div class="pad" style="padding-top:0"><div class="kv-chips">${p.caps.map((c) => `<span class="tag code">${esc(c)}</span>`).join("")}</div></div>
+          <div class="pad" style="padding-top:0">
+            ${p.caps.map((c) => {
+              const [label, desc] = CAPS[c] || [c, ""];
+              return `<div style="display:flex;align-items:baseline;gap:9px;padding:4px 0;font-size:12.5px">
+                <span style="font-weight:500;min-width:122px">${esc(label)}</span>
+                <span class="mono dim" style="font-size:10.5px;min-width:96px">${esc(c)}</span>
+                <span class="dim" style="font-size:11.5px;flex:1">${esc(desc)}</span>
+              </div>`;
+            }).join("")}
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-h"><h2>Eventos assinados</h2></div>
+          <div class="pad" style="padding-top:0"><div class="chips">${p.events.length ? p.events.map((e) => `<span class="tag code">${esc(e)}</span>`).join("") : '<span class="dim" style="font-size:12px">Nenhum. O plugin só responde a comandos.</span>'}</div></div>
         </section>
       </div>
       <div class="stack">
         <section class="card pad">
-          <h2 class="sec">Runtime</h2>
+          <h2 class="sec">Ambiente</h2>
           <dl class="dl">
-            <dt>Tipo</dt><dd class="mono">${p.runtime.kind}</dd>
-            ${p.runtime.cmd && p.runtime.cmd.length ? `<dt>Comando</dt><dd class="mono">${esc(p.runtime.cmd.join(" "))}</dd>` : ""}
-            ${p.runtime.build ? `<dt>Build</dt><dd class="mono">${esc(p.runtime.build.join(" "))}</dd>` : ""}
-            ${p.runtime.image ? `<dt>Imagem</dt><dd class="mono" style="font-size:10.5px">${esc(p.runtime.image)}</dd>` : ""}
-            <dt>Commit</dt><dd class="mono">${esc(p.sha)}</dd>
+            <dt>Tipo</dt><dd>${runtimeLabel(p)}</dd>
+            ${p.runtime.cmd && p.runtime.cmd.length ? `<dt>Comando</dt><dd class="mono" style="font-size:11px">${esc(p.runtime.cmd.join(" "))}</dd>` : ""}
+            ${p.runtime.build ? `<dt>Build</dt><dd class="mono" style="font-size:11px">${esc(p.runtime.build.join(" "))}</dd>` : ""}
+            ${p.runtime.image ? `<dt>Imagem</dt><dd class="mono" style="font-size:11px">${esc(p.runtime.image)}</dd>` : ""}
             <dt>Reinícios</dt><dd>${p.restarts}</dd>
           </dl>
         </section>
@@ -790,7 +870,7 @@ function pluginTab(p, tab) {
           <div class="card-h"><h2>Instalado em</h2></div>
           ${guilds.map((g) => {
             const on = p.guilds.includes("*") || p.guilds.includes(g.id);
-            return `<div class="set-row" style="padding:9px 16px"><div class="l"><div class="t" style="font-size:12.5px;font-weight:400">${esc(g.name)}</div></div>${on ? '<span class="stat ok"><i class="dot"></i>Instalado</span>' : '<span class="stat"><i class="dot" style="background:var(--text-3)"></i>Não instalado</span>'}</div>`;
+            return `<div class="set-row" style="padding:9px 16px"><div class="l"><div class="t" style="font-size:12.5px;font-weight:400">${esc(g.name)}</div></div>${on ? '<span class="stat ok"><i class="dot"></i>Instalado</span>' : '<span class="stat"><i class="dot" style="background:var(--text-3)"></i>Fora</span>'}</div>`;
           }).join("")}
         </section>
       </div>
@@ -812,20 +892,20 @@ kind = "${p.runtime.kind}"${p.runtime.cmd && p.runtime.cmd.length ? `\ncmd  = ${
 
 function logLines(p) {
   const base = [
-    ["info", "initialize · guild=1201 · config aplicada"],
-    ["ok", "handleCommand /" + (p.commands[0]?.name || "ping") + " · 41ms · 1 action"],
-    ["info", "handleEvent MESSAGE_CREATE · 12ms · 0 actions"],
-    ["ok", "kv.set pet:4410 · 3ms"],
+    ["info", "initialize · guild 1201 · configuração aplicada"],
+    ["ok", "handleCommand /" + (p.commands[0]?.name || "ping") + " · 41 ms · 1 ação"],
+    ["info", "handleEvent MESSAGE_CREATE · 12 ms · 0 ações"],
+    ["ok", "kv.set pet:4410 · 3 ms"],
   ];
-  if (p.status === "degraded") base.push(["err", "timeout após 3000ms · request_id=8f2a1c · processo encerrado"], ["warn", "reinício 7 de 3 · espera 8s"], ["info", "processo saiu com código 137 · SIGKILL"]);
+  if (p.status === "degraded") base.push(["err", "tempo esgotado após 3000 ms · request_id 8f2a1c · processo encerrado"], ["warn", "reinício 7 de 3 · aguardando 8 s"], ["info", "processo saiu com código 137 · SIGKILL"]);
   if (!p.enabled) base.push(["warn", "processo parado pelo administrador"]);
-  return base.map(([lvl, msg]) => {
-    const t = `12:0${Math.floor(Math.random() * 9)}:${Math.floor(Math.random() * 59).toString().padStart(2, "0")}`;
+  return base.map(([lvl, msg], i) => {
+    const t = `12:0${i}:${String((i * 17) % 60).padStart(2, "0")}`;
     return `<div class="ln"><span class="t">${t}</span><span class="s">[1201]</span><span class="lv ${lvl}">${lvl.toUpperCase()}</span><span class="m">${esc(msg)}</span></div>`;
   }).join("");
 }
 
-/* ───────────── instalar ───────────── */
+/* ─────────── instalar ─────────── */
 let wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null, done: false };
 
 function viewInstall() {
@@ -840,10 +920,10 @@ function viewInstall() {
   if (wiz.step === 1) {
     body = `<section class="card pad">
       <h2 class="sec">Repositório do plugin</h2>
-      <input id="wiz-url" placeholder="https://github.com/devlucas/discord-pets" value="${esc(wiz.url)}" aria-label="URL do repositório">
-      <p class="hint">O core clona o repositório, lê o <span class="mono">plugin.toml</span> e fixa um commit. A branch é só a origem — a instalação nunca segue a <span class="mono">main</span> sozinha.</p>
+      <input id="wiz-url" placeholder="https://github.com/devlucas/discord-pets" value="${esc(wiz.url)}" aria-label="Endereço do repositório">
+      <p class="hint">O core clona o repositório, lê o <span class="mono">plugin.toml</span> e fixa um commit. A branch indica a origem, mas a instalação não acompanha a <span class="mono">main</span> sozinha.</p>
       <div style="display:flex;gap:8px;margin-top:16px;align-items:center">
-        <input id="wiz-branch" placeholder="main" value="main" style="max-width:160px" aria-label="Branch">
+        <input id="wiz-branch" placeholder="main" value="main" style="max-width:150px" aria-label="Branch">
         <div style="flex:1"></div>
         <button class="btn pri" data-act="wiz-next">Analisar repositório</button>
       </div>
@@ -855,48 +935,47 @@ function viewInstall() {
       </section>
       <section class="card">
         <div class="card-h"><h2>Verificações</h2></div>
-        <div class="pad" style="padding-top:0">
-          ${[["plugin.toml válido"], ["runtime suportado · process"], ["entry existe no commit"], ["sem dependência de discord.js"], ["conformidade 6 de 6"]]
-            .map(([l]) => `<div class="check"><span class="ok">${icon("check", 13)}</span>${esc(l)}</div>`).join("")}
+        <div class="pad" style="padding-top:0;padding-bottom:6px">
+          ${["plugin.toml válido", "Ambiente suportado: processo", "Arquivo de entrada presente no commit", "Sem dependência do discord.js", "Conformidade: 6 de 6 testes"].map((l) => `<div class="check"><span class="ok">${icon("check", 13)}</span>${esc(l)}</div>`).join("")}
         </div>
-        <div class="sep" style="margin:0"></div>
-        <div class="pad"><dl class="dl"><dt>Commit</dt><dd class="mono">a91f2c7</dd><dt>Tamanho</dt><dd>412 KB</dd><dt>Licença</dt><dd>MIT</dd></dl></div>
-        <div class="set-row" style="justify-content:flex-end;gap:8px;background:var(--surface-2);border-radius:0 0 var(--r) var(--r)"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-perms">Revisar permissões</button></div>
+        <div class="sep"></div>
+        <div class="pad"><dl class="dl"><dt>Commit</dt><dd class="mono" style="font-size:11px">a91f2c7</dd><dt>Tamanho</dt><dd>412 KB</dd><dt>Licença</dt><dd>MIT</dd></dl></div>
+        <div class="set-foot"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-perms">Revisar permissões</button></div>
       </section></div>`;
   } else if (wiz.step === 3) {
     body = `<div class="cols"><section class="card">
-        <div class="card-h"><h2>O plugin pede acesso a</h2><span class="sub">desmarque para negar</span></div>
+        <div class="card-h"><h2>Permissões pedidas</h2><span class="sub">desmarque para negar</span></div>
         ${wiz.manifest.caps.map((c) => {
-          const [title, desc] = allCaps[c] || [c, ""];
+          const [label, desc] = CAPS[c] || [c, ""];
           const sens = c.startsWith("economy");
-          return `<label class="cap-row" style="cursor:pointer">
+          return `<label class="cap-row">
             <input type="checkbox" data-perm="${c}" ${wiz.perms[c] !== false ? "checked" : ""}>
-            <div><div class="nm">${esc(c)}</div><div class="ds">${esc(title)} — ${esc(desc)}</div>${sens ? '<div class="warnline">Altera a moeda global do servidor.</div>' : ""}</div>
+            <div><div class="nm">${esc(label)}<span class="cd">${esc(c)}</span></div><div class="ds">${esc(desc)}</div>${sens ? '<div class="warnline">Altera a moeda global do servidor.</div>' : ""}</div>
           </label>`;
         }).join("")}
-        <div class="set-row" style="justify-content:flex-end;gap:8px;background:var(--surface-2);border-radius:0 0 var(--r) var(--r)"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-build">Aprovar e buildar</button></div>
+        <div class="set-foot"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-build">Aprovar e buildar</button></div>
       </section>
       <section class="card">
         <div class="card-h"><h2>Instalar em</h2></div>
         ${guilds.map((g, i) => `<label class="set-row" style="cursor:pointer"><input type="checkbox" ${i === 0 ? "checked" : ""} style="width:auto;flex:0 0 auto;accent-color:var(--accent)"><div class="l" style="margin-left:9px"><div class="t">${esc(g.name)}</div><div class="d">${g.role} · ${nf(g.members)} membros</div></div></label>`).join("")}
-        <div class="pad" style="padding-top:4px"><p class="hint" style="margin:0">Permissão negada faz o core recusar a chamada com <span class="mono">E_CAPABILITY</span>. O plugin não tem acesso parcial.</p></div>
+        <div class="pad" style="padding-top:4px"><p class="hint" style="margin:0">Quando uma permissão é negada, o core recusa a chamada com <span class="mono">E_CAPABILITY</span>. Não existe acesso parcial.</p></div>
       </section></div>`;
   } else if (wiz.step === 4) {
     body = `<section class="card">
       <div class="card-h"><h2>Build e conformidade</h2>${wiz.done ? '<span class="stat ok"><i class="dot"></i>Concluído</span>' : '<span class="stat" style="color:var(--accent)"><i class="dot"></i>Executando</span>'}</div>
       <div class="logs" id="buildlog" style="border-top:1px solid var(--line)">${wiz.logs.map((l) => `<div class="ln"><span class="m">${esc(l)}</span></div>`).join("")}</div>
-      <div class="set-row" style="justify-content:flex-end;background:var(--surface-2);border-radius:0 0 var(--r) var(--r)"><button class="btn pri" data-act="wiz-done" ${wiz.done ? "" : "disabled"}>Concluir instalação</button></div>
+      <div class="set-foot"><button class="btn pri" data-act="wiz-done" ${wiz.done ? "" : "disabled"}>Concluir instalação</button></div>
     </section>`;
   } else {
-    body = `<section class="card pad" style="text-align:center;padding:40px 24px">
-      <div style="width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 12px">${icon("check", 20)}</div>
-      <h2 style="margin:0 0 5px;font-size:17px;letter-spacing:-.02em">Pets 1.4.2 instalado</h2>
-      <p class="muted" style="margin:0 0 18px;font-size:12.5px">Rodando em Servidor Dev BR · commit <span class="mono">a91f2c7</span> · permissões aprovadas.</p>
+    body = `<section class="card pad" style="text-align:center;padding:38px 24px">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 12px">${icon("check", 19)}</div>
+      <h2 style="margin:0 0 5px;font-size:16px;font-weight:600;letter-spacing:-.02em">Pets 1.4.2 instalado</h2>
+      <p class="muted" style="margin:0 0 18px;font-size:12.5px;line-height:1.5">Rodando no Servidor Dev BR, no commit <span class="mono" style="font-size:11px">a91f2c7</span>, com as permissões que você aprovou.</p>
       <div style="display:flex;gap:8px;justify-content:center"><button class="btn" data-act="wiz-reset">Instalar outro</button><button class="btn pri" data-plugin="pets">Abrir plugin</button></div>
     </section>`;
   }
 
-  const head = pageHead("Instalar plugin", "Do repositório ao servidor em quatro passos.", "");
+  const head = pageHead("Instalar plugin", "Do repositório ao servidor em quatro passos.", "", "Desenvolvimento");
   return shell(head, `<div class="wiz">${bar}${body}</div>`);
 }
 
@@ -924,11 +1003,11 @@ function wizBuild() {
     "  dependências instaladas · nenhuma com acesso ao token",
     "$ python3 -m bot_plugin_conformance",
     "  ✓ initialize           12 ms",
-    "  ✓ handleCommand /pet   38 ms · 1 action",
-    "  ✓ handleEvent           9 ms · 0 actions",
+    "  ✓ handleCommand /pet   38 ms · 1 ação",
+    "  ✓ handleEvent           9 ms · 0 ações",
     "  ✓ health                2 ms",
-    "  ✓ protocolo malformado  erro correto, sem crash",
-    "  ✓ timeout de 3 s respeitado",
+    "  ✓ protocolo malformado  erro correto, sem travar",
+    "  ✓ tempo limite de 3 s   respeitado",
     "conformidade 6 de 6 · build ok · sha256 9c1f…",
   ];
   let i = 0;
@@ -948,13 +1027,13 @@ function wizBuild() {
   }, 420);
 }
 
-/* ───────────── console ───────────── */
+/* ─────────── console ─────────── */
 let con = { plugin: "pets", method: "handleCommand", out: null };
 
 function viewConsole() {
-  const head = pageHead("Console JSON-RPC", "A mesma conversa que o core tem com qualquer plugin, em qualquer linguagem.", "");
+  const head = pageHead("Console JSON-RPC", "A mesma conversa que o core tem com o plugin, escrita à mão.", "", "Desenvolvimento");
   const body = `<div class="cols"><section class="card">
-      <div class="card-h"><h2>Requisição</h2><div style="display:flex;gap:7px;align-items:center"><select id="con-plugin" style="width:auto;max-width:170px;height:24px;padding:0 6px;font-size:12px">${plugins.map((p) => `<option value="${p.id}" ${con.plugin === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button class="btn sm pri" data-act="con-send">Executar</button></div></div>
+      <div class="card-h"><h2>Requisição</h2><div style="display:flex;gap:7px;align-items:center"><select id="con-plugin" style="width:auto;max-width:160px;height:24px;padding:0 6px;font-size:12px">${plugins.map((p) => `<option value="${p.id}" ${con.plugin === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button class="btn sm pri" data-act="con-send">Executar</button></div></div>
       <div class="pad"><textarea id="con-req" rows="11" class="mono" style="font-family:var(--mono);font-size:11.5px;line-height:1.65" aria-label="Requisição JSON-RPC">${esc(JSON.stringify({
         jsonrpc: "2.0", id: 1, method: con.method,
         params: con.method === "handleCommand"
@@ -963,12 +1042,12 @@ function viewConsole() {
             ? { type: "MESSAGE_CREATE", payload: { userId: "4410", content: "!pet", channelId: "9001" } }
             : { guildId: "1201" },
       }, null, 2))}</textarea>
-      <p class="hint">Uma linha JSON por mensagem. stdout é o canal do protocolo, stderr é log.</p></div>
+      <p class="hint">Uma linha JSON por mensagem. A saída padrão carrega o protocolo; os logs vão para a saída de erro.</p></div>
     </section>
     <section class="card">
-      <div class="card-h"><h2>Resposta</h2><span class="sub">Action[]</span></div>
+      <div class="card-h"><h2>Resposta</h2><span class="sub">lista de ações</span></div>
       <div class="pad"><pre id="con-out" style="min-height:210px">${con.out ? esc(con.out) : esc(JSON.stringify({ jsonrpc: "2.0", note: "envie uma requisição para ver a resposta" }, null, 2))}</pre>
-      <p class="hint">O plugin só devolve intenções. O core valida a permissão e executa no Discord.</p></div>
+      <p class="hint">O plugin devolve apenas intenções. O core confere a permissão e executa no Discord.</p></div>
     </section></div>`;
   return shell(head, body);
 }
@@ -988,55 +1067,55 @@ function conSend() {
   render();
 }
 
-/* ───────────── guilds ───────────── */
+/* ─────────── guilds ─────────── */
 function viewGuilds() {
-  const head = pageHead("Guilds e permissões", "Onde cada plugin pode rodar. O administrador de cada guild aprova o que instala.", "");
-  const cards = `<div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+  const head = pageHead("Guilds", "Onde cada plugin pode rodar. O administrador de cada servidor aprova o que instala.", "", "Plataforma");
+  const cards = `<div class="guilds">
     ${guilds.map((g) => {
       const inst = plugins.filter((p) => p.enabled && (p.guilds.includes("*") || p.guilds.includes(g.id)));
       return `<section class="card">
         <div class="pad" style="display:flex;gap:10px;align-items:center">
-          <div style="width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:10.5px;font-weight:600;color:#fff;background:#6e6e73">${g.initials}</div>
-          <div><div style="font-weight:500;font-size:13px">${esc(g.name)}</div><div class="dim" style="font-size:11.5px">${nf(g.members)} membros · ${g.role}</div></div>
+          <div style="width:29px;height:29px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:#fff;background:#71727a;flex:0 0 auto">${g.initials}</div>
+          <div style="min-width:0"><div style="font-weight:500;font-size:13px">${esc(g.name)}</div><div class="dim" style="font-size:11.5px">${nf(g.members)} membros · você é ${g.role}</div></div>
         </div>
-        <div class="sep" style="margin:0"></div>
-        <div class="pad" style="padding-top:10px">
+        <div class="sep"></div>
+        <div class="pad" style="padding-top:10px;padding-bottom:8px">
           <h2 class="sec">Plugins ativos · ${inst.length}</h2>
-          ${inst.map((p) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12.5px"><span>${esc(p.name)}</span><span class="mono dim" style="font-size:10.5px">v${p.version}</span></div>`).join("") || '<div class="dim" style="font-size:12.5px">Nenhum</div>'}
+          ${inst.map((p) => `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;font-size:12.5px"><span>${esc(p.name)}</span><span class="dim mono" style="font-size:10.5px">${p.version}</span></div>`).join("") || '<div class="dim" style="font-size:12.5px">Nenhum plugin instalado.</div>'}
         </div>
-        <div class="set-row" style="background:var(--surface-2);border-radius:0 0 var(--r) var(--r)"><button class="btn sm" data-go="install">Instalar aqui</button></div>
+        <div class="set-foot" style="justify-content:flex-start"><button class="btn sm" data-go="install">Instalar aqui</button></div>
       </section>`;
     }).join("")}</div>`;
 
   const bars = `<section class="card pad" style="margin-top:12px">
     <h2 class="sec">Permissões mais pedidas</h2>
-    <div class="bars">
+    <div class="bars-list">
       ${["reply", "kv", "economy.grant", "add_role", "scheduler", "http"].map((c) => {
         const n = plugins.filter((p) => p.caps.includes(c)).length;
-        return `<div class="bar"><span class="mono">${c}</span><span class="dim num">${n} de ${plugins.length}</span><div class="track"><i style="width:${(n / plugins.length) * 100}%"></i></div></div>`;
+        return `<div class="b"><span class="nm">${esc((CAPS[c] || [c])[0])} <span class="mono dim" style="font-size:10.5px">${esc(c)}</span></span><span class="v">${n} de ${plugins.length}</span><div class="track"><i style="width:${(n / plugins.length) * 100}%"></i></div></div>`;
       }).join("")}
     </div>
   </section>`;
   return shell(head, cards + bars);
 }
 
-/* ───────────── protocolo ───────────── */
+/* ─────────── protocolo ─────────── */
 function viewProtocol() {
-  const head = pageHead("Protocolo", "JSON-RPC 2.0 sobre stdio, ou HTTP para containers. É o contrato inteiro — e ele não muda com a linguagem.", "");
+  const head = pageHead("Protocolo", "JSON-RPC 2.0 sobre entrada e saída padrão, ou HTTP para containers. É o contrato inteiro, e ele não muda com a linguagem.", "", "Plataforma");
   const body = `<div class="cols"><div class="stack">
       <section class="card tblwrap">
-        <div class="card-h"><h2>Métodos</h2></div>
-        <table><thead><tr><th>Método</th><th>Direção</th><th>Payload</th></tr></thead><tbody>
+        <div class="card-h"><h2>Métodos</h2><span class="sub">5 no total</span></div>
+        <table><thead><tr><th>Método</th><th>Direção</th><th>Conteúdo</th></tr></thead><tbody>
           ${[["initialize", "core → plugin", "{ manifest, guildId, config }"],
              ["handleCommand", "core → plugin", "{ command, args, userId, guildId }"],
              ["handleEvent", "core → plugin", "{ type, payload }"],
              ["health", "core → plugin", "{ }"],
-             ["response", "plugin → core", "Action[]"]]
+             ["resposta", "plugin → core", "lista de ações"]]
             .map(([m, d, p]) => `<tr><td class="mono">${m}</td><td class="dim" style="font-size:11.5px">${d}</td><td class="mono dim" style="font-size:10.5px">${esc(p)}</td></tr>`).join("")}
         </tbody></table>
       </section>
       <section class="card pad">
-        <h2 class="sec">Actions — a única saída possível</h2>
+        <h2 class="sec">Ações — a única saída possível</h2>
         <pre>${esc(`{ type: "reply",         content: string, ephemeral?: boolean }
 { type: "editMessage",   messageId: string, content: string }
 { type: "addRole",       userId: string, roleId: string }
@@ -1046,6 +1125,7 @@ function viewProtocol() {
 { type: "economy.grant", userId: string, amount: number }
 { type: "emit",          topic: string, payload: unknown }
 { type: "schedule",      in: "10m", run: string }`)}</pre>
+        <p class="hint">Qualquer coisa fora desta lista é recusada pelo core antes de chegar ao Discord.</p>
       </section>
     </div>
     <div class="stack">
@@ -1072,35 +1152,35 @@ for line in sys.stdin:
                     "content": "Bilu está com fome 3 de 10"}])
     elif method == "health":
         send(req, [])`)}</pre>
-        <p class="hint">Isso é o SDK inteiro. Toda linguagem que lê stdin e escreve JSON funciona.</p>
+        <p class="hint">Isso é o SDK inteiro. Qualquer linguagem que leia a entrada padrão e escreva JSON funciona.</p>
       </section>
       <section class="card tblwrap">
         <div class="card-h"><h2>Suporte por linguagem</h2></div>
         <table><tbody>
-          ${[["Python, Node, Go, Rust, C", "process", "ok"],
-             ["C#, Java, Kotlin, PHP, Elixir", "container", "warn"],
-             ["Qualquer binário estático", "process", "ok"]]
-            .map(([l, k, s]) => `<tr><td style="font-size:12px">${esc(l)}</td><td><span class="tag code">${esc(k)}</span></td><td class="r"><span class="stat ${s === "ok" ? "ok" : "warn"}"><i class="dot"></i>${s === "ok" ? "suportado" : "via container"}</span></td></tr>`).join("")}
+          ${[["Python, Node, Go, Rust, C", "processo", 1],
+             ["C#, Java, Kotlin, PHP, Elixir", "container", 0],
+             ["Qualquer binário estático", "processo", 1]]
+            .map(([l, k, ok]) => `<tr><td style="font-size:12px">${esc(l)}</td><td><span class="tag code">${esc(k)}</span></td><td class="r"><span class="stat ${ok ? "ok" : ""}" style="${ok ? "" : "color:var(--text-2)"}"><i class="dot"></i>${ok ? "Suportado" : "Container"}</span></td></tr>`).join("")}
         </tbody></table>
       </section>
     </div></div>`;
   return shell(head, body);
 }
 
-/* ───────────── logs global ───────────── */
+/* ─────────── logs ─────────── */
 function viewLogs() {
   const opts = plugins.filter((p) => p.enabled).map((p) => `<option>${p.id}</option>`).join("");
-  const head = pageHead("Logs", "Fluxo unificado, correlacionado por request_id.", "");
+  const head = pageHead("Logs", "Fluxo único de todos os plugins, correlacionado por request_id.", "", "Servidor");
   const body = `<section class="card">
-    <div class="card-h"><h2>Todos os plugins</h2><div style="display:flex;gap:8px;align-items:center">
+    <div class="card-h"><h2>Todos os plugins</h2><div style="display:flex;gap:10px;align-items:center">
       <select id="log-src" style="width:auto;height:24px;padding:0 6px;font-size:12px"><option>todos</option>${opts}</select>
-      <span class="sub"><i class="dot"></i>ao vivo</span></div></div>
+      <span class="sub"><i class="dot"></i>Ao vivo</span></div></div>
     <div class="logs" id="log-stream" style="max-height:440px;border-top:1px solid var(--line)"></div>
   </section>`;
   return shell(head, body);
 }
 
-/* ───────────── render ───────────── */
+/* ─────────── render ─────────── */
 function render() {
   const v = state.view;
   let html;
@@ -1114,7 +1194,7 @@ function render() {
   else if (v === "logs") html = viewLogs();
   $("#view").innerHTML = html;
   $("#brandmark").innerHTML = icon("brand", 13);
-  $$(".nav button").forEach((b) => {
+  $$(".nav a").forEach((b) => {
     b.classList.toggle("on", b.dataset.go === v || (v === "plugin" && b.dataset.go === "plugins"));
     const ico = b.querySelector(".ic");
     if (ico && !ico.childElementCount) ico.innerHTML = icon(b.dataset.go, 13);
@@ -1126,7 +1206,7 @@ function render() {
 }
 
 let evT = null, logT = null;
-function stopStreams() { clearInterval(evT); clearInterval(logT); evT = logT = null; }
+const stopStreams = () => { clearInterval(evT); clearInterval(logT); evT = logT = null; };
 
 function startEvStream() {
   stopStreams();
@@ -1138,7 +1218,7 @@ function startEvStream() {
     const e = events[Math.floor(Math.random() * events.length)];
     const t = targets[Math.floor(Math.random() * targets.length)];
     const ms = (Math.random() * 60 + 4).toFixed(0);
-    el.insertAdjacentHTML("beforeend", `<div class="ev"><span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="n">${e}</span><span class="w">→ ${t}</span><span class="d">${ms} ms</span></div>`);
+    el.insertAdjacentHTML("beforeend", `<div class="ev"><span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="n">${e}</span><span class="w">${t}</span><span class="d">${ms} ms</span></div>`);
     while (el.children.length > 16) el.removeChild(el.firstChild);
     el.scrollTop = el.scrollHeight;
   };
@@ -1149,10 +1229,10 @@ function startEvStream() {
 function startLogStream() {
   stopStreams();
   const msgs = [
-    ["pets", "ok", "handleCommand /pet · 38ms · 1 action"],
-    ["loja", "ok", "handleCommand /comprar · 84ms · 2 actions"],
-    ["cassino", "warn", "p95 acima do limite · 2900ms · request_id 8f2a1c"],
-    ["pets", "info", "kv.set pet:4410 · 3ms"],
+    ["pets", "ok", "handleCommand /pet · 38 ms · 1 ação"],
+    ["loja", "ok", "handleCommand /comprar · 84 ms · 2 ações"],
+    ["cassino", "warn", "p95 acima do limite · 2900 ms · request_id 8f2a1c"],
+    ["pets", "info", "kv.set pet:4410 · 3 ms"],
     ["economia", "info", "daily · guild 1201 · 100 moedas · 14 membros"],
     ["loja", "ok", "addRole userId 8891 roleId 555"],
     ["cassino", "err", "E_TIMEOUT · request_id 9c11d2 · processo encerrado · reinício 1 de 3"],
@@ -1169,7 +1249,7 @@ function startLogStream() {
   logT = setInterval(add, 1200);
 }
 
-/* ───────────── eventos ───────────── */
+/* ─────────── eventos ─────────── */
 document.addEventListener("click", (e) => {
   const go = e.target.closest("[data-go]");
   if (go) {
@@ -1208,12 +1288,12 @@ document.addEventListener("click", (e) => {
     render();
   } else if (a === "kill") {
     p.enabled = false; p.status = "stopped";
-    toast(`${p.name} parado. Eventos descartados.`);
+    toast(`${p.name} parado. Novos eventos serão descartados.`);
     render();
   } else if (a === "save") toast(`Configuração de ${p.name} aplicada`);
   else if (a === "reset") render();
   else if (a === "clearlogs") {
-    const el = $("#plog"); if (el) el.innerHTML = '<div class="ln"><span class="m dim">— vazio —</span></div>';
+    const el = $("#plog"); if (el) el.innerHTML = '<div class="ln"><span class="m dim">sem registros</span></div>';
   } else if (a === "rpc") {
     const m = act.dataset.m;
     const out = { jsonrpc: "2.0", id: 1, result: m === "handleCommand" ? [{ type: "reply", content: "**Bilu** · fome 3 de 10" }] : [] };
