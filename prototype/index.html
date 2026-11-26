@@ -457,88 +457,114 @@ const ICON = {
 };
 const icon = (n, s = 14) => `<svg viewBox="0 0 16 16" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ""}</svg>`;
 
-/* ─────────── dados ─────────── */
-const guilds = [
+/* ─────────── dados ───────────
+   Estas listas são o conteúdo de demonstração. Quando o painel abre servido
+   pelo core (http://127.0.0.1:4319), loadData() substitui tudo pela API real
+   e apiOnline passa a true. Aberto como arquivo, o painel segue no modo demo. */
+let apiOnline = false;
+
+let guilds = [
   { id: "1201", name: "Servidor Dev BR", initials: "DV", members: 2431, role: "proprietário" },
   { id: "1202", name: "Casinha do Gio", initials: "CG", members: 87, role: "proprietário" },
   { id: "1203", name: "Bot Lab", initials: "BL", members: 512, role: "administrador" },
 ];
 
-const plugins = [
+let plugins = [
   {
-    id: "pets", name: "Pets", lang: "python", version: "1.4.2",
-    desc: "Pets com fome, felicidade e ranking",
-    repo: "github.com/devlucas/discord-pets", branch: "main", sha: "a91f2c7",
-    runtime: { kind: "process", build: ["pip", "install", "-r", "requirements.txt"], cmd: ["python3", "main.py"] },
+    id: "pets", name: "Pets", lang: "python", version: "1.0.0",
+    desc: "Pets com fome, felicidade e ranking por servidor",
+    repo: "plugins/pets", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["python3", "main.py"] },
     status: "healthy", enabled: true, guilds: ["1201", "1202"],
-    caps: ["reply", "kv", "economy.read", "scheduler"],
-    commands: [{ name: "pet", desc: "Adota ou acaricia seu pet" }, { name: "petrank", desc: "Ranking de pets do servidor" }],
+    caps: ["reply", "kv", "economy.read", "economy.grant"],
+    commands: [{ name: "pet", desc: "Adota ou cuida do seu pet" }, { name: "petrank", desc: "Ranking de pets do servidor" }],
     events: ["MESSAGE_CREATE"],
-    calls24h: 12480, p95: 41, errors24h: 3, kvKeys: 8120, mem: "38 MB", restarts: 0,
+    calls24h: 1248, p95: 41, errors24h: 0, kvKeys: 812, mem: "—", restarts: 0,
     schema: {
-      cooldown: { type: "number", title: "Cooldown", hint: "Segundos entre interações", default: 30 },
+      cooldown: { type: "number", title: "Cooldown", hint: "Segundos entre cuidados", default: 30 },
       hunger_rate: { type: "number", title: "Fome por hora", hint: "Quanto a fome sobe a cada hora", default: 4 },
-      announce_adoption: { type: "boolean", title: "Anunciar adoção no canal", hint: "Publica uma mensagem quando alguém adota um pet" },
+      reward: { type: "number", title: "Recompensa por cuidado", hint: "Moedas ganhas ao cuidar do pet", default: 10 },
     },
-    config: { cooldown: 30, hunger_rate: 4, announce_adoption: true },
+    config: { cooldown: 30, hunger_rate: 4, reward: 10 },
   },
   {
-    id: "loja", name: "Loja", lang: "rust", version: "2.0.1",
-    desc: "Itens, cargos e cobrança na moeda do servidor",
-    repo: "github.com/mari/loja-bot", branch: "release", sha: "77be004",
-    runtime: { kind: "container", image: "ghcr.io/mari/loja:2.0.1", port: 8080 },
+    id: "economia", name: "Economia", lang: "javascript", version: "1.0.0",
+    desc: "Saldo, recompensa diária e transferência entre membros",
+    repo: "plugins/economia", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["node", "main.js"] },
+    status: "healthy", enabled: true, guilds: ["1201", "1202", "1203"],
+    caps: ["reply", "kv", "economy.read", "economy.grant"],
+    commands: [{ name: "saldo", desc: "Mostra quantas moedas você tem" }, { name: "daily", desc: "Resgata a recompensa diária" }, { name: "pagar", desc: "Transfere moedas para outro membro" }],
+    events: [],
+    calls24h: 3310, p95: 12, errors24h: 0, kvKeys: 240, mem: "—", restarts: 0,
+    schema: {
+      daily_amount: { type: "number", title: "Recompensa diária", hint: "Moedas entregues por dia", default: 100 },
+      daily_cooldown_hours: { type: "number", title: "Espera entre resgates", hint: "Horas até poder resgatar de novo", default: 22 },
+      transfer_fee: { type: "number", title: "Taxa de transferência", hint: "Percentual descontado", default: 0 },
+    },
+    config: { daily_amount: 100, daily_cooldown_hours: 22, transfer_fee: 0 },
+  },
+  {
+    id: "loja", name: "Loja", lang: "go", version: "1.0.0",
+    desc: "Cargos por moedas, com estoque por servidor",
+    repo: "plugins/loja", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["go", "run", "."] },
     status: "healthy", enabled: true, guilds: ["1201"],
-    caps: ["reply", "kv", "economy.grant", "economy.read", "add_role"],
-    commands: [{ name: "loja", desc: "Abre a loja" }, { name: "comprar", desc: "Compra um item" }],
-    events: ["INTERACTION_CREATE"],
-    calls24h: 3310, p95: 96, errors24h: 0, kvKeys: 1240, mem: "112 MB", restarts: 0,
-    schema: {
-      currency_name: { type: "string", title: "Nome da moeda", hint: "Aparece nas mensagens da loja", default: "coins" },
-      tax_percent: { type: "number", title: "Taxa por venda", hint: "Percentual retido pela loja", default: 5 },
-    },
-    config: { currency_name: "coins", tax_percent: 5 },
-  },
-  {
-    id: "economia", name: "Economia", lang: "core", version: "0.9.0",
-    desc: "Moeda global, saldo e recompensa diária",
-    repo: "—", branch: "—", sha: "builtin",
-    runtime: { kind: "core", cmd: [] },
-    status: "healthy", enabled: true, guilds: ["*"],
-    caps: ["economy"],
-    commands: [{ name: "saldo", desc: "Mostra seu saldo" }, { name: "daily", desc: "Recompensa diária" }],
+    caps: ["reply", "kv", "economy.read", "economy.grant", "addRole"],
+    commands: [{ name: "loja", desc: "Lista os itens à venda" }, { name: "comprar", desc: "Compra um item da loja" }, { name: "inventario", desc: "Mostra o que você já comprou" }],
     events: [],
-    calls24h: 40120, p95: 6, errors24h: 0, kvKeys: 2431, mem: "—", restarts: 0,
-    schema: { daily_amount: { type: "number", title: "Valor do daily", hint: "Moedas dadas a cada 24 horas", default: 100 } },
-    config: { daily_amount: 100 },
-  },
-  {
-    id: "cassino", name: "Cassino", lang: "typescript", version: "0.6.0",
-    desc: "Apostas na roleta e no cara ou coroa",
-    repo: "github.com/joao/cassino", branch: "main", sha: "3d90aa1",
-    runtime: { kind: "process", build: ["npm", "ci", "&&", "npm", "run", "build"], cmd: ["node", "dist/index.js"] },
-    status: "degraded", enabled: true, guilds: ["1201", "1203"],
-    caps: ["reply", "economy.grant", "kv"],
-    commands: [{ name: "roleta", desc: "Aposta na roleta" }, { name: "caraoucoroa", desc: "Aposta no cara ou coroa" }],
-    events: [],
-    calls24h: 2180, p95: 2900, errors24h: 41, kvKeys: 380, mem: "64 MB", restarts: 6,
+    calls24h: 640, p95: 96, errors24h: 0, kvKeys: 96, mem: "—", restarts: 0,
     schema: {
-      max_bet: { type: "number", title: "Aposta máxima", hint: "Limite de moedas por aposta", default: 500 },
-      house_edge: { type: "number", title: "Margem da casa", hint: "Percentual de vantagem da casa", default: 3 },
+      role_prefix: { type: "string", title: "Prefixo do cargo", hint: "Prefixo usado nos IDs de cargo", default: "5" },
+      max_per_user: { type: "number", title: "Limite por membro", hint: "Quantas compras cada membro pode fazer", default: 10 },
     },
-    config: { max_bet: 500, house_edge: 3 },
+    config: { role_prefix: "5", max_per_user: 10 },
   },
   {
-    id: "moderacao", name: "Moderação", lang: "go", version: "1.1.0",
-    desc: "Banimentos, advertências e cargos automáticos",
-    repo: "github.com/botlab/moderacao", branch: "v1", sha: "c0ffee2",
-    runtime: { kind: "process", cmd: ["./bin/mod"] },
-    status: "stopped", enabled: false, guilds: ["1201"],
-    caps: ["reply", "add_role", "kick", "kv"],
-    commands: [{ name: "ban", desc: "Bane um membro" }, { name: "warn", desc: "Adverte um membro" }],
-    events: ["MESSAGE_CREATE", "GUILD_MEMBER_ADD"],
-    calls24h: 0, p95: 0, errors24h: 0, kvKeys: 91, mem: "—", restarts: 0,
-    schema: { auto_role: { type: "string", title: "Cargo automático na entrada", hint: "ID do cargo dado a novos membros", default: "" } },
-    config: { auto_role: "" },
+    id: "cassino", name: "Cassino", lang: "typescript", version: "1.0.0",
+    desc: "Apostas em roleta e cara ou coroa, com limite por aposta",
+    repo: "plugins/cassino", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["bun", "run", "main.ts"] },
+    status: "healthy", enabled: true, guilds: ["1201", "1203"],
+    caps: ["reply", "kv", "economy.read", "economy.grant"],
+    commands: [{ name: "roleta", desc: "Aposta em vermelho, preto ou número" }, { name: "caraoucoroa", desc: "Aposta em cara ou coroa" }, { name: "apostas", desc: "Mostra suas estatísticas" }],
+    events: [],
+    calls24h: 2180, p95: 84, errors24h: 0, kvKeys: 380, mem: "—", restarts: 0,
+    schema: {
+      min_bet: { type: "number", title: "Aposta mínima", hint: "Valor mínimo por aposta", default: 10 },
+      max_bet: { type: "number", title: "Aposta máxima", hint: "Valor máximo por aposta", default: 500 },
+      house_edge: { type: "number", title: "Margem da casa", hint: "Percentual retido do prêmio", default: 5 },
+    },
+    config: { min_bet: 10, max_bet: 500, house_edge: 5 },
+  },
+  {
+    id: "moderacao", name: "Moderação", lang: "ruby", version: "1.0.0",
+    desc: "Avisos, banimentos e histórico de punições",
+    repo: "plugins/moderacao", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["ruby", "main.rb"] },
+    status: "healthy", enabled: true, guilds: ["1201"],
+    caps: ["reply", "kv", "kick", "addRole"],
+    commands: [{ name: "aviso", desc: "Registra um aviso para um membro" }, { name: "historico", desc: "Mostra as punições de um membro" }, { name: "banir", desc: "Expulsa um membro do servidor" }],
+    events: [],
+    calls24h: 91, p95: 22, errors24h: 0, kvKeys: 91, mem: "—", restarts: 0,
+    schema: {
+      max_warnings: { type: "number", title: "Avisos até punir", hint: "Quantos avisos antes da punição automática", default: 3 },
+      mute_role: { type: "string", title: "Cargo de silenciado", hint: "ID do cargo aplicado ao passar do limite", default: "9100" },
+    },
+    config: { max_warnings: 3, mute_role: "9100" },
+  },
+  {
+    id: "ranking", name: "Ranking", lang: "java", version: "1.0.0",
+    desc: "Ranking de moedas e de atividades do servidor",
+    repo: "plugins/ranking", branch: "main", sha: "local",
+    runtime: { kind: "process", cmd: ["java", "Main.java"] },
+    status: "healthy", enabled: true, guilds: ["1201", "1203"],
+    caps: ["reply", "economy.read"],
+    commands: [{ name: "top", desc: "Ranking das maiores fortunas" }, { name: "meu-top", desc: "Mostra sua posição no ranking" }],
+    events: [],
+    calls24h: 402, p95: 130, errors24h: 0, kvKeys: 0, mem: "—", restarts: 0,
+    schema: { limit: { type: "number", title: "Tamanho do ranking", hint: "Quantas pessoas aparecem no topo", default: 10 } },
+    config: { limit: 10 },
   },
 ];
 
@@ -546,21 +572,122 @@ const CAPS = {
   reply: ["Responder", "Envia mensagens no canal do evento."],
   replyEphemeral: ["Responder em privado", "Resposta visível só para quem interagiu."],
   editMessage: ["Editar mensagens", "Edita mensagens já enviadas pelo bot."],
-  add_role: ["Gerenciar cargos", "Atribui e remove cargos dos membros."],
+  addRole: ["Gerenciar cargos", "Atribui cargos aos membros."],
+  removeRole: ["Remover cargos", "Tira cargos dos membros."],
   kick: ["Expulsar membros", "Remove membros do servidor."],
   kv: ["Dados próprios", "Armazena dados no espaço do plugin e da guild."],
   "economy.read": ["Ler moeda", "Consulta o saldo da moeda global."],
   "economy.grant": ["Alterar moeda", "Muda o saldo de membros — exige aprovação."],
   economy: ["Moeda do servidor", "Serviço global de saldo e recompensas."],
   scheduler: ["Agendamentos", "Executa tarefas recorrentes, como fome de pets."],
+  emit: ["Publicar eventos", "Avisa outros plugins sobre o que aconteceu."],
   http: ["Rede externa", "Requisições para os domínios declarados."],
 };
 
-const LANG = { python: "Python", rust: "Rust", typescript: "TypeScript", go: "Go", core: "Core" };
-const LANG_COLOR = { python: "#b08800", rust: "#b0603a", typescript: "#2f6fc4", go: "#1a8f8f", core: "#6558b8" };
+const LANG = {
+  python: "Python", rust: "Rust", typescript: "TypeScript", go: "Go",
+  javascript: "JavaScript", ruby: "Ruby", java: "Java", csharp: "C#",
+  core: "Core", unknown: "—",
+};
+const LANG_COLOR = {
+  python: "#b08800", rust: "#b0603a", typescript: "#2f6fc4", go: "#1a8f8f",
+  javascript: "#b89100", ruby: "#b0303a", java: "#a05a20", csharp: "#6a4fb0",
+  core: "#6558b8", unknown: "#8b8c92",
+};
 
 const VOLUME = [38, 31, 24, 19, 16, 21, 34, 52, 74, 88, 81, 76, 69, 72, 85, 97, 100, 92, 78, 66, 54, 47, 41, 35];
-const HOURLY = ["00", "03", "06", "09", "12", "15", "18", "21", "23"];
+let HOURLY = ["00", "03", "06", "09", "12", "15", "18", "21", "23"];
+let status = { calls24h: 0, errors24h: 0, kvKeys: 0, adapter: "mock", uptimeMs: 0 };
+
+/* ─────────── API ─────────── */
+
+async function api(path, opts) {
+  const res = await fetch(path, {
+    headers: { "content-type": "application/json" },
+    ...opts,
+  });
+  const text = await res.text();
+  let data;
+  try { data = text ? JSON.parse(text) : null; } catch { data = { error: text }; }
+  if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+  return data;
+}
+
+/** Traduz o formato da API para o formato que as telas já desenham. */
+function mapPlugin(p) {
+  const schema = {};
+  for (const [k, s] of Object.entries(p.configSchema || {})) {
+    schema[k] = { type: s.type || "string", title: s.title || k, hint: s.description || s.hint || "", default: s.default };
+  }
+  const install = p.guilds?.find((g) => g.enabled) ?? p.guilds?.[0];
+  const defaults = Object.fromEntries(
+    Object.entries(schema).filter(([, s]) => s.default !== undefined).map(([k, s]) => [k, s.default]),
+  );
+  return {
+    id: p.id,
+    name: p.name,
+    lang: p.lang,
+    version: p.version,
+    desc: p.description || "",
+    repo: p.repoUrl ? p.repoUrl.replace(/^https?:\/\//, "").replace(/\.git$/, "") : "—",
+    branch: p.branch || "—",
+    sha: (p.commitSha || "local"),
+    runtime: {
+      kind: p.runtime?.kind || "process",
+      cmd: p.runtime?.cmd || [],
+      image: p.runtime?.image || null,
+    },
+    status: p.status,
+    enabled: p.enabled,
+    guilds: (p.guilds || []).filter((g) => g.enabled).map((g) => g.guildId),
+    caps: p.capabilities || [],
+    commands: (p.commands || []).map((c) => ({ name: c.name, desc: c.description || "" })),
+    events: p.events || [],
+    calls24h: p.stats?.calls24h ?? 0,
+    p95: p.stats?.p95 ?? 0,
+    errors24h: p.stats?.errors24h ?? 0,
+    kvKeys: p.kvKeys ?? 0,
+    mem: "—",
+    restarts: p.restarts ?? 0,
+    alive: p.alive,
+    schema,
+    config: { ...defaults, ...(install?.config ?? {}) },
+  };
+}
+
+async function loadData() {
+  const [st, list, gs] = await Promise.all([api("/api/status"), api("/api/plugins"), api("/api/guilds")]);
+  status = st;
+  plugins = list.map(mapPlugin);
+  guilds = gs.map((g) => ({
+    id: g.id,
+    name: g.name,
+    initials: g.initials || g.name.slice(0, 2).toUpperCase(),
+    members: g.members ?? 0,
+    role: g.role || "membro",
+  }));
+  if (Array.isArray(st.volume) && st.volume.some((v) => v > 0)) {
+    const peak = Math.max(...st.volume, 1);
+    VOLUME.length = 0;
+    VOLUME.push(...st.volume.map((v) => Math.round((v / peak) * 100)));
+  }
+  if (!guilds.some((g) => g.id === curGuild)) curGuild = guilds[0]?.id ?? curGuild;
+  apiOnline = true;
+  return { st, list, gs };
+}
+
+/** Recarrega só os números, sem trocar a tela. */
+async function refreshQuiet() {
+  if (!apiOnline) return;
+  try {
+    const [st, list] = await Promise.all([api("/api/status"), api("/api/plugins")]);
+    status = st;
+    const mapped = list.map(mapPlugin);
+    if (mapped.length !== plugins.length) { plugins = mapped; render(); return; }
+    plugins = mapped;
+  } catch { /* mantém a última leitura */ }
+}
+
 
 /* ─────────── utilitários ─────────── */
 const $ = (s, r = document) => r.querySelector(s);
@@ -742,52 +869,66 @@ function pageHead(title, lede, actions, eyebrow) {
 /* ─────────── visão geral ─────────── */
 function viewOverview() {
   const active = plugins.filter((p) => p.enabled);
-  const calls = plugins.reduce((a, p) => a + p.calls24h, 0);
-  const errs = plugins.reduce((a, p) => a + p.errors24h, 0);
-  const kv = plugins.reduce((a, p) => a + p.kvKeys, 0);
+  const calls = apiOnline ? status.calls24h : plugins.reduce((a, p) => a + p.calls24h, 0);
+  const errs = apiOnline ? status.errors24h : plugins.reduce((a, p) => a + p.errors24h, 0);
+  const kv = apiOnline ? status.kvKeys : plugins.reduce((a, p) => a + p.kvKeys, 0);
+  const p95s = plugins.filter((p) => p.p95).map((p) => p.p95).sort((a, b) => a - b);
+  const p95 = p95s.length ? p95s[Math.min(p95s.length - 1, Math.floor(p95s.length * 0.95))] : 0;
+  const off = plugins.length - active.length;
+  const errPlugins = plugins.filter((p) => p.errors24h > 0);
 
   const head = pageHead(
     "Visão geral",
     "Tudo que está rodando neste servidor agora.",
-    `<button class="btn pri" data-go="install">Instalar plugin</button>`,
+    `<button class="btn" data-act="restart-all">Reiniciar tudo</button><button class="btn pri" data-go="install">Instalar plugin</button>`,
   );
 
   const metrics = `<div class="metrics">
-    <div class="metric"><div class="lbl">Plugins em execução</div><div class="val">${active.length}<small> de ${plugins.length}</small></div><div class="delta">1 desativado manualmente</div></div>
-    <div class="metric"><div class="lbl">Chamadas em 24 h</div><div class="val">${nf(calls)}</div><div class="delta">Tempo de resposta p95 de 41 ms</div></div>
-    <div class="metric"><div class="lbl">Erros em 24 h</div><div class="val" style="color:${errs ? "var(--amber)" : "var(--green)"}">${nf(errs)}</div><div class="delta">Todos vindos do Cassino</div></div>
-    <div class="metric"><div class="lbl">Chaves armazenadas</div><div class="val">${nf(kv)}</div><div class="delta">Em 3 espaços de dados</div></div>
+    <div class="metric"><div class="lbl">Plugins em execução</div><div class="val">${active.length}<small> de ${plugins.length}</small></div><div class="delta">${off ? `${plural(off, "desativado", "desativados")} manualmente` : "todos ativos"}</div></div>
+    <div class="metric"><div class="lbl">Chamadas em 24 h</div><div class="val">${nf(calls)}</div><div class="delta">${p95 ? `Tempo de resposta p95 de ${p95} ms` : "Sem chamadas registradas"}</div></div>
+    <div class="metric"><div class="lbl">Erros em 24 h</div><div class="val" style="color:${errs ? "var(--amber)" : "var(--green)"}">${nf(errs)}</div><div class="delta">${errPlugins.length ? `Vindos de ${errPlugins.map((p) => p.name).join(", ")}` : "Nenhum erro registrado"}</div></div>
+    <div class="metric"><div class="lbl">Chaves armazenadas</div><div class="val">${nf(kv)}</div><div class="delta">Em ${plural(active.length, "espaço de dados", "espaços de dados")}</div></div>
   </div>`;
 
-  const peak = Math.max(...VOLUME);
+  const peak = Math.max(...VOLUME, 1);
+  const total = VOLUME.reduce((a, b) => a + b, 0) || 1;
   const chart = `<section class="card">
     <div class="card-h"><h2>Volume nas últimas 24 horas</h2><span class="sub">${nf(calls)} chamadas</span></div>
     <div class="chart">
-      <div class="bars">${VOLUME.map((v, i) => `<i class="${v >= peak * 0.92 ? "hot" : ""}" style="height:${Math.max(2, (v / peak) * 100)}%" title="${HOURLY[Math.floor(i / 3)] || ""}h · ${nf(Math.round((v / 100) * 720))} chamadas"></i>`).join("")}</div>
+      <div class="bars">${VOLUME.map((v, i) => `<i class="${v >= peak * 0.92 ? "hot" : ""}" style="height:${Math.max(2, (v / peak) * 100)}%" title="${i}h · ${nf(Math.round((v / total) * calls))} chamadas"></i>`).join("")}</div>
       <div class="axis">${HOURLY.map((h) => `<span>${h}h</span>`).join("")}</div>
       <div class="legend">
-        <span><b>${nf(Math.round(calls * 0.69))}</b> Pets</span>
-        <span><b>${nf(Math.round(calls * 0.18))}</b> Economia</span>
-        <span><b>${nf(Math.round(calls * 0.13))}</b> Outros</span>
+        ${plugins.slice(0, 3).map((p) => `<span><b>${nf(p.calls24h)}</b> ${esc(p.name)}</span>`).join("")}
       </div>
     </div>
   </section>`;
 
   const list = `<section class="card">
     <div class="card-h"><h2>Plugins instalados</h2><span class="link" data-go="plugins">Ver todos</span></div>
-    <div class="rows">${plugins.map(pluginRow).join("")}</div>
+    <div class="rows">${plugins.map(pluginRow).join("") || '<div class="empty">Nenhum plugin instalado. Use “Instalar plugin”.</div>'}</div>
   </section>`;
+
+  const attention = plugins.filter((p) => !p.enabled || p.status === "degraded" || p.errors24h > 0 || p.restarts > 0);
+  const attnRows = attention.slice(0, 4).map((p) => {
+    const s = statusOf(p);
+    const txt = !p.enabled
+      ? `<b>${esc(p.name)}</b> está desativado e não responde a comandos.`
+      : p.status === "degraded"
+        ? `<b>${esc(p.name)}</b> reiniciou ${p.restarts} ${p.restarts === 1 ? "vez" : "vezes"} e parou de responder.`
+        : p.errors24h > 0
+          ? `<b>${esc(p.name)}</b> teve ${plural(p.errors24h, "erro", "erros")} nas últimas 24 h.`
+          : `<b>${esc(p.name)}</b> reiniciou ${p.restarts} ${p.restarts === 1 ? "vez" : "vezes"}.`;
+    return `<div class="attn"><span class="stat ${s.cls}"><i class="dot" style="background:${s.tone}"></i>${s.label}</span><div class="txt">${txt}</div></div>`;
+  }).join("");
 
   const side = `<div class="stack">
     <section class="card">
-      <div class="card-h"><h2>Atividade</h2><span class="sub"><i class="dot"></i>Ao vivo</span></div>
+      <div class="card-h"><h2>Atividade</h2><span class="sub"><i class="dot"></i>${apiOnline ? "Ao vivo" : "Demonstração"}</span></div>
       <div class="stream" id="ev-stream"></div>
     </section>
     <section class="card">
       <div class="card-h"><h2>Precisa de atenção</h2></div>
-      <div class="attn"><span class="stat warn"><i class="dot"></i>Degradado</span><div class="txt"><b>Cassino</b> reiniciou 6 vezes e passa de 2,9 s no p95. O limite é 3 s.</div></div>
-      <div class="attn"><span class="stat"><i class="dot" style="background:var(--text-3)"></i>Parado</span><div class="txt"><b>Moderação</b> está desativada há 3 dias.</div></div>
-      <div class="attn"><span class="stat" style="color:var(--accent)"><i class="dot"></i>Nova versão</span><div class="txt"><b>Pets</b> tem a 1.5.0 publicada no repositório.</div></div>
+      ${attnRows || '<div class="attn"><span class="stat ok"><i class="dot"></i>Ativo</span><div class="txt">Nada pendente. Todos os plugins estão saudáveis.</div></div>'}
     </section>
   </div>`;
 
@@ -795,7 +936,7 @@ function viewOverview() {
 }
 
 function pluginRow(p) {
-  const mem = p.mem !== "—" ? ` · ${p.mem}` : "";
+  const mem = p.mem && p.mem !== "—" ? ` · ${p.mem}` : "";
   return `<div class="row-item" data-plugin="${p.id}" role="button" tabindex="0">
     <div class="tile">${esc(p.name.charAt(0))}</div>
     <div class="row-main">
@@ -916,8 +1057,8 @@ function pluginTab(p, tab) {
 
   if (tab === "logs") {
     return `<section class="card">
-      <div class="card-h"><h2>Logs de ${esc(p.name)}</h2><div style="display:flex;gap:10px;align-items:center"><span class="sub"><i class="dot"></i>Ao vivo</span><button class="btn sm" data-act="clearlogs">Limpar</button></div></div>
-      <div class="logs round" id="plog">${logLines(p)}</div>
+      <div class="card-h"><h2>Logs de ${esc(p.name)}</h2><div style="display:flex;gap:10px;align-items:center"><span class="sub"><i class="dot"></i>${apiOnline ? "Ao vivo" : "Demonstração"}</span><button class="btn sm" data-act="refresh-logs" data-id="${p.id}">Atualizar</button></div></div>
+      <div class="logs round" id="plog">${apiOnline ? "" : logLines(p)}</div>
     </section>
     <p class="hint">O plugin escreve em <span class="mono">stderr</span>. O core acrescenta guild e <span class="mono">request_id</span> em cada linha.</p>`;
   }
@@ -930,15 +1071,16 @@ function pluginTab(p, tab) {
       </section>
       <div class="stack">
         <section class="card">
-          <div class="card-h"><h2>Testar chamada</h2><span class="sub">resposta simulada</span></div>
+          <div class="card-h"><h2>Testar chamada</h2><span class="sub">${apiOnline ? "executa de verdade" : "resposta simulada"}</span></div>
           <div class="pad" style="padding-top:0;display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn sm" data-act="rpc" data-m="handleCommand">handleCommand</button>
-            <button class="btn sm" data-act="rpc" data-m="handleEvent">handleEvent</button>
-            <button class="btn sm" data-act="rpc" data-m="health">health</button>
+            <button class="btn sm" data-act="rpc" data-m="health" data-id="${p.id}">health</button>
+            ${p.commands.slice(0, 3).map((c) => `<button class="btn sm" data-act="run-cmd" data-cmd="${esc(c.name)}" data-id="${p.id}">!${esc(c.name)}</button>`).join("")}
           </div>
           <div class="pad" style="padding-top:0"><pre id="rpc-out" style="min-height:140px">${esc(JSON.stringify({ jsonrpc: "2.0", note: "escolha um método acima" }, null, 2))}</pre></div>
         </section>
-        <p class="hint">Com o core real, isso vira stdio para processos ou <span class="mono">POST /rpc</span> para containers.</p>
+        <p class="hint">${apiOnline
+          ? 'A chamada vai pelo mesmo caminho do Discord: processo do plugin, protocolo JSON-RPC, validação de ações.'
+          : 'Substitua pelo <span class="mono">POST /api/plugins/&lt;id&gt;/call</span> quando o painel for servido pelo core.'}</p>
       </div>
     </div>`;
   }
@@ -947,7 +1089,7 @@ function pluginTab(p, tab) {
       <div class="metric"><div class="lbl">Chamadas em 24 h</div><div class="val" style="font-size:19px">${nf(p.calls24h)}</div></div>
       <div class="metric"><div class="lbl">Tempo de resposta p95</div><div class="val" style="font-size:19px;color:${p.p95 > 500 ? "var(--amber)" : "inherit"}">${p.p95 ? p.p95 + `<small> ms</small>` : "—"}</div></div>
       <div class="metric"><div class="lbl">Erros em 24 h</div><div class="val" style="font-size:19px;color:${p.errors24h ? "var(--red)" : "var(--green)"}">${p.errors24h}</div></div>
-      <div class="metric"><div class="lbl">Memória em uso</div><div class="val" style="font-size:19px">${p.mem.replace(" MB", `<small> MB</small>`)}</div></div>
+      <div class="metric"><div class="lbl">Chaves de dados</div><div class="val" style="font-size:19px">${nf(p.kvKeys)}</div></div>
     </div>
     <div class="cols" style="margin-top:12px">
       <div class="stack">
@@ -996,12 +1138,15 @@ function pluginTab(p, tab) {
 }
 
 function manifestOf(p) {
+  const caps = p.caps ?? p.capabilities ?? [];
+  const events = p.events ?? [];
+  const cmds = p.commands ?? [];
   return `name = "${p.id}"
 version = "${p.version}"
-capabilities = [${p.caps.map((c) => `"${c}"`).join(", ")}]
-events = [${p.events.map((e) => `"${e}"`).join(", ")}]
+capabilities = [${caps.map((c) => `"${c}"`).join(", ")}]
+events = [${events.map((e) => `"${e}"`).join(", ")}]
 commands = [
-${p.commands.map((c) => `  { name = "${c.name}", description = "${c.desc}" },`).join("\n")}
+${cmds.map((c) => `  { name = "${c.name}", description = "${c.desc ?? c.description ?? ""}" },`).join("\n")}
 ]
 
 [runtime]
@@ -1024,10 +1169,10 @@ function logLines(p) {
 }
 
 /* ─────────── instalar ─────────── */
-let wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null, done: false };
+let wiz = { step: 1, url: "", sources: null, manifest: null, perms: {}, logs: [], timer: null, done: false, error: null, result: null };
 
 function viewInstall() {
-  const steps = ["Repositório", "Manifesto", "Permissões", "Build", "Pronto"];
+  const steps = ["Origem", "Manifesto", "Permissões", "Instalar", "Pronto"];
   const bar = `<div class="steps">${steps.map((s, i) => {
     const n = i + 1;
     const cls = wiz.step === n ? "on" : wiz.step > n ? "done" : "";
@@ -1036,113 +1181,158 @@ function viewInstall() {
 
   let body = "";
   if (wiz.step === 1) {
+    const list = wiz.sources;
     body = `<section class="card pad">
-      <h2 class="sec">Repositório do plugin</h2>
-      <input id="wiz-url" placeholder="https://github.com/devlucas/discord-pets" value="${esc(wiz.url)}" aria-label="Endereço do repositório">
-      <p class="hint">O core clona o repositório, lê o <span class="mono">plugin.toml</span> e fixa um commit. A branch indica a origem, mas a instalação não acompanha a <span class="mono">main</span> sozinha.</p>
-      <div style="display:flex;gap:8px;margin-top:16px;align-items:center">
-        <input id="wiz-branch" placeholder="main" value="main" style="max-width:150px" aria-label="Branch">
-        <div style="flex:1"></div>
-        <button class="btn pri" data-act="wiz-next">Analisar repositório</button>
+      <h2 class="sec">Diretório do plugin</h2>
+      <div style="display:flex;gap:8px">
+        <input id="wiz-url" placeholder="/caminho/para/o/plugin" value="${esc(wiz.url)}" aria-label="Diretório do plugin">
+        <button class="btn pri" data-act="wiz-next">Analisar</button>
       </div>
-    </section>`;
+      <p class="hint">Informe uma pasta com <span class="mono">plugin.toml</span>. O core lê o manifesto, copia para <span class="mono">.plugins/</span> e fixa o commit do git quando existir.</p>
+      ${wiz.error ? `<div class="warnline" style="margin-top:10px">${esc(wiz.error)}</div>` : ""}
+    </section>
+    ${list === null ? `<section class="card pad" style="margin-top:12px">${sk("140px", 9)}<div class="sk-lines" style="margin-top:12px">${sk("100%", 9)}${sk("88%", 9)}${sk("72%", 9)}</div></section>`
+      : `<section class="card" style="margin-top:12px">
+        <div class="card-h"><h2>Encontrados neste repositório</h2><span class="sub">${list.length} pasta(s) de plugin</span></div>
+        ${list.map((s) => `<div class="set-row" style="padding:9px 16px">
+          <div class="l"><div class="t">${esc(s.name)} <span class="dim" style="font-weight:400;font-size:11.5px">${s.version}</span></div>
+          <div class="d mono" style="font-size:10.5px">${esc(s.dir)}</div></div>
+          <div class="ctl">${s.installed
+            ? '<span class="stat ok"><i class="dot"></i>Instalado</span>'
+            : `<button class="btn sm" data-act="wiz-pick" data-dir="${esc(s.dir)}">Escolher</button>`}</div>
+        </div>`).join("") || '<div class="empty">Nenhuma pasta com plugin.toml.</div>'}
+      </section>`}`;
   } else if (wiz.step === 2) {
+    const m = wiz.manifest;
     body = `<div class="cols"><section class="card pad">
         <h2 class="sec">Manifesto encontrado</h2>
-        <pre>${esc(manifestOf(wiz.manifest))}</pre>
+        <pre>${esc(manifestOf(m))}</pre>
       </section>
       <section class="card">
         <div class="card-h"><h2>Verificações</h2></div>
         <div class="pad" style="padding-top:0;padding-bottom:6px">
-          ${["plugin.toml válido", "Ambiente suportado: processo", "Arquivo de entrada presente no commit", "Sem dependência do discord.js", "Conformidade: 6 de 6 testes"].map((l) => `<div class="check"><span class="ok">${icon("check", 13)}</span>${esc(l)}</div>`).join("")}
+          ${[
+            ["plugin.toml válido", true],
+            [`Ambiente suportado: ${m.runtime.kind}`, true],
+            [`Entrada: ${(m.runtime.cmd || []).join(" ") || m.runtime.image || "—"}`, true],
+            ["Sem acesso ao token do Discord", true],
+            [m.alreadyInstalled ? "Já instalado — será atualizado" : "Ainda não instalado", true],
+          ].map(([l]) => `<div class="check"><span class="ok">${icon("check", 13)}</span>${esc(l)}</div>`).join("")}
         </div>
         <div class="sep"></div>
-        <div class="pad"><dl class="dl"><dt>Commit</dt><dd class="mono" style="font-size:11px">a91f2c7</dd><dt>Tamanho</dt><dd>412 KB</dd><dt>Licença</dt><dd>MIT</dd></dl></div>
+        <div class="pad"><dl class="dl">
+          <dt>Linguagem</dt><dd>${esc(LANG[m.lang] || m.lang)}</dd>
+          <dt>Commit</dt><dd class="mono" style="font-size:11px">${esc(m.commitSha || "sem git")}</dd>
+          <dt>Diretório</dt><dd class="mono" style="font-size:11px">${esc(m.dir)}</dd>
+        </dl></div>
         <div class="set-foot"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-perms">Revisar permissões</button></div>
       </section></div>`;
   } else if (wiz.step === 3) {
     body = `<div class="cols"><section class="card">
         <div class="card-h"><h2>Permissões pedidas</h2><span class="sub">desmarque para negar</span></div>
-        ${wiz.manifest.caps.map((c) => {
+        ${wiz.manifest.capabilities.map((c) => {
           const [label, desc] = CAPS[c] || [c, ""];
-          const sens = c.startsWith("economy");
+          const sens = c.startsWith("economy") || c === "kick" || c === "http";
           return `<label class="cap-row">
             <input type="checkbox" data-perm="${c}" ${wiz.perms[c] !== false ? "checked" : ""}>
-            <div><div class="nm">${esc(label)}<span class="cd">${esc(c)}</span></div><div class="ds">${esc(desc)}</div>${sens ? '<div class="warnline">Altera a moeda global do servidor.</div>' : ""}</div>
+            <div><div class="nm">${esc(label)}<span class="cd">${esc(c)}</span></div><div class="ds">${esc(desc)}</div>${sens ? '<div class="warnline">Permissão sensível: precisa da sua aprovação explícita.</div>' : ""}</div>
           </label>`;
-        }).join("")}
-        <div class="set-foot"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-build">Aprovar e buildar</button></div>
+        }).join("") || '<div class="empty">Este plugin não pede nenhuma permissão.</div>'}
+        <div class="set-foot"><button class="btn" data-act="wiz-back">Voltar</button><button class="btn pri" data-act="wiz-build">Instalar</button></div>
       </section>
       <section class="card">
         <div class="card-h"><h2>Instalar em</h2></div>
-        ${guilds.map((g, i) => `<label class="set-row" style="cursor:pointer"><input type="checkbox" ${i === 0 ? "checked" : ""} style="width:auto;flex:0 0 auto;accent-color:var(--accent)"><div class="l" style="margin-left:9px"><div class="t">${esc(g.name)}</div><div class="d">${g.role} · ${nf(g.members)} membros</div></div></label>`).join("")}
+        ${guilds.map((g, i) => `<label class="set-row" style="cursor:pointer"><input type="checkbox" data-guild="${g.id}" ${i === 0 ? "checked" : ""} style="width:auto;flex:0 0 auto;accent-color:var(--accent)"><div class="l" style="margin-left:9px"><div class="t">${esc(g.name)}</div><div class="d">${esc(g.role)} · ${nf(g.members)} membros</div></div></label>`).join("")}
         <div class="pad" style="padding-top:4px"><p class="hint" style="margin:0">Quando uma permissão é negada, o core recusa a chamada com <span class="mono">E_CAPABILITY</span>. Não existe acesso parcial.</p></div>
       </section></div>`;
   } else if (wiz.step === 4) {
     body = `<section class="card">
-      <div class="card-h"><h2>Build e conformidade</h2>${wiz.done ? '<span class="stat ok"><i class="dot"></i>Concluído</span>' : '<span class="stat" style="color:var(--accent)"><i class="dot"></i>Executando</span>'}</div>
+      <div class="card-h"><h2>Instalando</h2>${wiz.done ? '<span class="stat ok"><i class="dot"></i>Concluído</span>' : '<span class="stat" style="color:var(--accent)"><i class="dot"></i>Executando</span>'}</div>
       <div class="logs" id="buildlog" style="border-top:1px solid var(--line)">${wiz.logs.map((l) => `<div class="ln"><span class="m">${esc(l)}</span></div>`).join("")}</div>
       <div class="set-foot"><button class="btn pri" data-act="wiz-done" ${wiz.done ? "" : "disabled"}>Concluir instalação</button></div>
     </section>`;
   } else {
+    const r = wiz.result || {};
     body = `<section class="card pad" style="text-align:center;padding:38px 24px">
       <div style="width:38px;height:38px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 12px">${icon("check", 19)}</div>
-      <h2 style="margin:0 0 5px;font-size:16px;font-weight:600;letter-spacing:-.02em">Pets 1.4.2 instalado</h2>
-      <p class="muted" style="margin:0 0 18px;font-size:12.5px;line-height:1.5">Rodando no Servidor Dev BR, no commit <span class="mono" style="font-size:11px">a91f2c7</span>, com as permissões que você aprovou.</p>
-      <div style="display:flex;gap:8px;justify-content:center"><button class="btn" data-act="wiz-reset">Instalar outro</button><button class="btn pri" data-plugin="pets">Abrir plugin</button></div>
+      <h2 style="margin:0 0 5px;font-size:16px;font-weight:600;letter-spacing:-.02em">${esc(r.name || "")} ${esc(r.version || "")} instalado</h2>
+      <p class="muted" style="margin:0 0 18px;font-size:12.5px;line-height:1.5">Rodando com ${plural((r.capabilities || []).length, "permissão aprovada", "permissões aprovadas")}, no commit <span class="mono" style="font-size:11px">${esc(r.commitSha || "local")}</span>.</p>
+      <div style="display:flex;gap:8px;justify-content:center"><button class="btn" data-act="wiz-reset">Instalar outro</button><button class="btn pri" data-plugin="${esc(r.id || "")}">Abrir plugin</button></div>
     </section>`;
   }
 
-  const head = pageHead("Instalar plugin", "Do repositório ao servidor em quatro passos.", "", "Desenvolvimento");
+  const head = pageHead("Instalar plugin", "Do diretório ao servidor em quatro passos.", "", "Desenvolvimento");
   return shell(head, `<div class="wiz">${bar}${body}</div>`);
 }
 
-function wizNext() {
+async function wizLoadSources() {
+  if (!apiOnline) { wiz.sources = []; return render(); }
+  try {
+    wiz.sources = await api("/api/sources");
+  } catch {
+    wiz.sources = [];
+  }
+  if (state.view === "install") render();
+}
+
+async function wizNext() {
   wiz.url = $("#wiz-url")?.value || wiz.url;
-  wiz.step = 2;
-  wiz.manifest = {
-    id: "pets", name: "Pets", version: "1.4.2", lang: "python", sha: "a91f2c7",
-    runtime: { kind: "process", build: ["pip", "install", "-r", "requirements.txt"], cmd: ["python3", "main.py"] },
-    caps: ["reply", "kv", "economy.read", "economy.grant", "scheduler"],
-    commands: [{ name: "pet", desc: "Adota ou acaricia seu pet" }],
-    events: ["MESSAGE_CREATE"],
-  };
+  if (!wiz.url) { wiz.error = "Informe o diretório do plugin."; return render(); }
+  try {
+    wiz.manifest = await api("/api/inspect", { method: "POST", body: JSON.stringify({ dir: wiz.url }) });
+    wiz.error = null;
+    wiz.step = 2;
+  } catch (err) {
+    wiz.error = err.message;
+  }
   render();
 }
 
-function wizBuild() {
+function wizLog(line) {
+  wiz.logs.push(line);
+  const el = $("#buildlog");
+  if (el) {
+    el.insertAdjacentHTML("beforeend", `<div class="ln"><span class="m">${esc(line)}</span></div>`);
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+async function wizBuild() {
   $$("[data-perm]").forEach((c) => (wiz.perms[c.dataset.perm] = c.checked));
-  wiz.step = 4; wiz.done = false; wiz.logs = [];
+  const caps = wiz.manifest.capabilities.filter((c) => wiz.perms[c] !== false);
+  const targets = $$("[data-guild]").filter((c) => c.checked).map((c) => c.dataset.guild);
+  if (!targets.length) { toast("Escolha ao menos um servidor"); return; }
+
+  wiz.step = 4; wiz.done = false; wiz.logs = []; wiz.error = null;
   render();
-  const lines = [
-    "$ git clone --depth 1 -b main https://github.com/devlucas/discord-pets .",
-    "  commit a91f2c7 fixado",
-    "$ pip install -r requirements.txt",
-    "  dependências instaladas · nenhuma com acesso ao token",
-    "$ python3 -m bot_plugin_conformance",
-    "  ✓ initialize           12 ms",
-    "  ✓ handleCommand /pet   38 ms · 1 ação",
-    "  ✓ handleEvent           9 ms · 0 ações",
-    "  ✓ health                2 ms",
-    "  ✓ protocolo malformado  erro correto, sem travar",
-    "  ✓ tempo limite de 3 s   respeitado",
-    "conformidade 6 de 6 · build ok · sha256 9c1f…",
-  ];
-  let i = 0;
-  clearInterval(wiz.timer);
-  wiz.timer = setInterval(() => {
-    if (i >= lines.length) {
-      clearInterval(wiz.timer); wiz.done = true; render();
-      setTimeout(() => { const el = $("#buildlog"); if (el) el.scrollTop = el.scrollHeight; }, 30);
-      return;
+
+  wizLog(`$ analisando ${wiz.manifest.dir}`);
+  wizLog(`  ${wiz.manifest.id}@${wiz.manifest.version} · ${LANG[wiz.manifest.lang] || wiz.manifest.lang}`);
+  wizLog(`  permissões aprovadas: ${caps.join(", ") || "nenhuma"}`);
+  wizLog(`$ instalando em ${targets.length} servidor(es)`);
+
+  try {
+    const res = await api("/api/plugins", {
+      method: "POST",
+      body: JSON.stringify({ dir: wiz.manifest.dir, guilds: targets, caps, config: {} }),
+    });
+    wiz.result = res;
+    wizLog(`  copiado para .plugins/${res.id}`);
+    wizLog(`  registrado no banco · versão ${res.version}`);
+    wizLog("$ testando protocolo");
+    const conf = await api("/api/conformance", { method: "POST", body: JSON.stringify({ dir: wiz.manifest.dir }) }).catch(() => null);
+    if (conf?.results) {
+      for (const r of conf.results) wizLog(`  ${r.ok ? "✓" : "✗"} ${r.name}${r.detail ? "  " + r.detail : ""}`);
     }
-    wiz.logs.push(lines[i++]);
-    const el = $("#buildlog");
-    if (el) {
-      el.insertAdjacentHTML("beforeend", `<div class="ln"><span class="m">${esc(wiz.logs[wiz.logs.length - 1])}</span></div>`);
-      el.scrollTop = el.scrollHeight;
-    } else render();
-  }, 420);
+    wizLog("");
+    wizLog(`pronto · ${wiz.manifest.id} v${res.version} ativo em ${targets.join(", ")}`);
+    await loadData();
+    wiz.done = true;
+    render();
+  } catch (err) {
+    wizLog(`erro: ${err.message}`);
+    wizLog("instalação interrompida");
+  }
 }
 
 /* ─────────── console ─────────── */
@@ -1150,68 +1340,102 @@ let con = { plugin: "pets", method: "handleCommand", out: null };
 
 function viewConsole() {
   const head = pageHead("Console JSON-RPC", "A mesma conversa que o core tem com o plugin, escrita à mão.", "", "Desenvolvimento");
+  const selected = plugins.find((p) => p.id === con.plugin) || plugins[0];
+  const firstCmd = selected?.commands?.[0]?.name || "ping";
   const body = `<div class="cols"><section class="card">
       <div class="card-h"><h2>Requisição</h2><div style="display:flex;gap:7px;align-items:center"><select id="con-plugin" style="width:auto;max-width:160px;height:24px;padding:0 6px;font-size:12px">${plugins.map((p) => `<option value="${p.id}" ${con.plugin === p.id ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select><button class="btn sm pri" data-act="con-send">Executar</button></div></div>
       <div class="pad"><textarea id="con-req" rows="11" class="mono" style="font-family:var(--mono);font-size:11.5px;line-height:1.65" aria-label="Requisição JSON-RPC">${esc(JSON.stringify({
         jsonrpc: "2.0", id: 1, method: con.method,
         params: con.method === "handleCommand"
-          ? { command: "pet", args: [], userId: "4410", guildId: "1201", channelId: "9001" }
+          ? { command: firstCmd, args: [], userId: "4410", guildId: curGuild, channelId: "9001" }
           : con.method === "handleEvent"
-            ? { type: "MESSAGE_CREATE", payload: { userId: "4410", content: "!pet", channelId: "9001" } }
-            : { guildId: "1201" },
+            ? { type: "MESSAGE_CREATE", guildId: curGuild, payload: { userId: "4410", content: "!pet", channelId: "9001" } }
+            : { guildId: curGuild },
       }, null, 2))}</textarea>
       <p class="hint">Uma linha JSON por mensagem. A saída padrão carrega o protocolo; os logs vão para a saída de erro.</p></div>
     </section>
     <section class="card">
-      <div class="card-h"><h2>Resposta</h2><span class="sub">lista de ações</span></div>
+      <div class="card-h"><h2>Resposta</h2><span class="sub">${apiOnline ? "do plugin de verdade" : "simulada"}</span></div>
       <div class="pad"><pre id="con-out" style="min-height:210px">${con.out ? esc(con.out) : esc(JSON.stringify({ jsonrpc: "2.0", note: "envie uma requisição para ver a resposta" }, null, 2))}</pre>
       <p class="hint">O plugin devolve apenas intenções. O core confere a permissão e executa no Discord.</p></div>
     </section></div>`;
   return shell(head, body);
 }
 
-function conSend() {
+async function conSend() {
   con.plugin = $("#con-plugin").value;
   const req = JSON.parse($("#con-req").value);
   con.method = req.method;
   const p = plugins.find((x) => x.id === con.plugin);
-  let out;
-  if (!p.enabled) out = { error: { code: -32000, message: "E_PLUGIN_DISABLED" } };
-  else if (con.method === "initialize") out = { result: [], note: `manifesto ${p.id}@${p.version} aceito, configuração aplicada` };
-  else if (con.method === "health") out = { result: [] };
-  else if (con.method === "handleEvent") out = { result: [{ type: "emit", topic: `${p.id}.xp`, payload: { userId: req.params.payload.userId, amount: 1 } }] };
-  else out = { result: [{ type: "reply", content: "**Bilu** · fome 3 de 10 · felicidade 8 de 10" }, { type: "kv.set", key: `pet:${req.params.userId}`, value: { name: "Bilu", hunger: 3 } }] };
-  con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, ...out }, null, 2);
+
+  if (!apiOnline) {
+    con.out = JSON.stringify({
+      jsonrpc: "2.0", id: req.id,
+      error: { code: -32000, message: "painel em modo demonstração: abra pela porta do core" },
+    }, null, 2);
+    return render();
+  }
+
+  if (!p?.enabled) {
+    con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, error: { code: -32000, message: "E_PLUGIN_DISABLED" } }, null, 2);
+    return render();
+  }
+
+  try {
+    if (con.method === "handleCommand") {
+      const res = await api(`/api/plugins/${con.plugin}/call`, {
+        method: "POST",
+        body: JSON.stringify({ method: "handleCommand", guildId: req.params.guildId, params: req.params }),
+      });
+      const msgs = (res.results?.[0]?.executed ?? []).map((e) => e.action);
+      con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, result: msgs.length ? msgs : res, meta: { durationMs: res.results?.[0]?.durationMs } }, null, 2);
+    } else if (con.method === "handleEvent") {
+      const res = await api("/api/simulate/event", {
+        method: "POST",
+        body: JSON.stringify({ type: req.params.type, guildId: req.params.guildId, payload: req.params.payload }),
+      });
+      con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, result: res }, null, 2);
+    } else {
+      const res = await api(`/api/plugins/${con.plugin}/call`, {
+        method: "POST",
+        body: JSON.stringify({ method: con.method, guildId: req.params.guildId, params: req.params }),
+      });
+      con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, ...res }, null, 2);
+    }
+  } catch (err) {
+    con.out = JSON.stringify({ jsonrpc: "2.0", id: req.id, error: { code: -32000, message: err.message } }, null, 2);
+  }
   render();
 }
 
 /* ─────────── guilds ─────────── */
 function viewGuilds() {
-  const head = pageHead("Guilds", "Onde cada plugin pode rodar. O administrador de cada servidor aprova o que instala.", "", "Plataforma");
+  const head = pageHead("Servidores", "Onde cada plugin pode rodar. O administrador de cada servidor aprova o que instala.", "", "Plataforma");
   const cards = `<div class="guilds">
     ${guilds.map((g) => {
-      const inst = plugins.filter((p) => p.enabled && (p.guilds.includes("*") || p.guilds.includes(g.id)));
+      const inst = plugins.filter((p) => p.guilds.includes(g.id));
       return `<section class="card">
         <div class="pad" style="display:flex;gap:10px;align-items:center">
-          <div style="width:29px;height:29px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:#fff;background:#71727a;flex:0 0 auto">${g.initials}</div>
-          <div style="min-width:0"><div style="font-weight:500;font-size:13px">${esc(g.name)}</div><div class="dim" style="font-size:11.5px">${nf(g.members)} membros · você é ${g.role}</div></div>
+          <div style="width:29px;height:29px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:#fff;background:#71727a;flex:0 0 auto">${esc(g.initials)}</div>
+          <div style="min-width:0"><div style="font-weight:500;font-size:13px">${esc(g.name)}</div><div class="dim" style="font-size:11.5px">${g.members ? `${nf(g.members)} membros · ` : ""}você é ${esc(g.role)}</div></div>
         </div>
         <div class="sep"></div>
         <div class="pad" style="padding-top:10px;padding-bottom:8px">
-          <h2 class="sec">Plugins ativos · ${inst.length}</h2>
+          <h2 class="sec">Plugins ativos · ${inst.filter((p) => p.enabled).length}</h2>
           ${inst.map((p) => `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;font-size:12.5px"><span>${esc(p.name)}</span><span class="dim mono" style="font-size:10.5px">${p.version}</span></div>`).join("") || '<div class="dim" style="font-size:12.5px">Nenhum plugin instalado.</div>'}
         </div>
         <div class="set-foot" style="justify-content:flex-start"><button class="btn sm" data-go="install">Instalar aqui</button></div>
       </section>`;
     }).join("")}</div>`;
 
+  const allCaps = [...new Set(plugins.flatMap((p) => p.caps))];
   const bars = `<section class="card pad" style="margin-top:12px">
     <h2 class="sec">Permissões mais pedidas</h2>
     <div class="bars-list">
-      ${["reply", "kv", "economy.grant", "add_role", "scheduler", "http"].map((c) => {
+      ${allCaps.map((c) => {
         const n = plugins.filter((p) => p.caps.includes(c)).length;
-        return `<div class="b"><span class="nm">${esc((CAPS[c] || [c])[0])} <span class="mono dim" style="font-size:10.5px">${esc(c)}</span></span><span class="v">${n} de ${plugins.length}</span><div class="track"><i style="width:${(n / plugins.length) * 100}%"></i></div></div>`;
-      }).join("")}
+        return `<div class="b"><span class="nm">${esc((CAPS[c] || [c])[0])} <span class="mono dim" style="font-size:10.5px">${esc(c)}</span></span><span class="v">${n} de ${plugins.length}</span><div class="track"><i style="width:${(n / Math.max(plugins.length, 1)) * 100}%"></i></div></div>`;
+      }).join("") || '<div class="dim" style="font-size:12.5px">Nenhum plugin instalado.</div>'}
     </div>
   </section>`;
   return shell(head, cards + bars);
@@ -1273,12 +1497,9 @@ for line in sys.stdin:
         <p class="hint">Isso é o SDK inteiro. Qualquer linguagem que leia a entrada padrão e escreva JSON funciona.</p>
       </section>
       <section class="card tblwrap">
-        <div class="card-h"><h2>Suporte por linguagem</h2></div>
+        <div class="card-h"><h2>Suporte por linguagem</h2><span class="sub">instalados aqui</span></div>
         <table><tbody>
-          ${[["Python, Node, Go, Rust, C", "processo", 1],
-             ["C#, Java, Kotlin, PHP, Elixir", "container", 0],
-             ["Qualquer binário estático", "processo", 1]]
-            .map(([l, k, ok]) => `<tr><td style="font-size:12px">${esc(l)}</td><td><span class="tag code">${esc(k)}</span></td><td class="r"><span class="stat ${ok ? "ok" : ""}" style="${ok ? "" : "color:var(--text-2)"}"><i class="dot"></i>${ok ? "Suportado" : "Container"}</span></td></tr>`).join("")}
+          ${plugins.map((p) => `<tr data-plugin="${p.id}" style="cursor:pointer"><td style="font-size:12px">${esc(p.name)}</td><td><span class="tag code">${esc(p.runtime.kind === "container" ? "container" : "processo")}</span></td><td class="r">${langLabel(p)}</td></tr>`).join("") || '<tr><td class="dim" colspan="3">Nenhum plugin instalado.</td></tr>'}
         </tbody></table>
       </section>
     </div></div>`;
@@ -1287,15 +1508,79 @@ for line in sys.stdin:
 
 /* ─────────── logs ─────────── */
 function viewLogs() {
-  const opts = plugins.filter((p) => p.enabled).map((p) => `<option>${p.id}</option>`).join("");
+  const opts = plugins.map((p) => `<option value="${p.id}">${p.id}</option>`).join("");
   const head = pageHead("Logs", "Fluxo único de todos os plugins, correlacionado por request_id.", "", "Servidor");
   const body = `<section class="card">
     <div class="card-h"><h2>Todos os plugins</h2><div style="display:flex;gap:10px;align-items:center">
-      <select id="log-src" style="width:auto;height:24px;padding:0 6px;font-size:12px"><option>todos</option>${opts}</select>
-      <span class="sub"><i class="dot"></i>Ao vivo</span></div></div>
+      <select id="log-src" style="width:auto;height:24px;padding:0 6px;font-size:12px"><option value="">todos</option>${opts}</select>
+      <select id="log-lvl" style="width:auto;height:24px;padding:0 6px;font-size:12px"><option value="">todos os níveis</option><option value="info">info</option><option value="warn">aviso</option><option value="error">erro</option></select>
+      <button class="btn sm" data-act="refresh-logs">Atualizar</button>
+      <span class="sub"><i class="dot"></i>${apiOnline ? "Ao vivo" : "Demonstração"}</span></div></div>
     <div class="logs" id="log-stream" style="max-height:440px;border-top:1px solid var(--line)"></div>
   </section>`;
   return shell(head, body);
+}
+
+function logRow(r) {
+  const t = new Date(r.ts).toTimeString().slice(0, 8);
+  const lvl = r.level === "error" ? "err" : r.level === "warn" ? "warn" : "info";
+  return `<div class="ln"><span class="t">${t}</span><span class="s">[${esc(r.pluginId || "core")}]</span><span class="lv ${lvl}">${lvl.toUpperCase()}</span><span class="m">${esc(r.message)}</span></div>`;
+}
+
+async function fillLogs() {
+  const el = $("#log-stream");
+  if (!el) return;
+  if (!apiOnline) { el.innerHTML = logLines({ commands: [{ name: "ping" }], status: "healthy", enabled: true }); return; }
+
+  const src = $("#log-src")?.value || "";
+  const lvl = $("#log-lvl")?.value || "";
+  const rows = await api(`/api/logs?limit=200${src ? `&plugin=${src}` : ""}${lvl ? `&level=${lvl}` : ""}`).catch(() => []);
+  el.innerHTML = rows.length
+    ? rows.map(logRow).join("")
+    : '<div class="ln"><span class="m dim">sem registros</span></div>';
+}
+
+async function fillPluginLogs(id) {
+  const el = $("#plog");
+  if (!el) return;
+  if (!apiOnline) return;
+  const rows = await api(`/api/plugins/${id}/logs?limit=100`).catch(() => []);
+  el.innerHTML = rows.length
+    ? rows.map(logRow).join("")
+    : '<div class="ln"><span class="m dim">sem registros ainda</span></div>';
+}
+
+/** Atividade da visão geral: lê os logs reais e mostra o mais recente. */
+async function startEvStream() {
+  stopStreams();
+  const el = () => $("#ev-stream");
+
+  if (!apiOnline) {
+    const events = ["MESSAGE_CREATE", "INTERACTION_CREATE", "GUILD_MEMBER_ADD", "CUSTOM"];
+    const targets = plugins.map((p) => p.id);
+    for (let i = 0; i < 7; i++) {
+      const e = events[Math.floor(Math.random() * events.length)];
+      const t = targets[Math.floor(Math.random() * targets.length)] || "core";
+      const box = el();
+      if (box) box.insertAdjacentHTML("beforeend", `<div class="ev"><span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="n">${e}</span><span class="w">${t}</span><span class="d">—</span></div>`);
+    }
+    return;
+  }
+
+  const paint = async () => {
+    const box = el();
+    if (!box) return stopStreams();
+    const rows = await api("/api/logs?limit=16").catch(() => []);
+    if (!rows.length) {
+      box.innerHTML = '<div class="ev"><span class="n">—</span><span class="w">nada ainda</span><span class="d">use o console</span></div>';
+      return;
+    }
+    box.innerHTML = rows.map((r) => `<div class="ev"><span class="t">${new Date(r.ts).toTimeString().slice(0, 8)}</span><span class="n">${esc(r.source)}</span><span class="w">${esc(r.pluginId || "core")}</span><span class="d">${esc(String(r.message).slice(0, 44))}</span></div>`).join("");
+    box.scrollTop = 0;
+  };
+
+  await paint();
+  evT = setInterval(paint, 3000);
 }
 
 /* ─────────── render ─────────── */
@@ -1312,6 +1597,7 @@ function paintHead() {
 
 function render() {
   const v = state.view;
+  stopStreams();
   let html;
   if (v === "overview") html = viewOverview();
   else if (v === "plugins") html = viewPlugins();
@@ -1324,7 +1610,9 @@ function render() {
   $("#view").innerHTML = html;
   paintHead();
   if (v === "overview") startEvStream();
-  if (v === "logs") startLogStream();
+  if (v === "logs") { fillLogs(); logT = setInterval(fillLogs, 4000); }
+  if (v === "plugin" && state.tab === "logs") fillPluginLogs(state.plugin);
+  if (v === "install" && wiz.sources === null && apiOnline) wizLoadSources();
 }
 
 /* navegação pinta o esqueleto e depois o conteúdo */
@@ -1343,57 +1631,16 @@ function navigate(next, plugin) {
 let evT = null, logT = null;
 const stopStreams = () => { clearInterval(evT); clearInterval(logT); evT = logT = null; };
 
-function startEvStream() {
-  stopStreams();
-  const events = ["MESSAGE_CREATE", "INTERACTION_CREATE", "GUILD_MEMBER_ADD", "MESSAGE_CREATE", "PRESENCE_UPDATE"];
-  const targets = ["pets", "loja", "cassino", "moderacao"];
-  const add = () => {
-    const el = $("#ev-stream");
-    if (!el) return stopStreams();
-    const e = events[Math.floor(Math.random() * events.length)];
-    const t = targets[Math.floor(Math.random() * targets.length)];
-    const ms = (Math.random() * 60 + 4).toFixed(0);
-    el.insertAdjacentHTML("beforeend", `<div class="ev"><span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="n">${e}</span><span class="w">${t}</span><span class="d">${ms} ms</span></div>`);
-    while (el.children.length > 16) el.removeChild(el.firstChild);
-    el.scrollTop = el.scrollHeight;
-  };
-  for (let i = 0; i < 7; i++) add();
-  evT = setInterval(add, 1500);
-}
-
-function startLogStream() {
-  stopStreams();
-  const msgs = [
-    ["pets", "ok", "handleCommand /pet · 38 ms · 1 ação"],
-    ["loja", "ok", "handleCommand /comprar · 84 ms · 2 ações"],
-    ["cassino", "warn", "p95 acima do limite · 2900 ms · request_id 8f2a1c"],
-    ["pets", "info", "kv.set pet:4410 · 3 ms"],
-    ["economia", "info", "daily · guild 1201 · 100 moedas · 14 membros"],
-    ["loja", "ok", "addRole userId 8891 roleId 555"],
-    ["cassino", "err", "E_TIMEOUT · request_id 9c11d2 · processo encerrado · reinício 1 de 3"],
-  ];
-  const add = () => {
-    const el = $("#log-stream");
-    if (!el) return stopStreams();
-    const [src, lvl, msg] = msgs[Math.floor(Math.random() * msgs.length)];
-    el.insertAdjacentHTML("beforeend", `<div class="ln"><span class="t">${new Date().toTimeString().slice(0, 8)}</span><span class="s">[${src}]</span><span class="lv ${lvl}">${lvl.toUpperCase()}</span><span class="m">${esc(msg)}</span></div>`);
-    while (el.children.length > 200) el.removeChild(el.firstChild);
-    el.scrollTop = el.scrollHeight;
-  };
-  for (let i = 0; i < 14; i++) add();
-  logT = setInterval(add, 1200);
-}
-
 /* ─────────── eventos ─────────── */
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const go = e.target.closest("[data-go]");
   if (go) {
     const next = go.dataset.go;
     if (next === "install" && state.view !== "install" && wiz.step !== 1) {
-      clearInterval(wiz.timer);
-      wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null, done: false };
+      wiz = { step: 1, url: "", sources: null, manifest: null, perms: {}, logs: [], timer: null, done: false, error: null, result: null };
     }
     navigate(next);
+    if (next === "install" && wiz.sources === null) wizLoadSources();
     return;
   }
 
@@ -1409,11 +1656,13 @@ document.addEventListener("click", (e) => {
     $$(".segmented button").forEach((b) => b.classList.toggle("on", b === tab));
     $("#tab-body").innerHTML = `<div style="margin-bottom:12px">${sk("210px", 10)}</div>${skDetailTab()}`;
     const id = tab.dataset.id, t = state.tab;
-    setTimeout(() => {
+    setTimeout(async () => {
       if (state.tab !== t) return;
       const p2 = plugins.find((x) => x.id === id);
       const body = $("#tab-body");
-      if (body) body.innerHTML = pluginTab(p2, t);
+      if (!body || !p2) return;
+      body.innerHTML = pluginTab(p2, t);
+      if (t === "logs") fillPluginLogs(id);
     }, 320);
     return;
   }
@@ -1425,37 +1674,113 @@ document.addEventListener("click", (e) => {
 
   if (a === "theme") toggleTheme();
   else if (a === "toggle") {
-    p.enabled = act.checked;
-    p.status = p.enabled ? "healthy" : "stopped";
-    toast(`${p.name} ${p.enabled ? "ativado" : "desativado"}`);
+    if (apiOnline) {
+      try {
+        await api(`/api/plugins/${p.id}`, { method: "PATCH", body: JSON.stringify({ enabled: act.checked }) });
+        await loadData();
+        toast(`${p.name} ${act.checked ? "ativado" : "desativado"}`);
+      } catch (err) { toast(`Falha: ${err.message}`); }
+    } else {
+      p.enabled = act.checked;
+      p.status = p.enabled ? "healthy" : "stopped";
+      toast(`${p.name} ${p.enabled ? "ativado" : "desativado"}`);
+    }
     render();
   } else if (a === "kill") {
-    p.enabled = false; p.status = "stopped";
-    toast(`${p.name} parado. Novos eventos serão descartados.`);
+    if (apiOnline) {
+      try {
+        await api(`/api/plugins/${p.id}`, { method: "PATCH", body: JSON.stringify({ enabled: false }) });
+        await loadData();
+        toast(`${p.name} parado.`);
+      } catch (err) { toast(`Falha: ${err.message}`); }
+    } else {
+      p.enabled = false; p.status = "stopped";
+      toast(`${p.name} parado.`);
+    }
     render();
-  } else if (a === "save") toast(`Configuração de ${p.name} aplicada`);
-  else if (a === "reset") render();
-  else if (a === "clearlogs") {
-    const el = $("#plog"); if (el) el.innerHTML = '<div class="ln"><span class="m dim">sem registros</span></div>';
+  } else if (a === "save") {
+    const cfg = { ...p.config };
+    for (const [k, s] of Object.entries(p.schema)) {
+      const el = $(`#cfg-${k}`);
+      if (!el) continue;
+      if (s.type === "boolean") { cfg[k] = el.checked; continue; }
+      if (el.value === "") { delete cfg[k]; continue; } // vazio volta ao padrão
+      const n = Number(el.value);
+      if (s.type === "number" && !Number.isFinite(n)) { delete cfg[k]; continue; }
+      cfg[k] = s.type === "number" ? n : el.value;
+    }
+    if (apiOnline) {
+      try {
+        const guildId = p.guilds[0] || curGuild;
+        await api(`/api/plugins/${p.id}/config`, { method: "PATCH", body: JSON.stringify({ guildId, config: cfg }) });
+        p.config = cfg;
+        toast(`Configuração de ${p.name} aplicada`);
+      } catch (err) { toast(`Falha: ${err.message}`); }
+    } else {
+      p.config = cfg;
+      toast(`Configuração de ${p.name} aplicada`);
+    }
+    render();
+  } else if (a === "reset") render();
+  else if (a === "refresh-logs") {
+    if (state.view === "plugin") fillPluginLogs(act.dataset.id || state.plugin);
+    else fillLogs();
+    toast("Logs atualizados");
   } else if (a === "rpc") {
     const m = act.dataset.m;
-    const out = { jsonrpc: "2.0", id: 1, result: m === "handleCommand" ? [{ type: "reply", content: "**Bilu** · fome 3 de 10" }] : [] };
-    const el = $("#rpc-out"); if (el) el.textContent = JSON.stringify(out, null, 2);
+    if (!apiOnline) {
+      const el = $("#rpc-out");
+      if (el) el.textContent = JSON.stringify({ jsonrpc: "2.0", id: 1, error: { code: -32000, message: "modo demonstração: abra pela porta do core" } }, null, 2);
+      return;
+    }
+    const el = $("#rpc-out");
+    if (el) el.textContent = "consultando…";
+    const res = await api(`/api/plugins/${act.dataset.id}/health`, { method: "POST" }).catch((err) => ({ error: err.message }));
+    if (el) el.textContent = JSON.stringify({ jsonrpc: "2.0", id: 1, result: res.result ?? res }, null, 2);
+  } else if (a === "run-cmd") {
+    const el = $("#rpc-out");
+    if (el) el.textContent = `executando !${act.dataset.cmd}…`;
+    if (!apiOnline) { if (el) el.textContent = JSON.stringify({ error: "modo demonstração" }, null, 2); return; }
+    const res = await api(`/api/plugins/${act.dataset.id}/call`, {
+      method: "POST",
+      body: JSON.stringify({ method: "handleCommand", guildId: curGuild, params: { command: act.dataset.cmd, args: [], userId: "4410" } }),
+    }).catch((err) => ({ error: err.message }));
+    if (el) el.textContent = JSON.stringify(res, null, 2);
+    refreshQuiet();
+  } else if (a === "restart-all") {
+    if (!apiOnline) return toast("Modo demonstração");
+    try {
+      await api("/api/restart", { method: "POST", body: "{}" });
+      await loadData();
+      toast("Todos os plugins reiniciados");
+    } catch (err) { toast(`Falha: ${err.message}`); }
+    render();
   } else if (a === "wiz-next") wizNext();
+  else if (a === "wiz-pick") { wiz.url = act.dataset.dir; $("#wiz-url").value = wiz.url; wizNext(); }
   else if (a === "wiz-back") { wiz.step = Math.max(1, wiz.step - 1); render(); }
   else if (a === "wiz-perms") { wiz.step = 3; render(); }
   else if (a === "wiz-build") wizBuild();
   else if (a === "wiz-done") { wiz.step = 5; render(); }
-  else if (a === "wiz-reset") { wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null, done: false }; render(); }
+  else if (a === "wiz-reset") { wiz = { step: 1, url: "", sources: wiz.sources, manifest: null, perms: {}, logs: [], timer: null, done: false, error: null, result: null }; render(); }
   else if (a === "con-send") {
-    try { conSend(); } catch { toast("JSON inválido na requisição"); }
+    try { await conSend(); } catch (err) { toast(`JSON inválido: ${err.message}`); }
   }
 });
 
-/* primeira pintura: esqueleto e depois conteúdo */
-$("#view").innerHTML = skeletonFor("overview");
-paintHead();
-setTimeout(render, 520);
+/* primeira pintura: esqueleto, busca os dados reais, depois conteúdo */
+async function boot() {
+  $("#view").innerHTML = skeletonFor("overview");
+  paintHead();
+  try {
+    await loadData();
+  } catch {
+    apiOnline = false; // aberto como arquivo, ou core fora do ar: modo demonstração
+  }
+  render();
+}
+
+boot();
+setInterval(() => { if (apiOnline && state.view === "overview") refreshQuiet(); }, 10000);
 </script>
 </body>
 </html>

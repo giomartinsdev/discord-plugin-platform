@@ -1,0 +1,42 @@
+name = "economia"
+display_name = "Economia"
+version = "1.0.0"
+description = "Saldo, recompensa diária e transferência entre membros."
+lang = "javascript"
+
+capabilities = ["reply", "kv", "economy.read", "economy.grant", "emit"]
+
+[[commands]]
+name = "saldo"
+description = "Mostra quantas moedas você tem"
+
+[[commands]]
+name = "daily"
+description = "Resgata a recompensa diária"
+
+[[commands]]
+name = "pagar"
+description = "Transfere moedas para outro membro"
+
+[runtime]
+kind = "process"
+cmd = ["node", "main.js"]
+timeout_ms = 3000
+
+[config.daily_amount]
+type = "number"
+title = "Recompensa diária"
+description = "Moedas entregues por dia"
+default = 100
+
+[config.daily_cooldown_hours]
+type = "number"
+title = "Espera entre resgates"
+description = "Horas até poder resgatar de novo"
+default = 22
+
+[config.transfer_fee]
+type = "number"
+title = "Taxa de transferência"
+description = "Percentual descontado de cada transferência"
+default = 0

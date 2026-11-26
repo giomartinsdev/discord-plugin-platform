@@ -1,0 +1,27 @@
+name = "ranking"
+display_name = "Ranking"
+version = "1.0.0"
+description = "Ranking de moedas e de atividades do servidor."
+lang = "java"
+
+capabilities = ["reply", "economy.read"]
+subscribes = ["economy.daily"]
+
+[[commands]]
+name = "top"
+description = "Ranking das maiores fortunas do servidor"
+
+[[commands]]
+name = "meu-top"
+description = "Mostra sua posição no ranking"
+
+[runtime]
+kind = "process"
+cmd = ["java", "Main.java"]
+timeout_ms = 8000
+
+[config.limit]
+type = "number"
+title = "Tamanho do ranking"
+description = "Quantas pessoas aparecem no topo"
+default = 10

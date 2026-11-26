@@ -1,0 +1,17 @@
+{
+  "name": "discord-plugin-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node --no-warnings core/src/index.js",
+    "seed": "node --no-warnings core/src/index.js --seed",
+    "dev": "node --no-warnings core/cli.js dev",
+    "test": "node --no-warnings --test \"tests/*.test.js\"",
+    "e2e": "node --no-warnings tests/e2e.mjs",
+    "conformance": "node --no-warnings core/cli.js conformance"
+  },
+  "dependencies": {},
+  "bin": { "bot-platform": "core/cli.js" }
+}

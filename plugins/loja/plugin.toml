@@ -1,0 +1,36 @@
+name = "loja"
+display_name = "Loja"
+version = "1.0.0"
+description = "Loja de cargos por moedas, com estoque por servidor."
+lang = "go"
+
+capabilities = ["reply", "kv", "economy.read", "economy.grant", "addRole"]
+
+[[commands]]
+name = "loja"
+description = "Lista os itens à venda"
+
+[[commands]]
+name = "comprar"
+description = "Compra um item da loja"
+
+[[commands]]
+name = "inventario"
+description = "Mostra o que você já comprou"
+
+[runtime]
+kind = "process"
+cmd = ["go", "run", "."]
+timeout_ms = 8000
+
+[config.role_prefix]
+type = "string"
+title = "Prefixo do cargo"
+description = "Prefixo usado nos IDs de cargo entregues"
+default = "5"
+
+[config.max_per_user]
+type = "number"
+title = "Limite por membro"
+description = "Quantas compras cada membro pode fazer"
+default = 10

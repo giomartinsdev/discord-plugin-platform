@@ -1,0 +1,39 @@
+name = "pets"
+display_name = "Pets"
+version = "1.0.0"
+description = "Pets com fome, felicidade e ranking por servidor."
+lang = "python"
+
+capabilities = ["reply", "kv", "economy.read", "economy.grant", "emit"]
+events = ["MESSAGE_CREATE"]
+
+[runtime]
+kind = "process"
+cmd = ["python3", "main.py"]
+timeout_ms = 3000
+
+[[commands]]
+name = "pet"
+description = "Adota ou cuida do seu pet"
+
+[[commands]]
+name = "petrank"
+description = "Ranking de pets do servidor"
+
+[config.cooldown]
+type = "number"
+title = "Cooldown"
+description = "Segundos entre cuidados"
+default = 30
+
+[config.hunger_rate]
+type = "number"
+title = "Fome por hora"
+description = "Quanto a fome sobe a cada hora"
+default = 4
+
+[config.reward]
+type = "number"
+title = "Recompensa por cuidado"
+description = "Moedas ganhas ao cuidar do pet"
+default = 10

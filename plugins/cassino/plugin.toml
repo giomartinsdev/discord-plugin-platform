@@ -1,0 +1,42 @@
+name = "cassino"
+display_name = "Cassino"
+version = "1.0.0"
+description = "Apostas em roleta e cara ou coroa, com limite por aposta."
+lang = "typescript"
+
+capabilities = ["reply", "kv", "economy.read", "economy.grant", "emit"]
+
+[[commands]]
+name = "roleta"
+description = "Aposta em vermelho, preto ou número"
+
+[[commands]]
+name = "caraoucoroa"
+description = "Aposta em cara ou coroa"
+
+[[commands]]
+name = "apostas"
+description = "Mostra suas estatísticas de apostas"
+
+[runtime]
+kind = "process"
+cmd = ["bun", "run", "main.ts"]
+timeout_ms = 4000
+
+[config.min_bet]
+type = "number"
+title = "Aposta mínima"
+description = "Valor mínimo por aposta"
+default = 10
+
+[config.max_bet]
+type = "number"
+title = "Aposta máxima"
+description = "Valor máximo por aposta"
+default = 500
+
+[config.house_edge]
+type = "number"
+title = "Margem da casa"
+description = "Percentual que a casa retém do prêmio"
+default = 5

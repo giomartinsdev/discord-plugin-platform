@@ -1,0 +1,36 @@
+name = "moderacao"
+display_name = "Moderação"
+version = "1.0.0"
+description = "Avisos, banimentos e histórico de punições por membro."
+lang = "ruby"
+
+capabilities = ["reply", "kv", "kick", "addRole"]
+
+[[commands]]
+name = "aviso"
+description = "Registra um aviso para um membro"
+
+[[commands]]
+name = "historico"
+description = "Mostra as punições de um membro"
+
+[[commands]]
+name = "banir"
+description = "Expulsa um membro do servidor"
+
+[runtime]
+kind = "process"
+cmd = ["ruby", "main.rb"]
+timeout_ms = 3000
+
+[config.max_warnings]
+type = "number"
+title = "Avisos até punir"
+description = "Quantos avisos antes de aplicar punição automática"
+default = 3
+
+[config.mute_role]
+type = "string"
+title = "Cargo de silenciado"
+description = "ID do cargo aplicado a quem passa do limite"
+default = "9100"
