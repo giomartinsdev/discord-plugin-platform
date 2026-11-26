@@ -367,6 +367,20 @@
 
   .empty{padding:34px 16px;text-align:center;color:var(--text-3);font-size:12.5px}
   .chips{display:flex;flex-wrap:wrap;gap:5px}
+
+  /* ── esqueleto de carregamento ── */
+  .sk{display:block;border-radius:4px;background:var(--surface-3);position:relative;overflow:hidden;flex:0 0 auto}
+  .sk::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:sk-sheen 1.2s ease-in-out infinite}
+  html[data-theme="dark"] .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+  @media (prefers-color-scheme: dark){
+    html:not([data-theme="light"]) .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+  }
+  @keyframes sk-sheen{100%{transform:translateX(100%)}}
+  @media(prefers-reduced-motion:reduce){.sk::after{animation:none}}
+  .sk-row{display:flex;align-items:center;gap:11px;padding:11px 16px;border-top:1px solid var(--line)}
+  .sk-row:first-child{border-top:0}
+  .sk-lines{display:grid;gap:7px}
+  .sk-h{padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between}
   .bars-list{display:grid;gap:11px}
   .bars-list .b{display:grid;grid-template-columns:1fr auto;gap:5px;font-size:12px;align-items:baseline}
   .bars-list .b .nm{color:var(--text-2)}
@@ -599,6 +613,110 @@ const capChips = (caps, max) => {
   const rest = max ? caps.length - list.length : 0;
   return `<div class="chips">${list.map((c) => `<span class="tag" title="${esc(c)}">${esc((CAPS[c] || [c])[0])}</span>`).join("")}${rest > 0 ? `<span class="tag code">+${rest}</span>` : ""}</div>`;
 };
+
+/* ─────────── esqueletos ─────────── */
+const sk = (w, h = 10, r = 4) => `<span class="sk" style="width:${w};height:${h}px;border-radius:${r}px"></span>`;
+
+const skHead = () => `<div class="head"><div class="txt">
+  <div style="margin-bottom:7px">${sk("64px", 9)}</div>
+  ${sk("210px", 21, 6)}
+  <div style="margin-top:10px">${sk("min(420px, 62%)", 11)}</div>
+</div><div class="actions">${sk("112px", 28, 6)}</div></div>`;
+
+const skMetricCell = () => `<div class="metric">
+  ${sk("76px", 9)}
+  <div style="margin-top:9px">${sk("88px", 20, 5)}</div>
+  <div style="margin-top:8px">${sk("128px", 9)}</div>
+</div>`;
+const skMetrics = (n = 4) => `<div class="metrics">${Array.from({ length: n }, skMetricCell).join("")}</div>`;
+
+const skCardH = (w = 118) => `<div class="sk-h">${sk(w + "px", 11)}${sk("46px", 9)}</div>`;
+const skRow = () => `<div class="sk-row">
+  <span class="sk" style="width:29px;height:29px;border-radius:6px"></span>
+  <div class="sk-lines" style="flex:1">${sk("116px", 11)}${sk("212px", 9)}</div>
+  ${sk("64px", 9)}
+</div>`;
+const skList = (n = 5) => `<section class="card">${skCardH()}<div>${Array.from({ length: n }, skRow).join("")}</div></section>`;
+
+const skChart = () => `<section class="card">${skCardH(182)}<div class="chart">
+  <div class="bars">${[62, 48, 71, 35, 80, 55, 66, 90, 44, 72, 58, 85, 63, 49, 77, 92, 60, 68, 46, 83, 57, 71, 64, 52]
+    .map((h) => `<i style="height:${h}%;background:var(--surface-3);border-radius:2px 2px 0 0"></i>`).join("")}</div>
+  <div style="margin-top:10px">${sk("100%", 9)}</div>
+  <div class="legend" style="margin-top:11px">${sk("62px", 9)}${sk("74px", 9)}${sk("56px", 9)}</div>
+</div></section>`;
+
+const skStream = (n = 7) => `<div class="stream">${Array.from({ length: n }, () => `<div class="ev" style="padding:4px 16px">${sk("46px", 9)}${sk("124px", 9)}${sk("72px", 9)}</div>`).join("")}</div>`;
+
+const skTable = (rows = 5) => `<section class="card"><div class="sk-row" style="padding:9px 16px;border-top:0">
+  ${sk("64px", 9)}${sk("52px", 9)}${sk("44px", 9)}${sk("58px", 9)}<div style="flex:1"></div>${sk("40px", 9)}
+</div>${Array.from({ length: rows }, () => `<div class="sk-row" style="padding:10px 16px">
+  <span class="sk" style="width:27px;height:27px;border-radius:5px"></span>
+  <div class="sk-lines" style="flex:1">${sk("108px", 11)}${sk("154px", 9)}</div>
+  ${sk("52px", 9)}${sk("40px", 9)}${sk("30px", 9)}
+</div>`).join("")}</section>`;
+
+const skCode = (lines = 6) => `<div style="display:grid;gap:8px">${["100%", "86%", "94%", "72%", "90%", "64%", "81%"]
+  .slice(0, lines).map((w) => sk(w, 10)).join("")}</div>`;
+const skCodeCard = (lines = 7, titleW = 96) => `<section class="card pad">${sk(titleW + "px", 9)}<div style="margin-top:12px">${skCode(lines)}</div></section>`;
+
+const skSegmented = () => `<div style="display:flex;gap:2px;padding:2px;background:var(--surface-3);border:1px solid var(--line);border-radius:6px;width:fit-content;margin-bottom:14px">
+  ${sk("72px", 22, 4)}${sk("86px", 22, 4)}${sk("68px", 22, 4)}${sk("48px", 22, 4)}</div>`;
+
+const skDetailHead = () => `<div style="margin-bottom:12px">${sk("58px", 10)}</div>
+<div class="head" style="padding-top:0">
+  <span class="sk" style="width:42px;height:42px;border-radius:9px"></span>
+  <div class="txt">${sk("132px", 19, 5)}<div style="margin-top:8px">${sk("300px", 10)}</div></div>
+  <div class="actions">${sk("37px", 22, 99)}${sk("96px", 28, 6)}</div>
+</div>${skSegmented()}`;
+
+const skForm = (rows = 3) => `<section class="card">${skCardH(104)}${Array.from({ length: rows }, () => `<div class="set-row">
+  <div class="l"><div>${sk("120px", 11)}</div><div style="margin-top:6px">${sk("210px", 9)}</div></div>
+  <div class="ctl">${sk("100%", 26, 6)}</div>
+</div>`).join("")}<div class="set-foot">${sk("78px", 26, 6)}${sk("66px", 26, 6)}</div></section>`;
+
+const skSteps = () => `<div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+  ${sk("17px", 17, 99)}${sk("68px", 9)}<div style="width:22px"></div>
+  ${sk("17px", 17, 99)}${sk("60px", 9)}<div style="width:22px"></div>
+  ${sk("17px", 17, 99)}${sk("76px", 9)}<div style="width:22px"></div>
+  ${sk("17px", 17, 99)}${sk("42px", 9)}
+</div>`;
+
+const skLogs = (n = 9) => `<div class="logs" style="max-height:400px">${Array.from({ length: n }, () => `<div class="ln" style="padding:3px 15px">
+  ${sk("46px", 9)}${sk("58px", 9)}${sk("30px", 9)}${sk("min(340px, 46%)", 9)}
+</div>`).join("")}</div>`;
+
+const skDetailTab = () => `${skMetrics()}${`<div class="cols" style="margin-top:12px">
+  <div class="stack">${skForm(2)}${skCodeCard(4)}</div>
+  <div class="stack">${skCodeCard(5)}${skCodeCard(4)}</div>
+</div>`}`;
+
+const skGuildCard = () => `<section class="card">
+  <div class="pad" style="display:flex;gap:10px;align-items:center">
+    <span class="sk" style="width:29px;height:29px;border-radius:6px"></span>
+    <div class="sk-lines" style="flex:1">${sk("104px", 11)}${sk("146px", 9)}</div>
+  </div>
+  <div class="sep"></div>
+  <div class="pad" style="padding-top:10px;padding-bottom:8px">
+    ${sk("96px", 9)}
+    <div class="sk-lines" style="margin-top:9px;gap:9px">${sk("100%", 9)}${sk("88%", 9)}${sk("72%", 9)}</div>
+  </div>
+  <div class="set-foot" style="justify-content:flex-start">${sk("82px", 24, 6)}</div>
+</section>`;
+
+function skeletonFor(v) {
+  if (v === "overview") return shell(skHead(), skMetrics() + `<div class="cols"><div class="stack">${skChart()}${skList()}</div><div class="stack"><section class="card">${skCardH()}${skStream()}</section><section class="card">${skCardH(148)}${skStream(3)}</section></div></div>`);
+  if (v === "plugins") return shell(skHead(), skTable());
+  if (v === "plugin") return shell(skDetailHead(), skDetailTab());
+  if (v === "install") return shell(skHead(), `<div class="wiz">${skSteps()}${skForm(2)}</div>`);
+  if (v === "console") return shell(skHead(), `<div class="cols">${skCodeCard(11, 82)}${skCodeCard(11, 68)}</div>`);
+  if (v === "guilds") return shell(skHead(), `<div class="guilds">${[0, 1, 2].map(skGuildCard).join("")}</div>
+    <section class="card pad" style="margin-top:12px">${sk("150px", 9)}
+      <div class="bars-list" style="margin-top:12px">${[0, 1, 2, 3, 4].map(() => `<div class="b">${sk("126px", 10)}${sk("100%", 4, 99)}</div>`).join("")}</div>
+    </section>`);
+  if (v === "protocol") return shell(skHead(), `<div class="cols"><div class="stack">${skTable(5)}${skCodeCard(9, 176)}</div><div class="stack">${skCodeCard(13, 132)}${skTable(3)}</div></div>`);
+  if (v === "logs") return shell(skHead(), `<section class="card">${skCardH(128)}${skLogs()}</section>`);
+  return shell(skHead(), skMetrics() + `<div class="cols"><div class="stack">${skList()}</div><div class="stack">${skCodeCard(6)}</div></div>`);
+}
 
 function shell(head, body) {
   return `<div class="topbar">${guildPicker()}<div class="sp"></div>
@@ -1181,6 +1299,17 @@ function viewLogs() {
 }
 
 /* ─────────── render ─────────── */
+function paintHead() {
+  $("#brandmark").innerHTML = icon("brand", 13);
+  $$(".nav a").forEach((b) => {
+    b.classList.toggle("on", b.dataset.go === state.view || (state.view === "plugin" && b.dataset.go === "plugins"));
+    const ico = b.querySelector(".ic");
+    if (ico && !ico.childElementCount) ico.innerHTML = icon(b.dataset.go, 13);
+  });
+  $("#nav-pl-count").textContent = plugins.length;
+  $("#foot-active").textContent = plugins.filter((p) => p.enabled).length;
+}
+
 function render() {
   const v = state.view;
   let html;
@@ -1193,16 +1322,22 @@ function render() {
   else if (v === "protocol") html = viewProtocol();
   else if (v === "logs") html = viewLogs();
   $("#view").innerHTML = html;
-  $("#brandmark").innerHTML = icon("brand", 13);
-  $$(".nav a").forEach((b) => {
-    b.classList.toggle("on", b.dataset.go === v || (v === "plugin" && b.dataset.go === "plugins"));
-    const ico = b.querySelector(".ic");
-    if (ico && !ico.childElementCount) ico.innerHTML = icon(b.dataset.go, 13);
-  });
-  $("#nav-pl-count").textContent = plugins.length;
-  $("#foot-active").textContent = plugins.filter((p) => p.enabled).length;
+  paintHead();
   if (v === "overview") startEvStream();
   if (v === "logs") startLogStream();
+}
+
+/* navegação pinta o esqueleto e depois o conteúdo */
+let navToken = 0;
+function navigate(next, plugin) {
+  const token = ++navToken;
+  state.view = next;
+  state.plugin = plugin || null;
+  state.tab = "overview";
+  $("#view").innerHTML = skeletonFor(next);
+  paintHead();
+  $("#view").scrollTop = 0;
+  setTimeout(() => { if (token === navToken) render(); }, 420);
 }
 
 let evT = null, logT = null;
@@ -1258,20 +1393,28 @@ document.addEventListener("click", (e) => {
       clearInterval(wiz.timer);
       wiz = { step: 1, url: "", manifest: null, perms: {}, logs: [], timer: null, done: false };
     }
-    state.view = next; state.plugin = null; render(); return;
+    navigate(next);
+    return;
   }
 
   const pl = e.target.closest("[data-plugin]");
   if (pl && !e.target.closest("[data-act]")) {
-    state.view = "plugin"; state.plugin = pl.dataset.plugin; state.tab = "overview"; render(); return;
+    navigate("plugin", pl.dataset.plugin);
+    return;
   }
 
   const tab = e.target.closest("[data-tab]");
   if (tab) {
     state.tab = tab.dataset.tab;
-    const p = plugins.find((x) => x.id === tab.dataset.id);
-    $("#tab-body").innerHTML = pluginTab(p, state.tab);
     $$(".segmented button").forEach((b) => b.classList.toggle("on", b === tab));
+    $("#tab-body").innerHTML = `<div style="margin-bottom:12px">${sk("210px", 10)}</div>${skDetailTab()}`;
+    const id = tab.dataset.id, t = state.tab;
+    setTimeout(() => {
+      if (state.tab !== t) return;
+      const p2 = plugins.find((x) => x.id === id);
+      const body = $("#tab-body");
+      if (body) body.innerHTML = pluginTab(p2, t);
+    }, 320);
     return;
   }
 
@@ -1309,7 +1452,10 @@ document.addEventListener("click", (e) => {
   }
 });
 
-render();
+/* primeira pintura: esqueleto e depois conteúdo */
+$("#view").innerHTML = skeletonFor("overview");
+paintHead();
+setTimeout(render, 520);
 </script>
 </body>
 </html>
