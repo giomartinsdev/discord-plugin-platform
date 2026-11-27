@@ -286,6 +286,23 @@
   .segmented button:hover{color:var(--text)}
   .segmented button.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 0 0 1px var(--line)}
 
+  /* guia */
+  .guide{max-width:760px}
+  .doc{display:grid;gap:12px}
+  .doc .doc-h{display:flex;align-items:center;gap:9px}
+  .doc .doc-h .n{width:20px;height:20px;flex:0 0 auto;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums}
+  .doc h3{font-size:13px;font-weight:600;margin:0;letter-spacing:-.01em}
+  .doc p{font-size:12.5px;color:var(--text-2);line-height:1.62;margin:8px 0 0}
+  .doc ul,.doc ol{margin:8px 0 0;padding-left:19px;font-size:12.5px;color:var(--text-2);line-height:1.62}
+  .doc li{margin:4px 0}
+  .doc code{font-family:var(--mono);font-size:11px;background:var(--surface-3);padding:1px 4px;border-radius:4px;overflow-wrap:anywhere}
+  .codewrap{position:relative}
+  .codewrap pre{padding-right:74px}
+  .codewrap .btn{position:absolute;top:7px;right:7px}
+  .callout{border-left:2px solid var(--line-2);padding:1px 0 1px 11px;margin-top:11px;font-size:12px;color:var(--text-3);line-height:1.6}
+  .callout b{color:var(--text-2);font-weight:500}
+  .callout.amber{border-color:var(--amber)}
+
   /* código */
   pre{
     background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
@@ -422,6 +439,7 @@
       <a data-go="plugins"><span class="ic"></span>Plugins<span class="count" id="nav-pl-count">0</span></a>
       <a data-go="logs"><span class="ic"></span>Logs</a>
       <i>Desenvolvimento</i>
+      <a data-go="guide"><span class="ic"></span>Criar um plugin</a>
       <a data-go="install"><span class="ic"></span>Instalar plugin</a>
       <a data-go="console"><span class="ic"></span>Console JSON-RPC</a>
       <i>Plataforma</i>
@@ -445,6 +463,7 @@ const ICON = {
   plugins: '<rect x="2.4" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="9" y="2.4" width="4.6" height="4.6" rx="1"/><rect x="2.4" y="9" width="4.6" height="4.6" rx="1"/><rect x="9" y="9" width="4.6" height="4.6" rx="1"/>',
   logs: '<path d="M2.7 4.3h10.6M2.7 8h10.6M2.7 11.7h6.2"/>',
   install: '<path d="M8 2.7v6.6M5.6 7l2.4 2.4L10.4 7M2.7 12.3h10.6"/>',
+  guide: '<path d="M2.7 3.4h4.2c.6 0 1.1.5 1.1 1.1v8.1c0-.6-.5-1.1-1.1-1.1H2.7z"/><path d="M13.3 3.4H9.1C8.5 3.4 8 3.9 8 4.5v8.1c0-.6.5-1.1 1.1-1.1h4.2z"/>',
   console: '<rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.7"/><path d="m5.2 6.6 1.6 1.5-1.6 1.5M8.7 9.8h2.1"/>',
   guilds: '<circle cx="6" cy="5.8" r="2"/><path d="M2.4 12.2a3.6 3.6 0 0 1 7.2 0"/><path d="M10.3 4.2a2 2 0 0 1 0 3.7M10.7 8.9a3.2 3.2 0 0 1 2.9 3.3"/>',
   protocol: '<path d="M6.2 2.6C4.3 2.6 4.1 3.6 4.1 5v1.1c0 1-.5 1.5-1.5 1.8 1 .3 1.5.8 1.5 1.8v1.1c0 1.4.2 2.4 2.1 2.4"/><path d="M9.8 2.6c1.9 0 2.1 1 2.1 2.4v1.1c0 1 .5 1.5 1.5 1.8-1 .3-1.5.8-1.5 1.8v1.1c0 1.4-.2 2.4-2.1 2.4"/>',
@@ -845,6 +864,7 @@ function skeletonFor(v) {
       <div class="bars-list" style="margin-top:12px">${[0, 1, 2, 3, 4].map(() => `<div class="b">${sk("126px", 10)}${sk("100%", 4, 99)}</div>`).join("")}</div>
     </section>`);
   if (v === "protocol") return shell(skHead(), `<div class="cols"><div class="stack">${skTable(5)}${skCodeCard(9, 176)}</div><div class="stack">${skCodeCard(13, 132)}${skTable(3)}</div></div>`);
+  if (v === "guide") return shell(skHead(), `<div class="cols"><div class="stack">${skCodeCard(13, 220)}${skTable(4)}</div><div class="stack">${skCodeCard(9, 160)}${skCodeCard(7, 120)}</div></div>`);
   if (v === "logs") return shell(skHead(), `<section class="card">${skCardH(128)}${skLogs()}</section>`);
   return shell(skHead(), skMetrics() + `<div class="cols"><div class="stack">${skList()}</div><div class="stack">${skCodeCard(6)}</div></div>`);
 }
@@ -1561,7 +1581,350 @@ for line in sys.stdin:
   return shell(head, body);
 }
 
-/* ─────────── logs ─────────── */
+// ── guia ──
+
+/** Bloco de código com botão de copiar. O texto fica num mapa, não no atributo. */
+const GUIDE_SNIPPETS = {};
+let guideSeq = 0;
+function code(txt) {
+  const id = `s${++guideSeq}`;
+  GUIDE_SNIPPETS[id] = txt;
+  return `<div class="codewrap"><pre>${esc(txt)}</pre><button class="btn sm" data-act="copy" data-snippet="${id}">Copiar</button></div>`;
+}
+function step(n, title, ...body) {
+  return `<section class="card pad doc">
+    <div class="doc-h"><span class="n">${n}</span><h3>${title}</h3></div>
+    ${body.join("")}
+  </section>`;
+}
+
+function viewGuide() {
+  const mode = state.guideMode || "humano";
+  const head = pageHead(
+    "Criar um plugin",
+    "Do zero ao comando respondendo no seu servidor. Escolha o modo: passo a passo para ler, ou blocos prontos para colar numa IA.",
+    "",
+    "Desenvolvimento",
+  );
+  const switchMode = `<div class="segmented">
+    <button class="${mode === "humano" ? "on" : ""}" data-act="guide-mode" data-mode="humano">Modo humano</button>
+    <button class="${mode === "ia" ? "on" : ""}" data-act="guide-mode" data-mode="ia">Modo IA</button>
+  </div>`;
+  return shell(head, `<div class="guide">${switchMode}${mode === "ia" ? guideForAI() : guideForHuman()}</div>`);
+}
+
+function guideForHuman() {
+  return `<div class="doc">
+    <p class="lede" style="margin:0 0 2px">Um plugin não é um pacote que você importa. É <b>um processo</b> que o core liga, conversa por texto e desliga quando ninguém usa. Ele nunca vê o token do Discord: só pede coisas e o core faz.</p>
+  </div>
+
+  ${step(1, "O manifesto: o plugin se apresenta",
+    `<p>Um arquivo <code>plugin.toml</code> na raiz do repositório. É a única coisa que o core lê antes de rodar seu código. Diz o nome, como iniciar o processo e quais comandos existem.</p>`,
+    code(`name = "contador"            # id interno: só minúsculo, 0-9, - e _
+display_name = "Contador"
+version = "1.0.0"
+description = "Conta quantas vezes cada membro usou o comando."
+lang = "python"
+
+capabilities = ["reply", "kv"]
+
+[[commands]]
+name = "contar"
+description = "Conta mais um para você"
+
+[[commands]]
+name = "contagem"
+description = "Mostra quantas vezes você usou"
+
+[runtime]
+kind = "process"
+cmd = ["python3", "main.py"]
+timeout_ms = 3000`),
+    `<div class="callout"><b>Duas armadilhas comuns.</b> Nome de comando tem que ser minúsculo — <code>doPainel</code> é recusado na hora, com a mensagem certa. E <code>cmd</code> precisa existir de verdade: é ele que o core executa, a partir do diretório do plugin.</div>`,
+    `<div class="callout"><b>Capabilities são permissões.</b> <code>reply</code> deixa responder, <code>kv</code> deixa guardar dados por servidor, <code>economy.read</code> e <code>economy.grant</code> leem e movem moedas. Você declara o que precisa; o dono do servidor aprova na tela. Devolver uma ação sem a permissão aprovada dá erro, não funciona escondido.</div>`,
+  )}
+
+  ${step(2, "O loop: uma linha entra, uma linha sai",
+    `<p>O core escreve JSON numa linha no <code>stdin</code> do seu processo. Você responde com JSON no <code>stdout</code>. Uma mensagem por linha, sempre. Nada de <code>print</code> solto em stdout: ali é protocolo. Log vai no <code>stderr</code>.</p>`,
+    `<p>Esses cinco métodos são o contrato inteiro:</p>`,
+    code(`initialize    → o core te apresenta: servidores, config, permissões
+handleCommand → chegou um comando, devolve uma lista de ações
+handleEvent   → chegou um evento (entrou membro, mensagem, etc.)
+health        → "tá vivo?"
+shutdown      → "vou desligar"`),
+    `<p>E a resposta não é texto pronto: é uma <b>lista de intenções</b> que o core executa. Quer responder? Devolve uma lista com <code>{ "type": "reply", "content": "..." }</code>. O core valida a permissão e manda no Discord.</p>`,
+    `<div class="callout"><b>Não invente campos.</b> Qualquer coisa fora da lista de ações é recusada antes de chegar no Discord. A lista completa está na aba Protocolo.</div>`,
+  )}
+
+  ${step(3, "O código: o menor plugin útil",
+    `<p>Isso é o plugin inteiro. Sem SDK, sem dependência, sem build.</p>`,
+    code(`#!/usr/bin/env python3
+import json, sys
+
+def send(obj):
+    sys.stdout.write(json.dumps(obj) + "\\n")
+    sys.stdout.flush()
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        msg = json.loads(line)
+    except json.JSONDecodeError:
+        sys.stderr.write("linha inválida\\n")   # log vai no stderr
+        continue
+
+    method = msg.get("method")
+    params = msg.get("params") or {}
+    out = {"jsonrpc": "2.0", "id": msg.get("id")}
+
+    if method == "initialize":
+        out["result"] = {"ok": True}
+    elif method == "handleCommand":
+        if params.get("command") == "contar":
+            out["result"] = [{"type": "reply", "content": "pong"}]
+        else:
+            out["result"] = [{"type": "reply", "content": "não conheço esse"}]
+    elif method == "handleEvent":
+        out["result"] = []
+    elif method == "health":
+        out["result"] = {"ok": True}
+    elif method == "shutdown":
+        send(dict(out, result={"ok": True}))
+        break
+    else:
+        out["error"] = {"code": -32601, "message": "método desconhecido: " + str(method)}
+
+    send(out)`),
+    `<div class="callout"><b>Quer guardar dados?</b> Chame <code>kv.get</code> e <code>kv.set</code> pelo stdin, com um <code>id</code> seu, e espere a resposta do core. Sem banco próprio, sem arquivo: o core guarda por servidor e por plugin. Tem exemplo pronto em <code>plugins/economia/main.js</code> neste repositório.</div>`,
+  )}
+
+  ${step(4, "Testar antes de instalar",
+    `<p>O core tem um teste de protocolo. Ele sobe seu processo do mesmo jeito que em produção e checa o que mais quebra na vida real: handshake, comando devolvendo lista, evento devolvendo lista, <code>health</code>, linha malformada não derrubando o processo, e stdout limpo.</p>`,
+    code(`node core/cli.js conformance ../meu-plugin`),
+    `<p>Se algum item falhar ele diz qual. Corrija e rode de novo. Isso roda em CI, sem Discord e sem banco.</p>`,
+    `<p>Dá também para falar com o plugin na mão, sem core nenhum, só para ver o protocolo acontecendo:</p>`,
+    code(`printf '%s\\n' \\
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"guilds":[]}}' \\
+  '{"jsonrpc":"2.0","id":2,"method":"handleCommand","params":{"command":"contar","userId":"1","guildId":"1"}}' \\
+  | python3 main.py`),
+  )}
+
+  ${step(5, "Instalar pelo painel",
+    `<p>Com o teste passando, vai em <b>Instalar plugin</b>. Aceita o caminho da pasta ou o link do repositório. Você vê o manifesto, escolhe quais permissões aprovar, escolhe os servidores, e instala.</p>`,
+    `<p>Nos bastidores o core copia o plugin para <code>.plugins/&lt;id&gt;</code>, fixa o commit, monta o processo e registra os slash commands no Discord — <b>só nos servidores onde você instalou</b>.</p>`,
+    `<div class="callout"><b>Prefere o terminal?</b> <code>node core/cli.js install ../meu-plugin</code> faz o mesmo. Depois <code>node core/cli.js simulate contador contar</code> dispara o comando sem abrir o Discord.</div>`,
+  )}
+
+  ${step(6, "Publicar e instalar por link",
+    `<p>Subiu no GitHub? Então ninguém precisa clonar nada à mão. Cole <code>https://github.com/usuario/meu-plugin</code> no assistente e pronto: o core clona raso, lê o manifesto e instala igual.</p>`,
+    `<p>A partir daí o plugin tem <b>origem</b>. O painel lembra de onde ele veio, e isso liga o botão <b>Puxar commits novos</b>.</p>`,
+  )}
+
+  ${step(7, "Atualizar sem derrubar o bot",
+    `<p>Fez um commit com um comando novo? Vai no plugin, aba <b>Comandos</b>, e clica em <b>Puxar commits novos</b>. O core faz <code>git fetch</code>, reinstala a cópia, reinicia <b>só aquele processo</b> e relê o manifesto.</p>`,
+    `<p>O que muda: código novo, comandos novos, comandos removidos, descrição nova. O que fica: servidores, permissões aprovadas e configuração. O bot nunca sai do ar. Medido aqui: menos de meio segundo.</p>`,
+    `<div class="callout amber"><b>Cuidado com o que você renomeia.</b> Se o commit mudar o <code>name</code> do plugin, ele vira outro plugin e você reinstala. O nome é a identidade.</div>`,
+  )}
+
+  ${step(8, "Ajustar comandos sem tocar no código",
+    `<p>Na mesma aba você desliga um comando ou dá um apelido. Desligado, ele some do roteador e do Discord. Com apelido, o comando passa a responder por outro nome — e o plugin continua recebendo o nome original do manifesto, então seu código não precisa saber de nada disso.</p>`,
+    `<p>Salvar aplica na hora, inclusive nos slash commands. O manifesto segue sendo a fonte da verdade; os ajustes ficam no banco, por plugin.</p>`,
+  )}
+
+  ${step(9, "Quando algo dá errado",
+    `<ul>
+      <li><b>O comando não aparece no Discord.</b> O plugin está instalado <i>neste</i> servidor? Está ligado? Olhe a aba Comandos — se o comando está desligado ali, ele não existe.</li>
+      <li><b>"comando inválido".</b> Nome com maiúscula ou acento. Use a-z, 0-9, <code>-</code> e <code>_</code>.</li>
+      <li><b>"capability não aprovada".</b> Você devolveu uma ação que não pediu no manifesto, ou o dono do servidor não aprovou. Peça a permissão certa.</li>
+      <li><b>O processo morre sozinho.</b> Quase sempre é exceção não tratada em <code>handleCommand</code>. O core reinicia três vezes com espera e depois marca <code>degraded</code>. A aba Logs mostra o stderr do seu plugin.</li>
+      <li><b>A resposta demora.</b> Se o plugin passar de 2 s o core adia a resposta, porque o Discord exige confirmação em 3 s. A mensagem chega, só um pouco depois.</li>
+    </ul>`,
+  )}
+</div>`;
+}
+
+function guideForAI() {
+  const prompt = `Você vai criar um plugin para a plugin platform (bot Discord em Node, plugins em
+qualquer linguagem). Não invente SDK: o contrato inteiro está abaixo.
+
+REGRAS
+- O plugin é um processo. Fala JSON-RPC 2.0 em NDJSON: uma mensagem JSON por linha.
+- Lê do stdin, escreve no stdout. Log vai no stderr, nunca em stdout.
+- Nunca vê o token do Discord. Devolve Action[] e o core executa.
+- Sem dependência externa a menos que seja indispensável.
+- O manifesto plugin.toml é a fonte da verdade.
+
+ARQUIVOS A CRIAR
+- plugin.toml
+- <entrypoint> (main.py / main.js / main.go / ...)
+- README.md curto
+
+MANIFESTO
+name = "<id>"              # ^[a-z0-9_-]{1,32}$ — minúsculo, sem acento
+display_name = "<Nome>"
+version = "1.0.0"
+description = "<uma frase>"
+lang = "<python|javascript|typescript|go|ruby|java|...>"
+capabilities = ["reply"]   # + "kv", "economy.read", "economy.grant" se precisar
+
+[[commands]]
+name = "<comando>"
+description = "<o que faz>"
+
+[runtime]
+kind = "process"
+cmd = ["<interpretador>", "<arquivo>"]
+timeout_ms = 3000
+
+MÉTODOS QUE O CORE CHAMA (responder sempre com o mesmo "id")
+initialize    {pluginId, version, guilds:[{id,config}], capabilities, core} -> {ok:true}
+handleCommand {command, args[], userId, guildId, channelId, messageId, isInteraction}
+              -> Action[]
+handleEvent   {type, guildId, payload} -> Action[]
+health        {} -> {ok:true, detail?}
+shutdown      {reason} -> {ok:true} (e encerrar)
+
+MÉTODOS QUE O PLUGIN CHAMA (só com a capability aprovada)
+kv.get        {guildId, key} -> {value}
+kv.set        {guildId, key, value} -> {ok:true}
+kv.del        {guildId, key} -> {deleted}
+kv.keys       {guildId, prefix?} -> {keys:[]}
+kv.incr       {guildId, key, by?} -> {value}
+economy.get   {guildId, userId} -> {balance}
+economy.grant {guildId, userId, amount, reason?} -> {balance}
+economy.top   {guildId, limit?} -> {entries:[{userId,balance}]}
+config.get    {guildId} -> {config}
+log           {level, message} -> {ok:true}
+http.fetch    {url, method?, body?, headers?} -> {status, body}  # só hosts em allowed_hosts
+
+ACTIONS (a resposta de comando/evento é uma lista destas)
+{type:"reply", content, ephemeral?}          cap: reply
+{type:"editMessage", messageId, content}     cap: editMessage
+{type:"addRole", userId, roleId}             cap: addRole
+{type:"removeRole", userId, roleId}          cap: addRole
+{type:"kick", userId, reason?}               cap: kick
+{type:"emit", topic, payload}                cap: emit
+{type:"schedule", in:"10m", run}             cap: scheduler
+
+ERROS
+-32001 E_TIMEOUT   -32002 E_CRASH     -32003 E_CAPABILITY
+-32004 E_PROTOCOL  -32005 E_INVALID_ACTION
+
+ENTREGUE
+1. plugin.toml válido
+2. o código do loop, com try/catch por mensagem para uma linha ruim não matar o processo
+3. README com: como rodar o teste de conformidade e como instalar
+
+VERIFICAÇÃO
+  node core/cli.js conformance <dir>
+  node core/cli.js install <dir> --guild=<id>
+  node core/cli.js simulate <plugin> <comando>`;
+
+  return `<div class="doc">
+    <p class="lede" style="margin:0 0 2px">Cole o prompt abaixo numa IA, junto com a ideia do plugin. Ela sai com o manifesto, o loop e o README no formato que o core aceita — sem inventar API.</p>
+  </div>
+
+  ${step(1, "Prompt pronto",
+    code(prompt),
+    `<div class="callout"><b>Substitua</b> <code>&lt;id&gt;</code>, <code>&lt;comando&gt;</code> e o entrypoint pelo que você quer. Se o plugin precisa guardar dados, peça a capability <code>kv</code> e explique o que guardar — assim a IA usa <code>kv.get</code>/<code>kv.set</code> em vez de inventar banco.</div>`,
+  )}
+
+  ${step(2, "O esqueleto do loop, sem invenção",
+    `<p>Se a IA enrolar, este é o formato exato. A regra é: parseia a linha, trata, responde com o mesmo <code>id</code>. Exceção numa mensagem não pode matar o processo.</p>`,
+    code(`#!/usr/bin/env python3
+import json, sys
+
+def send(obj):
+    sys.stdout.write(json.dumps(obj) + "\\n")
+    sys.stdout.flush()
+
+def log(msg):
+    sys.stderr.write(msg + "\\n")
+
+COMMANDS = {
+    "contar": lambda p: [{"type": "reply", "content": "pong"}],
+}
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        msg = json.loads(line)
+    except json.JSONDecodeError:
+        log("linha inválida")          # nunca derruba o processo
+        continue
+
+    method, params, mid = msg.get("method"), msg.get("params") or {}, msg.get("id")
+    try:
+        if method == "initialize":
+            result = {"ok": True}
+        elif method == "handleCommand":
+            fn = COMMANDS.get(params.get("command"))
+            result = fn(params) if fn else [{"type": "reply", "content": "comando desconhecido"}]
+        elif method == "handleEvent":
+            result = []
+        elif method == "health":
+            result = {"ok": True}
+        elif method == "shutdown":
+            send({"jsonrpc": "2.0", "id": mid, "result": {"ok": True}})
+            break
+        else:
+            send({"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": "método desconhecido: " + str(method)}})
+            continue
+        send({"jsonrpc": "2.0", "id": mid, "result": result})
+    except Exception as exc:
+        log("erro em " + str(method) + ": " + str(exc))
+        send({"jsonrpc": "2.0", "id": mid, "error": {"code": -32000, "message": str(exc)}})`),
+  )}
+
+  ${step(3, "Chamar o core de dentro do handler",
+    `<p>Guardar dado é uma chamada, não um import. Escreva no stdout e leia a resposta do stdin — na mesma thread, com um <code>id</code> que você inventou.</p>`,
+    code(`_seq = 0
+
+def core(method, params):
+    global _seq
+    _seq += 1
+    rid = "p" + str(_seq)
+    send({"jsonrpc": "2.0", "id": rid, "method": method, "params": params})
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            raise RuntimeError("core fechou a conexão")
+        msg = json.loads(line)
+        if "method" in msg:            # o core chamando durante nossa espera
+            send({"jsonrpc": "2.0", "id": msg["id"], "result": {"ok": True}})
+            continue
+        if msg.get("id") != rid:
+            continue
+        if "error" in msg:
+            raise RuntimeError(msg["error"].get("message", "erro no core"))
+        return msg.get("result") or {}
+
+# uso dentro do handler
+total = core("kv.get", {"guildId": gid, "key": "count:" + uid}).get("value") or 0
+core("kv.set", {"guildId": gid, "key": "count:" + uid, "value": total + 1})`),
+    `<div class="callout"><b>Precisa de async?</b> O modelo é o mesmo: um mapa de <code>id → promise</code> e um leitor de linha que resolve. Veja <code>plugins/economia/main.js</code>, que faz exatamente isso em JS puro.</div>`,
+  )}
+
+  ${step(4, "Checklist antes de dizer que terminou",
+    code(`node core/cli.js conformance <dir>        # 6 checagens de protocolo
+node core/cli.js install <dir> --guild=<id>  # instala e registra os slash commands
+node core/cli.js simulate <plugin> <cmd>     # dispara sem Discord`),
+    `<ul>
+      <li>stdout só tem JSON — nenhum <code>print</code> de debug.</li>
+      <li>Toda mensagem recebida tem resposta com o mesmo <code>id</code>.</li>
+      <li>Linha malformada é ignorada, não derruba o processo.</li>
+      <li>O que o plugin devolve só usa capabilities declaradas no manifesto.</li>
+      <li>Nome de comando minúsculo, sem acento, até 32 caracteres.</li>
+      <li><code>timeout_ms</code> compatível com o trabalho: 3 s é o padrão.</li>
+    </ul>`,
+  )}
+</div>`;
+}
+
 function viewLogs() {
   const opts = plugins.map((p) => `<option value="${p.id}">${p.id}</option>`).join("");
   const head = pageHead("Logs", "Fluxo único de todos os plugins, correlacionado por request_id.", "", "Servidor");
@@ -1661,6 +2024,7 @@ function render() {
   else if (v === "console") html = viewConsole();
   else if (v === "guilds") html = viewGuilds();
   else if (v === "protocol") html = viewProtocol();
+  else if (v === "guide") html = viewGuide();
   else if (v === "logs") html = viewLogs();
   $("#view").innerHTML = html;
   paintHead();
@@ -1728,6 +2092,27 @@ document.addEventListener("click", async (e) => {
   const p = plugins.find((x) => x.id === act.dataset.id);
 
   if (a === "theme") toggleTheme();
+  else if (a === "guide-mode") {
+    state.guideMode = act.dataset.mode;
+    render();
+  } else if (a === "copy") {
+    const txt = GUIDE_SNIPPETS[act.dataset.snippet] ?? "";
+    try {
+      await navigator.clipboard.writeText(txt);
+      toast("Copiado");
+    } catch {
+      // clipboard bloqueado (http ou permissão): seleciona o texto pro usuário copiar
+      const pre = act.parentElement?.querySelector("pre");
+      if (pre) {
+        const r = document.createRange();
+        r.selectNodeContents(pre);
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        toast("Selecionado — use ⌘C");
+      } else toast("Não deu para copiar");
+    }
+  }
   else if (a === "toggle") {
     if (apiOnline) {
       try {

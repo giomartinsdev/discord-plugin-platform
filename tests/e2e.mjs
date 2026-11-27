@@ -254,6 +254,11 @@ async function main() {
   const html = await (await fetch(base + "/")).text();
   check("painel é servido em /", html.includes("<!doctype html") || html.includes("<!DOCTYPE html"));
 
+  /* guia de criação de plugin dentro do painel, nos dois modos */
+  check("painel tem o guia de plugin", html.includes('data-go="guide"') && html.includes("function viewGuide"));
+  check("guia tem modo humano e modo IA", html.includes("guideForHuman") && html.includes("guideForAI"));
+  check("guia cita o teste de conformidade", html.includes("conformance") && html.includes("plugin.toml"));
+
   await app.close();
   rmSync(dir, { recursive: true, force: true });
 
