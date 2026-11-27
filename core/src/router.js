@@ -49,7 +49,7 @@ export class Router {
     if (existing) existing.shutdown("reload");
 
     const host = new PluginHost({
-      plugin: withManifest(plugin, guilds, approvedCaps),
+      plugin: withManifest(plugin, guilds, approvedCaps, this.store.setting(`commands:${plugin.id}`, null)),
       store: this.store,
       log: this.log,
       handlers: this.handlers(),
@@ -60,6 +60,15 @@ export class Router {
 
   host(pluginId) {
     return this.hosts.get(pluginId) ?? null;
+  }
+
+  /** tira o host do mapa: o próximo `reload()` registra um processo novo */
+  async unregister(pluginId, reason = "reload") {
+    const host = this.hosts.get(pluginId);
+    if (!host) return false;
+    this.hosts.delete(pluginId);
+    await host.shutdown(reason);
+    return true;
   }
 
   /** recarrega do banco: usado depois de instalar/remover/ativar plugin */
@@ -79,7 +88,7 @@ export class Router {
       if (existing && !existing.degraded) {
         // atualiza dados sem derrubar o processo
         existing.plugin = {
-          ...withManifest(plugin, guilds, approved),
+          ...withManifest(plugin, guilds, approved, this.store.setting(`commands:${plugin.id}`, null)),
         };
         continue;
       }
@@ -128,16 +137,17 @@ export class Router {
     for (const [, host] of this.hosts) {
       const p = host.plugin;
       if (!p.enabled) continue;
-      if (!p.commands.some((c) => c.name === command)) continue;
+      const target = p.commands.find((c) => c.name === command);
+      if (!target) continue;
       if (!p.guilds.some((g) => g.id === guildId)) continue;
-      candidates.push(host);
+      candidates.push({ host, name: target.original ?? command });
     }
     if (!candidates.length) return { handled: false, reason: "comando não registrado nesta guild" };
 
     const results = [];
-    for (const host of candidates) {
+    for (const { host, name } of candidates) {
       results.push(await this.invoke(host, "handleCommand", {
-        command, args, guildId, userId, channelId, messageId, isInteraction,
+        command: name, args, guildId, userId, channelId, messageId, isInteraction,
       }, { guildId, userId, channelId, messageId, isInteraction }));
     }
     return { handled: results.some((r) => r.ok), results };
@@ -332,16 +342,32 @@ export class Router {
 }
 
 /** Manifesto achatado no registro do plugin: comandos/eventos no topo. */
-function withManifest(plugin, guilds, approved) {
+function withManifest(plugin, guilds, approved, overrides = null) {
   const m = plugin.manifest ?? {};
   return {
     ...plugin,
-    commands: m.commands ?? [],
+    commands: applyCommandOverrides(m.commands ?? [], overrides),
     events: m.events ?? [],
     subscribes: m.subscribes ?? [],
     guilds,
     runtime: { ...plugin.runtime, enabledCaps: approved },
   };
+}
+
+/**
+ * O painel pode desligar um comando ou dar um apelido sem editar o repo.
+ * O plugin continua vendo o nome original; só o core muda o que escuta.
+ */
+export function applyCommandOverrides(commands, overrides) {
+  if (!Array.isArray(overrides) || !overrides.length) return commands;
+  const byName = new Map(overrides.map((o) => [o.name, o]));
+  const out = [];
+  for (const c of commands) {
+    const o = byName.get(c.name);
+    if (o?.enabled === false) continue;
+    out.push(o?.alias ? { ...c, name: o.alias, original: c.name } : c);
+  }
+  return out;
 }
 
 export function parseDuration(str) {

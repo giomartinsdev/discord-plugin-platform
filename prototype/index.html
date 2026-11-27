@@ -630,8 +630,12 @@ function mapPlugin(p) {
     version: p.version,
     desc: p.description || "",
     repo: p.repoUrl ? p.repoUrl.replace(/^https?:\/\//, "").replace(/\.git$/, "") : "—",
+    repoRaw: p.repoUrl || null,
     branch: p.branch || "—",
     sha: (p.commitSha || "local"),
+    source: p.source || null,
+    commandOverrides: p.commandOverrides || [],
+    manifest: p.manifest || null,
     runtime: {
       kind: p.runtime?.kind || "process",
       cmd: p.runtime?.cmd || [],
@@ -1003,12 +1007,13 @@ function viewPlugin(id) {
         </div>
       </div>
       <div class="actions">
+        ${p.source?.url ? `<button class="btn" data-act="refresh" data-id="${p.id}" title="git pull + reload em runtime">Atualizar</button>` : ""}
         <label class="switch" title="Ativar ou desativar"><input type="checkbox" data-act="toggle" data-id="${p.id}" ${p.enabled ? "checked" : ""} aria-label="Ativar plugin"><i></i></label>
         <button class="btn danger" data-act="kill" data-id="${p.id}">Parar agora</button>
       </div>
     </div>
     <div class="segmented">
-      ${[["overview", "Visão geral"], ["config", "Configuração"], ["protocol", "Protocolo"], ["logs", "Logs"]]
+      ${[["overview", "Visão geral"], ["commands", "Comandos"], ["config", "Configuração"], ["protocol", "Protocolo"], ["logs", "Logs"]]
         .map(([k, l]) => `<button class="${state.tab === k ? "on" : ""}" data-tab="${k}" data-id="${p.id}">${l}</button>`).join("")}
     </div>
     <div id="tab-body">${pluginTab(p, state.tab)}</div>`;
@@ -1016,6 +1021,50 @@ function viewPlugin(id) {
 }
 
 function pluginTab(p, tab) {
+  if (tab === "commands") {
+    // a lista vem do manifesto cru: comando desligado some dos efetivos, mas
+    // precisa continuar na tela para poder ser religado
+    const all = (p.manifest?.commands ?? p.commands ?? []).map((c) => ({ name: c.name, description: c.description ?? "" }));
+    const ov = new Map((p.commandOverrides || []).map((o) => [o.name, o]));
+    const rows = all.map((c) => {
+      const o = ov.get(c.name) ?? {};
+      const enabled = o.enabled !== false;
+      const alias = o.alias ?? "";
+      return `<div class="set-row" data-cmdrow="${esc(c.name)}">
+        <div class="l"><div class="t mono" style="font-size:12px;font-weight:500">/${esc(alias || c.name)}${alias ? ` <span class="dim" style="font-weight:400;font-size:10.5px">era /${esc(c.name)}</span>` : ""}</div>
+        <div class="d">${esc(c.description)}</div></div>
+        <div class="ctl" style="gap:8px">
+          <input class="cmd-alias" data-orig="${esc(c.name)}" placeholder="${esc(c.name)}" value="${esc(alias)}" style="width:110px" aria-label="Apelido para ${esc(c.name)}">
+          <label class="switch" title="Ativar ou desativar este comando"><input type="checkbox" data-cmdenabled="${esc(c.name)}" ${enabled ? "checked" : ""} aria-label="Ativar /${esc(c.name)}"><i></i></label>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div class="cols">
+      <section class="card">
+        <div class="card-h"><h2>Comandos</h2><span class="sub">${plural(all.length, "comando", "comandos")}</span></div>
+        ${rows || '<div class="empty">Este plugin não declara comandos.</div>'}
+        <div class="set-foot">
+          <span class="dim" style="font-size:11.5px;margin-right:auto">Desligue ou dê apelido sem editar o repositório. O plugin continua vendo o nome original.</span>
+          <button class="btn pri" data-act="save-cmds" data-id="${p.id}">Salvar comandos</button>
+        </div>
+      </section>
+      <div class="stack">
+        <section class="card pad">
+          <h2 class="sec">Origem</h2>
+          <dl class="dl">
+            <dt>Repositório</dt><dd class="mono" style="font-size:11px;word-break:break-all">${esc(p.repoRaw || "diretório local")}</dd>
+            <dt>Branch</dt><dd>${esc(p.branch)}</dd>
+            <dt>Commit</dt><dd class="mono" style="font-size:11px">${esc(p.sha)}</dd>
+          </dl>
+          ${p.source?.url
+            ? `<div style="padding:0 16px 14px"><button class="btn sm" data-act="refresh" data-id="${p.id}">Puxar commits novos</button><p class="hint" style="margin-top:8px">Faz <span class="mono">git fetch</span>, reinstala e reinicia só este plugin. Guilds, permissões e configuração ficam.</p></div>`
+            : `<p class="hint" style="padding:0 16px 14px">Instalado de um diretório: para atualizar, reinstale apontando o diretório.</p>`}
+        </section>
+      </div>
+    </div>`;
+  }
+
   if (tab === "config") {
     const rows = Object.entries(p.schema).map(([k, s]) => {
       const v = p.config[k];
@@ -1183,12 +1232,12 @@ function viewInstall() {
   if (wiz.step === 1) {
     const list = wiz.sources;
     body = `<section class="card pad">
-      <h2 class="sec">Diretório do plugin</h2>
+      <h2 class="sec">Repositório ou diretório</h2>
       <div style="display:flex;gap:8px">
-        <input id="wiz-url" placeholder="/caminho/para/o/plugin" value="${esc(wiz.url)}" aria-label="Diretório do plugin">
+        <input id="wiz-url" placeholder="https://github.com/usuario/meu-plugin ou /caminho/para/o/plugin" value="${esc(wiz.url)}" aria-label="Repositório ou diretório do plugin">
         <button class="btn pri" data-act="wiz-next">Analisar</button>
       </div>
-      <p class="hint">Informe uma pasta com <span class="mono">plugin.toml</span>. O core lê o manifesto, copia para <span class="mono">.plugins/</span> e fixa o commit do git quando existir.</p>
+      <p class="hint">Cole o link do repositório git: o core clona, lê o <span class="mono">plugin.toml</span>, copia para <span class="mono">.plugins/</span> e fixa o commit. Depois, o botão <span class="mono">Atualizar</span> no plugin puxa commits novos sem reiniciar o bot.</p>
       ${wiz.error ? `<div class="warnline" style="margin-top:10px">${esc(wiz.error)}</div>` : ""}
     </section>
     ${list === null ? `<section class="card pad" style="margin-top:12px">${sk("140px", 9)}<div class="sk-lines" style="margin-top:12px">${sk("100%", 9)}${sk("88%", 9)}${sk("72%", 9)}</div></section>`
@@ -1277,9 +1326,11 @@ async function wizLoadSources() {
 
 async function wizNext() {
   wiz.url = $("#wiz-url")?.value || wiz.url;
-  if (!wiz.url) { wiz.error = "Informe o diretório do plugin."; return render(); }
+  const value = wiz.url.trim();
+  if (!value) { wiz.error = "Informe o repositório ou o diretório do plugin."; return render(); }
   try {
-    wiz.manifest = await api("/api/inspect", { method: "POST", body: JSON.stringify({ dir: wiz.url }) });
+    const payload = /^(https?:\/\/|git@|ssh:\/\/|git:\/\/|file:\/\/)/.test(value) ? { url: value } : { dir: value };
+    wiz.manifest = await api("/api/inspect", { method: "POST", body: JSON.stringify(payload) });
     wiz.error = null;
     wiz.step = 2;
   } catch (err) {
@@ -1306,7 +1357,7 @@ async function wizBuild() {
   wiz.step = 4; wiz.done = false; wiz.logs = []; wiz.error = null;
   render();
 
-  wizLog(`$ analisando ${wiz.manifest.dir}`);
+  wizLog(`$ analisando ${wiz.manifest.fromRepo ? wiz.manifest.repoUrl : wiz.manifest.dir}`);
   wizLog(`  ${wiz.manifest.id}@${wiz.manifest.version} · ${LANG[wiz.manifest.lang] || wiz.manifest.lang}`);
   wizLog(`  permissões aprovadas: ${caps.join(", ") || "nenhuma"}`);
   wizLog(`$ instalando em ${targets.length} servidor(es)`);
@@ -1314,7 +1365,11 @@ async function wizBuild() {
   try {
     const res = await api("/api/plugins", {
       method: "POST",
-      body: JSON.stringify({ dir: wiz.manifest.dir, guilds: targets, caps, config: {} }),
+      body: JSON.stringify({
+        url: wiz.manifest.fromRepo ? wiz.manifest.repoUrl : undefined,
+        dir: wiz.manifest.fromRepo ? undefined : wiz.manifest.dir,
+        guilds: targets, caps, config: {},
+      }),
     });
     wiz.result = res;
     wizLog(`  copiado para .plugins/${res.id}`);
@@ -1747,6 +1802,48 @@ document.addEventListener("click", async (e) => {
     }).catch((err) => ({ error: err.message }));
     if (el) el.textContent = JSON.stringify(res, null, 2);
     refreshQuiet();
+  } else if (a === "save-cmds") {
+    const list = [];
+    $$("[data-cmdrow]").forEach((row) => {
+      const name = row.dataset.cmdrow;
+      const aliasEl = row.querySelector(".cmd-alias");
+      const onEl = row.querySelector("[data-cmdenabled]");
+      const entry = { name, enabled: !!onEl?.checked };
+      const alias = (aliasEl?.value || "").trim().toLowerCase().replace(/\s+/g, "-");
+      if (alias && alias !== name) entry.alias = alias;
+      list.push(entry);
+    });
+    if (!list.some((c) => c.enabled)) return toast("Deixe ao menos um comando ativo");
+    if (!apiOnline) return toast("Modo demonstração");
+    try {
+      const res = await api(`/api/plugins/${p.id}/commands`, { method: "PUT", body: JSON.stringify({ commands: list }) });
+      p.commandOverrides = res.commands || list;
+      await loadData();
+      toast(`Comandos de ${p.name} atualizados`);
+    } catch (err) { toast(`Falha: ${err.message}`); }
+    render();
+  } else if (a === "refresh") {
+    if (!apiOnline) return toast("Modo demonstração");
+    const btn = act;
+    btn.disabled = true;
+    btn.textContent = "Puxando…";
+    try {
+      const res = await api(`/api/plugins/${p.id}/refresh`, { method: "POST", body: "{}" });
+      await loadData();
+      if (res.updated) {
+        const n = (res.commands || []).length;
+        toast(`${p.name} atualizado para ${res.commitSha} · ${plural(n, "comando", "comandos")}`);
+      } else if (res.reason) {
+        toast(res.reason);
+      } else {
+        toast(`${p.name} já estava no último commit (${res.commitSha})`);
+      }
+    } catch (err) {
+      toast(`Falha ao atualizar: ${err.message}`);
+      btn.disabled = false;
+      btn.textContent = "Atualizar";
+    }
+    render();
   } else if (a === "restart-all") {
     if (!apiOnline) return toast("Modo demonstração");
     try {

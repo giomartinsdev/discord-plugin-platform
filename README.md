@@ -47,6 +47,34 @@ moderação) e `Kick Members` (moderação). Para ler o conteúdo das mensagens 
 atribui. Os IDs de cargo vêm da config de cada plugin (ex.: `mute_role = "9100"` na moderação) —
 troque pelos IDs reais do seu servidor no painel, aba Configuração.
 
+## Instalar pelo link do repositório
+
+No painel, **Instalar plugin** aceita uma URL de repositório git (`https://`, `git@`, `ssh://`) ou
+um diretório local:
+
+1. cola `https://github.com/usuario/meu-plugin`
+2. o core clona num diretório de trabalho e lê o `plugin.toml`
+3. escolhe permissões e servidores e instala
+
+O core guarda a origem. Depois, no plugin → aba **Comandos** → **Puxar commits novos**:
+
+- faz `git fetch` do branch e reinstala a cópia em `.plugins/`
+- reinicia **só aquele plugin** (o bot continua no ar)
+- relê o manifesto, então comandos novos, removidos ou com descrição nova entram em vigor
+- re-registra os slash commands no Discord
+- preserva guilds, permissões aprovadas e configuração
+
+## Comandos pela tela
+
+Plugin → aba **Comandos**:
+
+- **desligar** um comando: ele some do roteador e do Discord, sem tocar no repositório
+- **apelido**: o comando passa a responder por outro nome (`/pong` em vez de `/ping`); o plugin
+  continua recebendo o nome original
+- salvar aplica na hora, inclusive nos slash commands
+
+O manifesto continua sendo a fonte da verdade; os ajustes ficam no banco, por plugin.
+
 ## Comandos
 
 ```bash
@@ -58,8 +86,10 @@ npm test                         # testes de unidade (manifesto, router, banco)
 
 node core/cli.js conformance plugins/pets     # 6 testes de protocolo
 node core/cli.js install plugins/pets         # instala um plugin local
+node core/cli.js install https://github.com/u/repo   # instala de um repositório
+node core/cli.js refresh pets                 # git pull + reload em runtime
 node core/cli.js simulate pets pet            # dispara um comando sem Discord
-node core/cli.js install <dir> --guild=1201,1202 --build
+node core/cli.js install <dir|url> --guild=1201,1202 --branch=main --build
 ```
 
 ## Plugins de exemplo

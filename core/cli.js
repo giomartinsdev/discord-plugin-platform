@@ -3,13 +3,14 @@
  * CLI do core. Sem dependência: só `node:util`.
  *
  *   bot-platform serve [--port=4319]
- *   bot-platform install <dir> [--guild=1201] [--build]
+ *   bot-platform install <dir|url> [--guild=1201] [--branch=main] [--build]
+ *   bot-platform refresh <id>
  *   bot-platform conformance <dir>
  *   bot-platform simulate <plugin> <comando> [args...]
  *   bot-platform dev
  */
 import { boot } from "./src/index.js";
-import { readManifestFromDir } from "./src/loader.js";
+import { readManifestFromDir, isRepoUrl } from "./src/loader.js";
 import { runConformance } from "./src/conformance.js";
 import { seedAll, defaultGuilds } from "./src/seed.js";
 import { resolve } from "node:path";
@@ -46,7 +47,7 @@ switch (cmd) {
   }
 
   case "seed": {
-    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
+    const app = await bootOrDie({ port: flags.port ? Number(flags.port) : 0, quiet: true });
     const out = await seedAll(app);
     for (const p of out.installed) console.log(`  ${c.green("✓")} ${p.id} v${p.version} ${c.dim(`(${p.lang})`)}`);
     console.log(c.bold(`\n${out.installed.length} plugins instalados`));
@@ -55,13 +56,26 @@ switch (cmd) {
   }
 
   case "install": {
-    const dir = positional[0];
-    if (!dir) die("informe o diretório do plugin: bot-platform install <dir>");
-    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
+    const origin = positional[0];
+    if (!origin) die("informe o diretório ou a URL do repositório: bot-platform install <dir|url>");
+    const app = await bootOrDie({ port: flags.port ? Number(flags.port) : 0, quiet: true });
     const guilds = flags.guild ? String(flags.guild).split(",") : [app.guilds[0]?.id ?? defaultGuilds()[0].id];
-    const res = await app.core.install({ dir: resolve(dir), guilds, build: !!flags.build });
+    const res = isRepoUrl(origin)
+      ? await app.core.install({ url: origin, branch: flags.branch, guilds, build: !!flags.build })
+      : await app.core.install({ dir: resolve(origin), guilds, build: !!flags.build });
     console.log(`${c.green("✓")} ${res.id} v${res.version} ${c.dim(`(${res.lang})`)} → ${guilds.join(", ")}`);
     console.log(c.dim(`  comandos: ${res.commands.map((x) => "!" + x.name).join(", ") || "nenhum"}`));
+    await app.close();
+    break;
+  }
+
+  case "refresh": {
+    const id = positional[0];
+    if (!id) die("informe o id do plugin: bot-platform refresh <id>");
+    const app = await bootOrDie({ port: flags.port ? Number(flags.port) : 0, quiet: true });
+    const res = await app.core.refresh(id);
+    if (!res.updated) console.log(c.dim(`  ${res.reason ?? "nada a atualizar"} (${res.commitSha ?? "—"})`));
+    else console.log(`${c.green("✓")} ${id} ${c.dim(`${res.commitShaBefore ?? "?"} → ${res.commitSha}`)} · ${res.commands.length} comandos`);
     await app.close();
     break;
   }
@@ -80,7 +94,7 @@ switch (cmd) {
   case "simulate": {
     const [pluginId, command, ...args] = positional;
     if (!pluginId || !command) die("uso: bot-platform simulate <plugin> <comando> [args...]");
-    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
+    const app = await bootOrDie({ port: flags.port ? Number(flags.port) : 0, quiet: true });
     const plugin = app.store.getPlugin(pluginId);
     if (!plugin) die(`plugin "${pluginId}" não instalado. Rode "bot-platform seed".`);
     const guildId = flags.guild ?? app.store.listGuildInstalls(pluginId)[0]?.guildId ?? defaultGuilds()[0].id;

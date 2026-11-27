@@ -93,8 +93,19 @@ Códigos JSON-RPC padrão, mais:
 - morte após 15 min ocioso
 - crash → reinício com backoff (1 s, 2 s, 4 s), 3 tentativas, depois `degraded`
 - `degraded` só volta com reinício manual pelo painel
+- atualização vinda de repositório (`refresh`) mata o processo e sobe outro; guilds,
+  permissões e configuração são preservadas
 - stdout é protocolo. Qualquer linha não-JSON em stdout é erro de conformidade
 - stderr é log livre, capturado e correlacionado por `request_id`
+
+## Comandos ajustados pelo painel
+
+O manifesto é a fonte da verdade, mas o painel pode sobrepor, por plugin:
+
+- desligar um comando: sai do roteador e do Discord; o plugin não é reiniciado
+- apelido: o core escuta o nome novo e chama o plugin com o nome original
+
+O plugin nunca precisa saber que o nome mudou: `handleCommand` recebe sempre o nome do manifesto.
 
 ## Conformidade
 

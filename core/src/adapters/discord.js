@@ -152,23 +152,69 @@ export class DiscordAdapter {
     if (this.onEmit) this.onEmit(kind, data);
   }
 
-  /** registra slash commands no Discord */
-  async registerCommands(commands) {
+  /**
+   * Registra slash commands por servidor: cada guild recebe só os comandos dos
+   * plugins instalados nela. `byGuild` é { guildId: commands[] }.
+   * Guilda sem comando tem o registro limpo.
+   */
+  async registerCommands(byGuild) {
     if (!this.token || !this.appId || !this.discord) return { skipped: true, reason: "sem token/app id" };
-    if (!commands.length) return { count: 0 };
     const { REST, Routes } = this.discord;
     const rest = new REST({ version: "10" }).setToken(this.token);
-    const body = commands.map((c) => ({
+
+    const shape = (c) => ({
       name: c.name,
       description: (c.description || c.name).slice(0, 100),
-      // sem opções declaradas, um campo livre única: `/pagar argumentos:<@alvo> 50`.
+      // sem opções declaradas, um campo livre único: `/pagar argumentos:<@alvo> 50`.
       // Sem isso o slash command chegaria sem argumento nenhum.
       options: c.options?.length
         ? c.options
         : [{ type: 3, name: "argumentos", description: "argumentos do comando", required: false }],
-    }));
-    await rest.put(Routes.applicationCommands(this.appId), { body });
-    return { count: body.length };
+    });
+
+    // O Discord limita bulk overwrite com força (o segundo PUT seguido espera ~1 min).
+    // Só reenvia o que mudou: comparar o corpo com o último aplicado por servidor.
+    this.commandsSent ??= new Map();
+
+    // limpa comandos globais de versões antigas: eles apareceriam em todo servidor
+    let clearedGlobal = false;
+    if (!this.globalCleared) {
+      try {
+        await rest.put(Routes.applicationCommands(this.appId), { body: [] });
+        this.globalCleared = true;
+        clearedGlobal = true;
+      } catch { /* pode falhar se não houver nenhum; segue */ }
+    }
+
+    let count = 0;
+    const failed = [];
+    const skippedGuilds = [];
+    const seen = new Set();
+    for (const [guildId, commands] of Object.entries(byGuild ?? {})) {
+      seen.add(guildId);
+      const body = commands.map(shape);
+      const key = JSON.stringify(body);
+      if (this.commandsSent.get(guildId) === key) {
+        skippedGuilds.push(guildId);
+        continue;
+      }
+      try {
+        await rest.put(Routes.applicationGuildCommands(this.appId, guildId), { body });
+        this.commandsSent.set(guildId, key);
+        count += body.length;
+      } catch (err) {
+        // sem permissão `applications.commands` naquele servidor: não derruba os outros
+        failed.push({ guildId, error: err.message });
+      }
+    }
+    // servidor que saiu da lista não precisa mais de comandos registrados
+    for (const guildId of [...this.commandsSent.keys()]) {
+      if (seen.has(guildId)) continue;
+      try { await rest.put(Routes.applicationGuildCommands(this.appId, guildId), { body: [] }); } catch {}
+      this.commandsSent.delete(guildId);
+    }
+
+    return { count, guilds: Object.keys(byGuild ?? {}).length, clearedGlobal, failed, unchanged: skippedGuilds.length };
   }
 
   async sendMessage({ channelId, content, ephemeral, interactionId }) {

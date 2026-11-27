@@ -22,9 +22,13 @@ export class MockAdapter {
   }
 
   /** no mock não existe Discord: registra em memória para o painel conferir */
-  async registerCommands(commands) {
-    this.registeredCommands = commands.map((c) => ({ name: c.name, description: c.description ?? "" }));
-    return { count: this.registeredCommands.length, mock: true };
+  async registerCommands(byGuild) {
+    // mesmo formato do adapter real: { guildId: commands[] }
+    this.registeredCommands = Object.fromEntries(
+      Object.entries(byGuild ?? {}).map(([id, list]) => [id, list.map((c) => ({ name: c.name, description: c.description ?? "" }))]),
+    );
+    const count = Object.values(this.registeredCommands).reduce((a, l) => a + l.length, 0);
+    return { count, guilds: Object.keys(this.registeredCommands).length, mock: true };
   }
 
   roleId(name) {

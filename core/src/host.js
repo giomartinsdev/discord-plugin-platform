@@ -117,6 +117,8 @@ export class PluginHost {
       });
 
       child.on("exit", (code, signal) => {
+        // um processo antigo (trocado por reload) não pode derrubar o atual
+        if (this.child !== child) return;
         const wasReady = this.ready;
         this.ready = false;
         for (const [, p] of this.pending) {
@@ -297,10 +299,12 @@ export class PluginHost {
   async shutdown(reason = "manual") {
     this.shuttingDown = true;
     if (this.alive) {
+      // guarda a referência: `this.child` pode virar o processo novo antes do SIGKILL
+      const victim = this.child;
       try { this.write({ jsonrpc: "2.0", id: `core-${++this.seq}`, method: "shutdown", params: { reason } }); } catch {}
       await new Promise((r) => setTimeout(r, 120));
-      try { this.child.kill("SIGTERM"); } catch {}
-      setTimeout(() => { try { this.child?.kill("SIGKILL"); } catch {} }, 800);
+      try { victim.kill("SIGTERM"); } catch {}
+      setTimeout(() => { try { victim.kill("SIGKILL"); } catch {} }, 800).unref?.();
     }
     this.child = null;
     this.ready = false;

@@ -4,7 +4,7 @@ import { createStore, defaultDbPath } from "./db.js";
 import { Router } from "./router.js";
 import { MockAdapter } from "./adapters/mock.js";
 import { DiscordAdapter } from "./adapters/discord.js";
-import { loadLocalPackage } from "./loader.js";
+import { loadLocalPackage, cloneRepo, pullRepo, isRepoUrl, slugFromUrl, readManifestFromDir } from "./loader.js";
 import { runConformance } from "./conformance.js";
 import { createApi } from "./api.js";
 import { defaultGuilds, seedAll } from "./seed.js";
@@ -32,22 +32,36 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
     adapter,
     root: ROOT,
 
-    async install({ dir, installDir, build = false, guilds: targetGuilds = [guilds[0].id], caps, config = {} }) {
-      const src = resolve(dir ?? installDir);
-      const pkg = loadLocalPackage(src, { store: ROOT, build, onLog: (l) => store.log({ level: "info", source: "build", message: l }) });
+    async install({ dir, url, branch, installDir, build = false, guilds: targetGuilds = [guilds[0].id], caps, config = {} }) {
+      const log = (l) => store.log({ level: "info", source: "build", message: l });
+
+      // origem: link de repositório ou diretório local
+      let src;
+      let source = null;
+      if (url && isRepoUrl(url)) {
+        src = cloneRepo(url, { workDir: join(ROOT, ".plugins"), branch, onLog: log });
+        source = { kind: "git", url, branch: branch ?? null, dir: src };
+      } else {
+        src = resolve(dir ?? installDir);
+      }
+
+      const pkg = loadLocalPackage(src, { store: ROOT, build, onLog: log });
 
       store.upsertPlugin({
         id: pkg.manifest.id,
         name: pkg.manifest.name,
         version: pkg.manifest.version,
         description: pkg.manifest.description,
-        repoUrl: pkg.repoUrl,
-        branch: pkg.branch,
+        repoUrl: source?.url ?? pkg.repoUrl,
+        branch: source?.branch ?? pkg.branch,
         commitSha: pkg.commitSha,
         lang: pkg.lang,
         runtime: pkg.runtime,
         manifest: pkg.manifest.raw,
       });
+
+      // guarda de onde atualizar depois (botão "Atualizar" do painel)
+      if (source) store.setSetting(`source:${pkg.manifest.id}`, source);
 
       const approved = caps ?? pkg.manifest.capabilities;
       for (const g of targetGuilds) store.installToGuild(pkg.manifest.id, g, approved, config);
@@ -68,7 +82,93 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
         commitSha: pkg.commitSha,
         capabilities: approved,
         commands: pkg.manifest.commands,
+        source,
       };
+    },
+
+    /**
+     * Puxa o último commit do repositório e recarrega o plugin em runtime:
+     * manifesto novo, comandos novos, processo reiniciado e slash commands
+     * re-registrados. Guilds, permissões e configuração são preservados.
+     */
+    async refresh(pluginId) {
+      const existing = store.getPlugin(pluginId);
+      if (!existing) {
+        const err = new Error(`plugin "${pluginId}" não existe`);
+        err.code = "E_NOT_FOUND";
+        throw err;
+      }
+      const source = store.setting(`source:${pluginId}`, null);
+      if (!source?.url) {
+        return { ok: true, updated: false, reason: "plugin instalado de diretório local: nada a puxar", commitSha: existing.commitSha };
+      }
+
+      const log = (l) => store.log({ pluginId, level: "info", source: "build", message: l });
+      const before = existing.commitSha;
+
+      // garante o clone mesmo se o diretório foi apagado
+      if (!existsSync(join(source.dir, "plugin.toml"))) {
+        source.dir = cloneRepo(source.url, { workDir: join(ROOT, ".plugins"), branch: source.branch, onLog: log });
+      } else {
+        pullRepo(source.dir, { branch: source.branch, onLog: log });
+      }
+
+      const pkg = loadLocalPackage(source.dir, { store: ROOT, build: true, onLog: log });
+
+      // preserva quem já tem o plugin instalado e o que o dono aprovou
+      const installs = store.listGuildInstalls(pluginId);
+      const guildIds = installs.map((i) => i.guildId);
+      store.upsertPlugin({
+        id: pkg.manifest.id,
+        name: pkg.manifest.name,
+        version: pkg.manifest.version,
+        description: pkg.manifest.description,
+        repoUrl: source.url,
+        branch: source.branch ?? pkg.branch,
+        commitSha: pkg.commitSha,
+        lang: pkg.lang,
+        runtime: pkg.runtime,
+        manifest: pkg.manifest.raw,
+        enabled: existing.enabled,
+        status: existing.status,
+      });
+      for (const i of installs) store.installToGuild(pkg.manifest.id, i.guildId, i.caps, i.config);
+      // mantém o clone como origem: é dele que o próximo refresh puxa
+      store.setSetting(`source:${pluginId}`, source);
+
+      // reinicia o processo: código do plugin mudou. Tira o host do mapa antes
+      // de desligar para que o handler de exit do processo antigo não interfira.
+      await router.unregister(pluginId, "atualizado pelo painel");
+      await router.reload();
+      await core.syncCommands().catch(() => {});
+
+      const res = {
+        ok: true,
+        updated: before !== pkg.commitSha,
+        id: pkg.manifest.id,
+        version: pkg.manifest.version,
+        commitShaBefore: before,
+        commitSha: pkg.commitSha,
+        commands: pkg.manifest.commands,
+        guilds: guildIds,
+        lang: pkg.lang,
+      };
+      store.log({
+        pluginId, level: "info", source: "core",
+        message: `atualizado ${before ?? "?"} → ${pkg.commitSha ?? "?"} (${pkg.manifest.commands.length} comandos)`,
+      });
+      return res;
+    },
+
+    /** comandos que o painel pode ligar/desligar e renomear (por plugin) */
+    commandOverrides(pluginId) {
+      return store.setting(`commands:${pluginId}`, null);
+    },
+    async setCommandOverrides(pluginId, list) {
+      store.setSetting(`commands:${pluginId}`, list);
+      await router.reload();
+      await core.syncCommands().catch(() => {});
+      return { ok: true, commands: list };
     },
 
     async conformance(dir) {
@@ -76,13 +176,23 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
       return runConformance(pkg.dir, pkg.manifest);
     },
 
-    /** registra no Discord os slash commands que os plugins declaram */
+    /** registra no Discord os slash commands, por servidor */
     async syncCommands() {
-      const all = store.listPlugins()
-        .filter((p) => p.enabled)
-        .flatMap((p) => p.manifest?.commands ?? []);
-      const unique = [...new Map(all.map((c) => [c.name, c])).values()];
-      return adapter.registerCommands?.(unique);
+      // cada guild recebe só os comandos dos plugins ativos instalados nela
+      const byGuild = {};
+      for (const g of guilds) byGuild[g.id] = [];
+      for (const host of router.hosts.values()) {
+        const p = host.plugin;
+        if (!p.enabled) continue;
+        for (const g of p.guilds) {
+          if (!byGuild[g.id]) byGuild[g.id] = [];
+          byGuild[g.id].push(...p.commands);
+        }
+      }
+      for (const id of Object.keys(byGuild)) {
+        byGuild[id] = [...new Map(byGuild[id].map((c) => [c.name, c])).values()];
+      }
+      return adapter.registerCommands?.(byGuild);
     },
   };
 

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync, statSync, mkdirSync, cpSync, rmSync } from "node:fs";
-import { join, resolve, basename, extname } from "node:path";
+import { join, resolve, basename, dirname, extname } from "node:path";
 import { execFileSync } from "node:child_process";
 import { parseToml, normalizeManifest } from "./manifest.js";
 
@@ -117,6 +117,66 @@ export function loadLocalPackage(dir, { store, build = true, onLog = () => {} } 
 
 function safeReaddir(dir) {
   try { return readdirSync(dir); } catch { return []; }
+}
+
+/* ── git ── */
+
+/** "https://github.com/u/repo.git" ou "git@github.com:u/repo" → "repo" */
+export function slugFromUrl(url) {
+  const tail = String(url).replace(/\/+$/, "").split(/[/:]/).pop() ?? "plugin";
+  return tail.replace(/\.git$/, "").replace(/[^\w.-]/g, "-") || "plugin";
+}
+
+export function isRepoUrl(value) {
+  return /^(https?:\/\/|git@|ssh:\/\/|git:\/\/|file:\/\/)/.test(String(value).trim());
+}
+
+function git(args, cwd) {
+  return execFileSync("git", args, { cwd, encoding: "utf8", timeout: 120000, stdio: ["ignore", "pipe", "pipe"] });
+}
+
+/**
+ * Clona o repositório num diretório de trabalho dentro do core. O id do plugin
+ * ainda não é conhecido, então o destino vem do nome do repositório.
+ * Devolve o diretório do clone (que contém plugin.toml).
+ */
+export function cloneRepo(url, { workDir, branch, onLog = () => {} }) {
+  const dest = join(workDir, "_src", slugFromUrl(url));
+  rmSync(dest, { recursive: true, force: true });
+  mkdirSync(dirname(dest), { recursive: true });
+
+  const args = ["clone", "--depth", "1"];
+  if (branch) args.push("--branch", branch);
+  args.push(url, dest);
+  onLog(`$ git ${args.join(" ")}`);
+  try {
+    git(args);
+  } catch (err) {
+    const detail = String(err.stderr || err.message).trim().split("\n").slice(-2).join(" ");
+    const e = new Error(`falha ao clonar ${url}: ${detail}`);
+    e.code = "E_CLONE";
+    throw e;
+  }
+  return dest;
+}
+
+/**
+ * Puxa commits novos num clone existente. Usa fetch+reset em vez de pull para
+ * não depender de estado local (o diretório é descartável).
+ */
+export function pullRepo(dir, { branch, onLog = () => {} }) {
+  const ref = branch || "HEAD";
+  onLog(`$ git fetch --depth 1 origin ${ref}`);
+  try {
+    git(["fetch", "--depth", "1", "origin", ref], dir);
+    git(["reset", "--hard", "FETCH_HEAD"], dir);
+  } catch (err) {
+    const detail = String(err.stderr || err.message).trim().split("\n").slice(-2).join(" ");
+    const e = new Error(`falha ao atualizar ${dir}: ${detail}`);
+    e.code = "E_PULL";
+    throw e;
+  }
+  return findCommit(dir);
 }
 
 export function pluginSummary(pkg, store, defaultGuilds = []) {

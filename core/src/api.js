@@ -1,9 +1,10 @@
 import { createServer } from "node:http";
-import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, mkdtempSync, rmSync } from "node:fs";
 import { join, extname, dirname, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
-import { loadLocalPackage, readManifestFromDir } from "./loader.js";
+import { loadLocalPackage, readManifestFromDir, cloneRepo, isRepoUrl } from "./loader.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(HERE, "..", "..", "prototype", "index.html");
@@ -117,6 +118,37 @@ async function api(req, res, url, ctx) {
       await router.reload();
       await ctx.core.syncCommands().catch(() => {});
       return json(200, { deleted: true });
+    }
+
+    if (seg[2] === "refresh" && method === "POST") {
+      try {
+        return json(200, await ctx.core.refresh(id));
+      } catch (err) {
+        return json(400, { error: err.message, code: err.code ?? null });
+      }
+    }
+
+    if (seg[2] === "commands" && method === "GET") {
+      return json(200, {
+        commands: plugin.manifest?.commands ?? [],
+        overrides: ctx.core.commandOverrides(id) ?? [],
+      });
+    }
+
+    if (seg[2] === "commands" && method === "PUT") {
+      const list = Array.isArray(body.commands) ? body.commands : [];
+      const known = new Set((plugin.manifest?.commands ?? []).map((c) => c.name));
+      for (const c of list) {
+        if (!known.has(c.name)) return json(400, { error: `comando "${c.name}" não existe neste plugin` });
+        if (c.alias && !/^[a-z0-9_-]{1,32}$/.test(c.alias)) {
+          return json(400, { error: `apelido inválido "${c.alias}": use a-z, 0-9, - e _` });
+        }
+        const on = list.filter((x) => x.enabled !== false);
+        if (on.length === 0) return json(400, { error: "o plugin precisa de pelo menos um comando ativo" });
+      }
+      const aliases = list.filter((c) => c.alias).map((c) => c.alias);
+      if (new Set(aliases).size !== aliases.length) return json(400, { error: "dois comandos com o mesmo apelido" });
+      return json(200, await ctx.core.setCommandOverrides(id, list));
     }
 
     if (seg[2] === "logs" && method === "GET") {
@@ -246,21 +278,30 @@ async function api(req, res, url, ctx) {
     return json(200, await ctx.core.conformance(body.dir));
   }
 
-  /* ── inspeção de diretório sem instalar (assistente de instalação) ── */
+  /* ── inspeção de diretório ou repositório sem instalar (assistente) ── */
   if (p === "/inspect" && method === "POST") {
-    if (!body.dir) return json(400, { error: "informe o diretório do plugin" });
+    if (!body.dir && !body.url) return json(400, { error: "informe o diretório ou a URL do repositório" });
+    let tmp = null;
     try {
-      const pkg = loadLocalPackage(resolve(body.dir), { build: false });
+      let target = body.dir;
+      if (body.url) {
+        if (!isRepoUrl(body.url)) return json(400, { error: "a URL precisa ser de um repositório git (https, ssh ou git@)" });
+        // clone descartável: só para ler o manifesto, é apagado no fim
+        tmp = mkdtempSync(join(tmpdir(), "plugin-inspect-"));
+        target = cloneRepo(body.url, { workDir: tmp, branch: body.branch });
+      }
+      const pkg = loadLocalPackage(resolve(target), { build: false });
       return json(200, {
         id: pkg.manifest.id,
         name: pkg.manifest.name,
         version: pkg.manifest.version,
         description: pkg.manifest.description,
         lang: pkg.lang,
-        dir: pkg.dir,
+        dir: tmp ?? pkg.dir,
+        fromRepo: !!body.url,
         commitSha: pkg.commitSha,
         branch: pkg.branch,
-        repoUrl: pkg.repoUrl,
+        repoUrl: body.url ?? pkg.repoUrl,
         capabilities: pkg.manifest.capabilities,
         commands: pkg.manifest.commands,
         events: pkg.manifest.events,
@@ -270,6 +311,8 @@ async function api(req, res, url, ctx) {
       });
     } catch (err) {
       return json(400, { error: err.message, details: err.details ?? null, code: err.code ?? null });
+    } finally {
+      if (tmp) rmSync(tmp, { recursive: true, force: true });
     }
   }
 
@@ -312,6 +355,8 @@ function serializePlugin(store, router, pl) {
   const host = router.host(pl.id);
   const stats = store.pluginStats(pl.id);
   const installs = store.listGuildInstalls(pl.id);
+  // comandos efetivos: manifesto + apelidos/desligados do painel
+  const commands = host?.plugin?.commands ?? pl.manifest.commands ?? [];
   return {
     id: pl.id,
     name: pl.name,
@@ -320,10 +365,12 @@ function serializePlugin(store, router, pl) {
     repoUrl: pl.repoUrl,
     branch: pl.branch,
     commitSha: pl.commitSha,
+    source: store.setting(`source:${pl.id}`, null),
+    commandOverrides: store.setting(`commands:${pl.id}`, null) ?? [],
     lang: pl.lang,
     runtime: { kind: pl.runtime.kind, cmd: pl.runtime.cmd, image: pl.runtime.image ?? null },
     capabilities: pl.manifest.capabilities ?? [],
-    commands: pl.manifest.commands ?? [],
+    commands,
     events: pl.manifest.events ?? [],
     configSchema: pl.manifest.config ?? {},
     status: host?.degraded ? "degraded" : pl.status,

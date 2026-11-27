@@ -26,9 +26,18 @@ export const GatewayIntentBits = { Guilds: 1, GuildMessages: 512, MessageContent
 export class REST {
   constructor() {}
   setToken() { return this; }
-  async put(route, { body }) { globalThis.__registered = { route, body }; return body; }
+  async put(route, { body }) {
+    if (globalThis.__failGuild && route.includes("/guilds/" + globalThis.__failGuild + "/")) {
+      throw new Error("Missing Permissions");
+    }
+    (globalThis.__registered ??= []).push({ route, body });
+    return body;
+  }
 }
-export const Routes = { applicationCommands: (id) => \`/applications/\${id}/commands\` };
+export const Routes = {
+  applicationCommands: (id) => \`/applications/\${id}/commands\`,
+  applicationGuildCommands: (id, guildId) => \`/applications/\${id}/guilds/\${guildId}/commands\`,
+};
 export class Client {
   constructor() {
     // o gateway pode entregar a guild antes do nome: é o bug que o REST cobre
@@ -94,19 +103,100 @@ test("boot publica as guilds reais do gateway", async () => {
   cleanup();
 });
 
-test("registerCommands envia opções e o campo livre de argumentos", async () => {
+test("registerCommands registra por servidor e limpa o registro global antigo", async () => {
   const { adapterClass, cleanup } = await loadWithStub();
   const a = new adapterClass({ token: "t", appId: "777" });
   await a.start();
-  const res = await a.registerCommands([
-    { name: "saldo", description: "Mostra saldo" },
-    { name: "pagar", description: "paga", options: [{ type: 3, name: "alvo" }] },
-  ]);
-  assert.equal(res.count, 2);
-  assert.equal(globalThis.__registered.route, "/applications/777/commands");
-  const [saldo, pagar] = globalThis.__registered.body;
-  assert.equal(saldo.options[0].name, "argumentos");
-  assert.deepEqual(pagar.options, [{ type: 3, name: "alvo" }]);
+  globalThis.__registered = [];
+
+  const res = await a.registerCommands({
+    "999": [
+      { name: "saldo", description: "Mostra saldo" },
+      { name: "pagar", description: "paga", options: [{ type: 3, name: "alvo" }] },
+    ],
+    "888": [{ name: "pet", description: "cuida do pet" }],
+    "777": [],
+  });
+
+  assert.equal(res.count, 3);
+  assert.equal(res.guilds, 3);
+  assert.equal(res.clearedGlobal, true);
+
+  const global = globalThis.__registered.find((r) => r.route === "/applications/777/commands");
+  assert.deepEqual(global.body, [], "comandos globais precisam ser limpos");
+
+  const nine = globalThis.__registered.find((r) => r.route === "/applications/777/guilds/999/commands");
+  assert.equal(nine.body.length, 2);
+  assert.equal(nine.body[0].options[0].name, "argumentos");
+  assert.deepEqual(nine.body[1].options, [{ type: 3, name: "alvo" }]);
+
+  const eight = globalThis.__registered.find((r) => r.route === "/applications/777/guilds/888/commands");
+  assert.deepEqual(eight.body.map((c) => c.name), ["pet"]);
+
+  const empty = globalThis.__registered.find((r) => r.route === "/applications/777/guilds/777/commands");
+  assert.deepEqual(empty.body, [], "servidor sem comando fica limpo");
+
+  cleanup();
+});
+
+test("falha em um servidor não impede registrar nos outros", async () => {
+  const { adapterClass, cleanup } = await loadWithStub();
+  const a = new adapterClass({ token: "t", appId: "777" });
+  await a.start();
+  globalThis.__registered = [];
+  globalThis.__failGuild = "888";
+
+  const res = await a.registerCommands({
+    "999": [{ name: "saldo", description: "Mostra saldo" }],
+    "888": [{ name: "pet", description: "cuida do pet" }],
+  });
+
+  assert.equal(res.count, 1);
+  assert.equal(res.failed.length, 1);
+  assert.equal(res.failed[0].guildId, "888");
+  assert.ok(globalThis.__registered.some((r) => r.route.includes("/guilds/999/")));
+  globalThis.__failGuild = null;
+  cleanup();
+});
+
+test("não reenvia comandos iguais ao Discord (evita o rate limit de bulk overwrite)", async () => {
+  const { adapterClass, cleanup } = await loadWithStub();
+  const a = new adapterClass({ token: "t", appId: "777" });
+  await a.start();
+  globalThis.__registered = [];
+
+  const payload = { "999": [{ name: "saldo", description: "Mostra saldo" }] };
+  const first = await a.registerCommands(payload);
+  assert.equal(first.count, 1);
+  assert.equal(first.unchanged, 0);
+  const callsAfterFirst = globalThis.__registered.length;
+
+  const second = await a.registerCommands(payload);
+  assert.equal(second.count, 0);
+  assert.equal(second.unchanged, 1);
+  assert.equal(globalThis.__registered.length, callsAfterFirst, "nada novo foi enviado");
+
+  // mudou a descrição: reenvia
+  const third = await a.registerCommands({ "999": [{ name: "saldo", description: "Outra" }] });
+  assert.equal(third.count, 1);
+  assert.ok(globalThis.__registered.length > callsAfterFirst);
+  cleanup();
+});
+
+test("servidor que saiu da lista tem os comandos limpos", async () => {
+  const { adapterClass, cleanup } = await loadWithStub();
+  const a = new adapterClass({ token: "t", appId: "777" });
+  await a.start();
+  globalThis.__registered = [];
+
+  await a.registerCommands({ "999": [{ name: "saldo", description: "s" }], "888": [{ name: "pet", description: "p" }] });
+  const before = globalThis.__registered.length;
+
+  await a.registerCommands({ "999": [{ name: "saldo", description: "s" }] });
+  const calls = globalThis.__registered.slice(before);
+  const cleaned = calls.find((c) => c.route.includes("/guilds/888/"));
+  assert.ok(cleaned, "precisa limpar o servidor que saiu");
+  assert.deepEqual(cleaned.body, []);
   cleanup();
 });
 
