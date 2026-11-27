@@ -17,15 +17,15 @@ npm run seed     # instala os 6 plugins de exemplo
 npm run dev      # sobe o core + painel em http://127.0.0.1:4319
 ```
 
-Não tem dependência. Node 22+ (usa `node:sqlite`). Para os plugins de exemplo, o runtime da
-linguagem precisa existir na máquina: `python3`, `node`, `go`, `bun`, `ruby`, `java`.
+Não tem dependência obrigatória. Node 22+ (usa `node:sqlite`). Para os plugins de exemplo, o
+runtime da linguagem precisa existir na máquina: `python3`, `node`, `go`, `bun`, `ruby`, `java`.
 
 Sem Discord, tudo funciona. O adapter padrão é o **mock**: as respostas aparecem no terminal e no
 painel. Para conectar de verdade:
 
 ```bash
-npm i discord.js
-cp .env.example .env      # preencha DISCORD_TOKEN, DISCORD_APP_ID e ADAPTER=discord
+npm i                 # instala discord.js (optionalDependencies)
+cp .env.example .env  # preencha DISCORD_TOKEN, DISCORD_APP_ID e ADAPTER=discord
 npm start
 ```
 

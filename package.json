@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node --no-warnings core/src/index.js",
     "seed": "node --no-warnings core/src/index.js --seed",
@@ -12,6 +14,10 @@
     "e2e": "node --no-warnings tests/e2e.mjs",
     "conformance": "node --no-warnings core/cli.js conformance"
   },
-  "dependencies": {},
-  "bin": { "bot-platform": "core/cli.js" }
+  "bin": {
+    "bot-platform": "core/cli.js"
+  },
+  "optionalDependencies": {
+    "discord.js": "^14.28.1"
+  }
 }

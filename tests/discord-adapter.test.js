@@ -31,7 +31,13 @@ export class REST {
 export const Routes = { applicationCommands: (id) => \`/applications/\${id}/commands\` };
 export class Client {
   constructor() {
-    this.guilds = { cache: new Map([["999", { id: "999", name: "Servidor Real", memberCount: 7 }]]) };
+    // o gateway pode entregar a guild antes do nome: é o bug que o REST cobre
+    this.guilds = {
+      cache: new Map([["999", { id: "999", name: undefined, memberCount: 7 }]]),
+      async fetch() {
+        return new Map([["999", { id: "999", name: "Servidor Real", memberCount: 7 }]]);
+      },
+    };
     this.user = { tag: "bot#0001" };
   }
   on(ev, fn) { handlers.set(ev, fn); return this; }

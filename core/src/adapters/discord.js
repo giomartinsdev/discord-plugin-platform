@@ -108,21 +108,44 @@ export class DiscordAdapter {
       process.stderr.write(`[discord] ${err.message}\n`);
     });
 
-    // login resolve quando o cliente está pronto: daí temos as guilds reais
-    await this.client.login(this.token);
-    this.guildsCache = [...this.client.guilds.cache.values()].map((g) => ({
-      id: g.id,
-      name: g.name,
-      initials: g.name.slice(0, 2).toUpperCase(),
-      members: g.memberCount ?? 0,
-      role: "membro",
-    }));
+    // login resolve antes do gateway popular as guilds: esperar o ready de verdade.
+    // O cache do gateway pode chegar incompleto, então o REST é a fonte da verdade.
+    this.ready = new Promise((resolve, reject) => {
+      this.client.once(Events.ClientReady, resolve);
+      this.client.login(this.token).catch(reject);
+    });
+    await this.ready;
+
+    this.guildsCache = await this.fetchGuilds();
     console.log(`bot conectado como ${this.client.user.tag} · ${this.guildsCache.length} servidor(es)`);
   }
 
   /** guilds reais em que o bot está. Vazio no mock. */
   listGuilds() {
     return this.guildsCache;
+  }
+
+  /** REST primeiro (sempre completo); cache do gateway como reserva */
+  async fetchGuilds() {
+    let rows = [];
+    try {
+      const map = await this.client.guilds.fetch();
+      rows = [...map.values()].map((g) => ({ id: g.id, name: g.name }));
+    } catch {
+      rows = [...this.client.guilds.cache.values()].map((g) => ({ id: g.id, name: g.name }));
+    }
+    return rows
+      .filter((g) => g.id)
+      .map((g) => {
+        const name = g.name ?? g.id;
+        return {
+          id: g.id,
+          name,
+          initials: name.slice(0, 2).toUpperCase(),
+          members: this.client.guilds.cache.get(g.id)?.memberCount ?? 0,
+          role: "membro",
+        };
+      });
   }
 
   emit(kind, data) {
