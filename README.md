@@ -56,7 +56,21 @@ Seis plugins reais, em seis linguagens, todos rodando pelo mesmo protocolo:
 | `moderacao` | Ruby | `!aviso` `!historico` `!banir` | reply, kv, kick, addRole |
 | `ranking` | Java | `!top` `!meu-top` | reply, economy.read |
 
-Todos passam `conformance`. Todos respondem no E2E (`npm run e2e`, 68 verificações).
+Todos passam `conformance`. Todos respondem no E2E (`npm run e2e`, 69 verificações).
+
+Se quiser começar do zero, há três repositórios de exemplo mínimos — mesmo plugin (`contador` por
+membro) em linguagens diferentes:
+
+- [plugin-starter-python](https://github.com/giomartinsdev/plugin-starter-python)
+- [plugin-starter-node](https://github.com/giomartinsdev/plugin-starter-node)
+- [plugin-starter-go](https://github.com/giomartinsdev/plugin-starter-go)
+
+```bash
+git clone https://github.com/giomartinsdev/plugin-starter-python
+node core/cli.js conformance ../plugin-starter-python
+node core/cli.js install ../plugin-starter-python
+node core/cli.js simulate contador contar
+```
 
 ## Escrever um plugin
 
