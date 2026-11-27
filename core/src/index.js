@@ -11,13 +11,20 @@ import { defaultGuilds, seedAll } from "./seed.js";
 
 const ROOT = process.env.PLATFORM_ROOT ? resolve(process.env.PLATFORM_ROOT) : process.cwd();
 
+// .env opcional, sem dependência: process.loadEnvFile existe desde Node 20.12
+try { process.loadEnvFile(join(ROOT, ".env")); } catch { /* sem .env: segue com o ambiente */ }
+
 export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port = Number(process.env.PORT ?? 4319), dbFile, quiet = false } = {}) {
   const file = dbFile ?? defaultDbPath();
   const store = createStore(file);
-  const guilds = defaultGuilds();
   const adapter = adapterKind === "discord"
     ? new DiscordAdapter({ token: process.env.DISCORD_TOKEN, appId: process.env.DISCORD_APP_ID })
-    : new MockAdapter({ guilds, verbose: !quiet });
+    : new MockAdapter({ guilds: defaultGuilds(), verbose: !quiet });
+
+  await adapter.start();
+
+  // no Discord de verdade as guilds vêm do gateway; no mock, do seed
+  const guilds = adapter.listGuilds?.().length ? adapter.listGuilds() : defaultGuilds();
 
   const core = {
     guilds,
@@ -45,8 +52,13 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
       const approved = caps ?? pkg.manifest.capabilities;
       for (const g of targetGuilds) store.installToGuild(pkg.manifest.id, g, approved, config);
 
-      router.reload();
+      await router.reload();
       store.log({ pluginId: pkg.manifest.id, level: "info", source: "core", message: `instalado de ${src}` });
+
+      // slash commands do Discord precisam refletir o que acabou de ser instalado
+      await core.syncCommands().catch((err) => store.log({
+        level: "warn", source: "core", message: `slash commands não sincronizados: ${err.message}`,
+      }));
 
       return {
         id: pkg.manifest.id,
@@ -63,6 +75,15 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
       const pkg = loadLocalPackage(resolve(dir), { build: false });
       return runConformance(pkg.dir, pkg.manifest);
     },
+
+    /** registra no Discord os slash commands que os plugins declaram */
+    async syncCommands() {
+      const all = store.listPlugins()
+        .filter((p) => p.enabled)
+        .flatMap((p) => p.manifest?.commands ?? []);
+      const unique = [...new Map(all.map((c) => [c.name, c])).values()];
+      return adapter.registerCommands?.(unique);
+    },
   };
 
   const router = new Router({ store, adapter, log: () => {} });
@@ -76,8 +97,15 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
     }
   };
 
-  await adapter.start();
   await router.load();
+
+  // slash commands: registra o que os plugins aprovados declararam
+  try {
+    const reg = await core.syncCommands();
+    if (reg && !reg.skipped && !quiet) console.log(`slash commands registrados: ${reg.count}`);
+  } catch (err) {
+    console.error(`falha ao registrar slash commands: ${err.message}`);
+  }
 
   const server = createApi({ store, router, adapter, core });
   const listen = () => new Promise((res, rej) => {
@@ -92,7 +120,7 @@ export async function boot({ adapterKind = process.env.ADAPTER ?? "mock", port =
     else throw err;
   }
 
-  return { store, router, adapter, core, server, port: actualPort, dbFile: file, close: async () => { await router.stopAll(); await adapter.stop?.(); server.close(); } };
+  return { store, router, adapter, core, guilds, server, port: actualPort, dbFile: file, close: async () => { await router.stopAll(); await adapter.stop?.(); server.close(); } };
 }
 
 /* ── CLI ── */
@@ -105,7 +133,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (seed) {
     const out = await seedAll(app);
     console.log(`\nseed: ${out.installed.length} plugins instalados`);
-    for (const p of out.installed) console.log(`  · ${p.id} v${p.version} (${p.lang}) → ${out.guildId}`);
+    for (const p of out.installed) console.log(`  · ${p.id} v${p.version} (${p.lang}) → ${out.guilds.join(", ")}`);
   }
 
   const active = app.store.listPlugins().filter((p) => p.enabled);

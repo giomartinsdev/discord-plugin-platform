@@ -35,7 +35,7 @@ const c = {
 switch (cmd) {
   case "serve":
   case "dev": {
-    const app = await boot({ port: flags.port ? Number(flags.port) : undefined });
+    const app = await bootOrDie({ port: flags.port ? Number(flags.port) : undefined });
     if (cmd === "dev" && !app.store.setting("seeded")) {
       const out = await seedAll(app);
       console.log(c.dim(`seed: ${out.installed.length} plugins instalados`));
@@ -46,7 +46,7 @@ switch (cmd) {
   }
 
   case "seed": {
-    const app = await boot({ port: Number(flags.port ?? 4319), quiet: true });
+    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
     const out = await seedAll(app);
     for (const p of out.installed) console.log(`  ${c.green("✓")} ${p.id} v${p.version} ${c.dim(`(${p.lang})`)}`);
     console.log(c.bold(`\n${out.installed.length} plugins instalados`));
@@ -57,8 +57,8 @@ switch (cmd) {
   case "install": {
     const dir = positional[0];
     if (!dir) die("informe o diretório do plugin: bot-platform install <dir>");
-    const app = await boot({ port: Number(flags.port ?? 4319), quiet: true });
-    const guilds = flags.guild ? String(flags.guild).split(",") : [defaultGuilds()[0].id];
+    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
+    const guilds = flags.guild ? String(flags.guild).split(",") : [app.guilds[0]?.id ?? defaultGuilds()[0].id];
     const res = await app.core.install({ dir: resolve(dir), guilds, build: !!flags.build });
     console.log(`${c.green("✓")} ${res.id} v${res.version} ${c.dim(`(${res.lang})`)} → ${guilds.join(", ")}`);
     console.log(c.dim(`  comandos: ${res.commands.map((x) => "!" + x.name).join(", ") || "nenhum"}`));
@@ -80,7 +80,7 @@ switch (cmd) {
   case "simulate": {
     const [pluginId, command, ...args] = positional;
     if (!pluginId || !command) die("uso: bot-platform simulate <plugin> <comando> [args...]");
-    const app = await boot({ port: Number(flags.port ?? 4319), quiet: true });
+    const app = await bootOrDie({ port: Number(flags.port ?? 4319), quiet: true });
     const plugin = app.store.getPlugin(pluginId);
     if (!plugin) die(`plugin "${pluginId}" não instalado. Rode "bot-platform seed".`);
     const guildId = flags.guild ?? app.store.listGuildInstalls(pluginId)[0]?.guildId ?? defaultGuilds()[0].id;
@@ -146,6 +146,18 @@ ${c.bold("bot-platform")} — plataforma de plugins para Discord
 function die(msg) {
   console.error(c.red("erro: ") + msg);
   process.exit(1);
+}
+
+/** boot com mensagens de erro legíveis para os problemas de configuração conhecidos */
+async function bootOrDie(opts) {
+  try {
+    return await boot(opts);
+  } catch (err) {
+    if (err.code === "E_NO_TOKEN" || err.code === "E_NO_DISCORD_JS") {
+      die(err.message);
+    }
+    throw err;
+  }
 }
 
 if (!existsSync(new URL(".", import.meta.url).pathname)) die("core não encontrado");

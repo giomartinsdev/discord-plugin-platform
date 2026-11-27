@@ -16,6 +16,17 @@ export class MockAdapter {
 
   async start() {}
 
+  /** guilds de demonstração — o core usa isso quando não há gateway */
+  listGuilds() {
+    return this.guilds;
+  }
+
+  /** no mock não existe Discord: registra em memória para o painel conferir */
+  async registerCommands(commands) {
+    this.registeredCommands = commands.map((c) => ({ name: c.name, description: c.description ?? "" }));
+    return { count: this.registeredCommands.length, mock: true };
+  }
+
   roleId(name) {
     return String(4000 + (name.length % 50));
   }

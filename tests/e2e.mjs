@@ -190,7 +190,7 @@ async function main() {
   const noType = router.validateAction(fakeHost, { content: "oi" }, { guildId: "1201" });
   check("action sem type é recusada", noType.ok === false);
 
-  const wrongGuild = router.validateAction(fakeHost, { type: "reply", content: "oi" }, { guildId: "1202" });
+  const wrongGuild = router.validateAction(fakeHost, { type: "reply", content: "oi" }, { guildId: "9999" });
   check("action fora da guild é recusada", wrongGuild.ok === false, wrongGuild.reason);
 
   /* ── observabilidade ── */

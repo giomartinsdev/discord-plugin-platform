@@ -138,7 +138,7 @@ export class Router {
     for (const host of candidates) {
       results.push(await this.invoke(host, "handleCommand", {
         command, args, guildId, userId, channelId, messageId, isInteraction,
-      }, { guildId, userId, channelId, messageId }));
+      }, { guildId, userId, channelId, messageId, isInteraction }));
     }
     return { handled: results.some((r) => r.ok), results };
   }

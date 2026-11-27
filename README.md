@@ -25,8 +25,27 @@ painel. Para conectar de verdade:
 
 ```bash
 npm i discord.js
-DISCORD_TOKEN=... DISCORD_APP_ID=... ADAPTER=discord npm start
+cp .env.example .env      # preencha DISCORD_TOKEN, DISCORD_APP_ID e ADAPTER=discord
+npm start
 ```
+
+`.env` é lido no boot (`process.loadEnvFile`) e está no `.gitignore`. No Discord real:
+
+- as guilds do painel vêm do gateway, não do seed — o bot precisa estar no servidor
+- `npm run seed` instala os 6 plugins em todos os servidores em que o bot está
+- os slash commands (`/saldo`, `/pet`, …) são registrados automaticamente no boot e a cada
+  `install`
+- comandos com `!` também funcionam; ambos passam pelo mesmo roteador
+- o adapter adia a resposta se o plugin passar de 2 s, porque o Discord exige ACK em 3 s
+
+**Permissões no portal do Discord** (OAuth2 → URL Generator): escopos `bot` e
+`applications.commands`; no bot, marque `Read Messages`, `Send Messages`, `Manage Roles` (loja e
+moderação) e `Kick Members` (moderação). Para ler o conteúdo das mensagens `!comando`, ative
+**Message Content Intent** em Bot → Privileged Gateway Intents.
+
+**Cargos**: `addRole`/`removeRole` exigem que o cargo do bot fique **acima** dos cargos que ele
+atribui. Os IDs de cargo vêm da config de cada plugin (ex.: `mute_role = "9100"` na moderação) —
+troque pelos IDs reais do seu servidor no painel, aba Configuração.
 
 ## Comandos
 
