@@ -105,7 +105,8 @@ async function api(req, res, url, ctx) {
         const host = router.host(id);
         if (!body.enabled) await host?.shutdown("desativado pelo painel");
         else host?.reset();
-        router.reload();
+        await router.reload();
+        await ctx.core.syncCommands().catch(() => {});
       }
       return json(200, serializePlugin(store, router, store.getPlugin(id)));
     }
@@ -113,7 +114,8 @@ async function api(req, res, url, ctx) {
     if (seg.length === 2 && method === "DELETE") {
       await router.host(id)?.shutdown("removido");
       store.deletePlugin(id);
-      router.reload();
+      await router.reload();
+      await ctx.core.syncCommands().catch(() => {});
       return json(200, { deleted: true });
     }
 
